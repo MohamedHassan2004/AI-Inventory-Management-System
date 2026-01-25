@@ -52,3 +52,24 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# appsettings.json files
+appsettings*.json
+appsettings.Development.json
+
+# GitHub Copilot / AI tooling
+**/.copilot/
+**/.copilotchat/
+**/.github/copilot*
+**/.continue/
+**/.aider*
+**/copilot-instructions.md
+**/.vscode/**/copilot*
+**/.vs/**/copilot*
+
+# IDE temp artifacts sometimes surfaced in diffs
+**/TFSTemp/
+**/vctmp*.gitignore
+
+
+**/.vs/
