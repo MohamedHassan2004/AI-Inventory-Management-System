@@ -3,26 +3,17 @@ using Inventory.Infrastructure.Data;
 
 namespace Inventory.Infrastructure.Repositories;
 
-public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context = context;
-    private readonly Hashtable _repositories = new();
+    private readonly ApplicationDbContext _dbContext;
 
-    public IGenericRepository<T> Repository<T>() where T : class
+    public UnitOfWork(ApplicationDbContext dbContext)
     {
-        var type = typeof(T).Name;
-
-        if (!_repositories.ContainsKey(type))
-        {
-            var repositoryType = typeof(GenericRepository<>);
-            var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), _context);
-            _repositories.Add(type, repositoryInstance);
-        }
-
-        return (IGenericRepository<T>)_repositories[type]!;
+        _dbContext = dbContext;
     }
 
-    public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
-
-    public void Dispose() => _context.Dispose();
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -1,7 +1,6 @@
 namespace Inventory.Domain.Interfaces;
 
-public interface IUnitOfWork : IDisposable
+public interface IUnitOfWork
 {
-    IGenericRepository<T> Repository<T>() where T : class;
-    Task<int> CompleteAsync();
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
