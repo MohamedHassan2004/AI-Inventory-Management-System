@@ -1,7 +1,9 @@
 using Inventory.API.Middlewares;
 using Inventory.Application;
+using Inventory.Domain.Entities.Users;
 using Inventory.Infrastructure;
 using Inventory.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Context;
 
@@ -9,7 +11,7 @@ namespace Inventory.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,16 @@ namespace Inventory.API
                     app.MapOpenApi();
                 }
 
+                // seed roles and super admin user
+                using (var scope = app.Services.CreateScope())
+                {
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    await ApplicationDbContextSeed.SeedRolesAsync(roleManager);
+
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    await ApplicationDbContextSeed.SeedSuperAdminUserAsync(userManager);
+                }
+
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
                 app.Use(async (context, next) =>
                 {
@@ -51,6 +63,7 @@ namespace Inventory.API
 
                 app.UseHttpsRedirection();
 
+                app.UseAuthentication();
                 app.UseAuthorization();
 
                 app.MapControllers();

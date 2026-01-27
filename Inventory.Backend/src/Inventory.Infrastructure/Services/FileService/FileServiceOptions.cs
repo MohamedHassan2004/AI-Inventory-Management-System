@@ -1,4 +1,4 @@
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Services.FileService;
 
 public class FileServiceOptions
 {

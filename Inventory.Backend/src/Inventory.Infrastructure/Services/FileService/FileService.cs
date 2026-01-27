@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Services.FileService;
 
 public class FileService : IFileService
 {
