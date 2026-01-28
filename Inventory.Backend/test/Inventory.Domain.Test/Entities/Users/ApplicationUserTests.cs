@@ -1,4 +1,5 @@
 ﻿using Inventory.Domain.Entities.Users;
+using Inventory.Domain.Enums;
 using Inventory.Domain.Interfaces;
 using Moq;
 using System;
@@ -19,6 +20,8 @@ namespace Inventory.Domain.Test.Entities.Users
             _dateTimeProviderMock = new Mock<IDateTimeProvider>();
         }
 
+        #region NewUser
+
         [Fact]
         public void NewUser_ShouldBeInitializedWithCorrectDefaultValues()
         {
@@ -28,18 +31,21 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Null(_user.LastLoginAt);
             Assert.True(_user.MustChangePassword);
             Assert.Null(_user.RefreshToken);
+            Assert.Null(_user.RefreshTokenExpiresAt);
+            Assert.Equal(UserRole.None, _user.Role);
         }
 
         [Theory]
-        [InlineData(null, "Full Name", "email@test.com", "0123", "url")]
-        [InlineData("username", "", "email@test.com", "0123", "url")]
-        [InlineData("username", "Full Name", " ", "0123", "url")]
+        [InlineData(" ", "Full Name", "email@test.com", "0123", UserRole.Manager)]
+        [InlineData("username", "", "email@test.com", "0123", UserRole.Admin)]
+        [InlineData("username", "Full Name", " ", "0123", UserRole.InventoryStaff)]
+        [InlineData("username", "Full Name", "email@test.com", "0123", UserRole.None)]
         public void Constructor_WhenInvalidDataProvided_ShouldThrowArgumentException(
-            string user, string name, string mail, string phone, string img)
+            string user, string name, string mail, string phone, UserRole role)
         {
             // Act & Assert
             Assert.Throws<ArgumentException>(() =>
-                new ApplicationUser(user, name, mail, phone, img, UserRole.Cashier));
+                new ApplicationUser(user, name, mail, phone, role));
         }
 
         [Fact]
@@ -50,23 +56,23 @@ namespace Inventory.Domain.Test.Entities.Users
             var fullName = "John Doe";
             var email = "john@example.com";
             var phone = "01000000000";
-            var img = "path/to/img.png";
             var role = UserRole.Manager;
 
             // Act
-            var newUser = new ApplicationUser(userName, fullName, email, phone, img, role);
+            var newUser = new ApplicationUser(userName, fullName, email, phone, role);
 
             // Assert
             Assert.Equal(userName, newUser.UserName);
             Assert.Equal(fullName, newUser.FullName);
             Assert.Equal(email, newUser.Email);
             Assert.Equal(phone, newUser.PhoneNumber);
-            Assert.Equal(img, newUser.IdentityImgUrl);
             Assert.Equal(role, newUser.Role);
         }
+        #endregion
 
+        #region  MarkAsDeleted
         [Fact]
-        public void MarkAsDeleted_WhenCalled_ShouldMakeIsDeletedTrueAndUpdateDeletedAt()
+        public void MarkAsDeleted_WhenCalled_ShouldBehaveCorrectly()
         {
             // Arrange
             var expectedDateTime = new DateTime(2026, 1, 1, 10, 0, 0);
@@ -76,9 +82,30 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.True(_user.IsDeleted);
             Assert.Equal(expectedDateTime, _user.DeletedAt);
+            Assert.Null(_user.RefreshToken);
+            Assert.Null(_user.RefreshTokenExpiresAt);
         }
 
+        #endregion
 
+        #region  Restore
+        [Fact]
+        public void Restore_WhenCalled_ShouldBehaveCorrectly()
+        {
+            // Arrange
+            var deletionTime = new DateTime(2026, 1, 1, 10, 0, 0);
+            _dateTimeProviderMock.Setup(x => x.UtcNow).Returns(deletionTime);
+            _user.MarkAsDeleted(_dateTimeProviderMock.Object);
+            // Act
+            _user.Restore();
+            // Assert
+            Assert.False(_user.IsDeleted);
+            Assert.Null(_user.DeletedAt);
+        }
+
+        #endregion
+
+        #region  UpdateLastLogin
         [Fact]
         public void UpdateLastLogin_WhenCalled_ShouldSetLastLoginAtToCurrentTime()
         {
@@ -92,6 +119,9 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal(expectedTime, _user.LastLoginAt);
         }
 
+        #endregion
+
+        #region Login
         [Fact]
         public void Login_WhenUserNotDeleted_ShouldUpdateLastLoginAt()
         {
@@ -115,6 +145,9 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal("Cannot login a deleted user.", exception.Message);
         }
 
+        #endregion
+
+        #region PasswordChanged
         [Fact]
         public void PasswordChanged_WhenCalled_ShouldSetMustChangePasswordToFalse()
         {
@@ -123,7 +156,9 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.False(_user.MustChangePassword);
         }
+        #endregion
 
+        #region  ChangeRole
         [Fact]
         public void ChangeRole_WhenUserDeleted_ShouldThrowInvalidOperationException()
         {
@@ -134,12 +169,13 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal("Cannot change role of a deleted user.", exception.Message);
         }
 
+
         [Fact]
-        public void ChangeRole_WhenNewRoleIsSuperAdmin_ShouldThrowInvalidOperationException()
+        public void ChangeRole_WhenNewRoleIsNone_ShouldThrowArgumentException()
         {
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => _user.ChangeRole(UserRole.SuperAdmin));
-            Assert.Equal("SuperAdmin role can only be assigned through system initialization.", exception.Message);
+            var exception = Assert.Throws<ArgumentException>(() => _user.ChangeRole(UserRole.None));
+            Assert.Equal("User role cannot be None.", exception.Message);
         }
 
         [Fact]
@@ -163,8 +199,12 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal(newRole, _user.Role);
         }
 
+        #endregion
+
+        #region  RefreshToken
+
         [Fact]
-        public void SetRefreshToken_WhenCalled_ShouldUpdateTokenAndExpiry()
+        public void SetRefreshToken_WhenUserNotDeleted_ShouldUpdateTokenAndExpiry()
         {
             // Arrange
             var token = "sample-refresh-token";
@@ -176,6 +216,18 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.Equal(token, _user.RefreshToken);
             Assert.Equal(expiry, _user.RefreshTokenExpiresAt);
+        }
+
+        [Fact]
+        public void SetRefreshToken_WhenUserDeleted_ShouldThrowInvalidOperationException()
+        {
+            // Arrange
+            _user.MarkAsDeleted(_dateTimeProviderMock.Object);
+            var token = "sample-refresh-token";
+            var expiry = DateTime.UtcNow.AddDays(7);
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() => _user.SetRefreshToken(token, expiry));
+            Assert.Equal("Cannot set refresh token for a deleted user.", exception.Message);
         }
 
         [Fact]
@@ -191,6 +243,8 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Null(_user.RefreshToken);
             Assert.Null(_user.RefreshTokenExpiresAt);
         }
+
+        #endregion
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using Inventory.Domain.Interfaces;
+﻿using Inventory.Domain.Enums;
+using Inventory.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Data;
@@ -12,7 +13,7 @@ namespace Inventory.Domain.Entities.Users
         public string FullName { get; set; } = string.Empty;
         public string IdentityImgUrl { get; set; } = string.Empty;
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        public UserRole Role { get; private set; }
+        public UserRole Role { get; private set; } = UserRole.None;
         public DateTime? LastLoginAt { get; private set; } = null;
         public bool IsDeleted { get; private set; } = false;
         public DateTime? DeletedAt { get; private set; } = null;
@@ -28,28 +29,32 @@ namespace Inventory.Domain.Entities.Users
             string fullName,
             string email,
             string phoneNumber,
-            string identityImgUrl,
             UserRole role)
         {
             if (string.IsNullOrEmpty(userName)) throw new ArgumentException("Username is required");
             if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException("Full name is required");
             if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required");
             if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("Phone number is required");
-            if (string.IsNullOrWhiteSpace(identityImgUrl)) throw new ArgumentException("Identity image URL is required");
-            if (!Enum.IsDefined(typeof(UserRole), role)) throw new ArgumentException("Invalid user role");
+            if (Role == UserRole.None) throw new ArgumentException("User role cannot be None");
+            if (!Enum.IsDefined<UserRole>(role)) throw new ArgumentException("Invalid user role");
 
             UserName = userName;
             Email = email;
             FullName = fullName;
             Role = role;
             PhoneNumber = phoneNumber;
-            IdentityImgUrl = identityImgUrl;
         }
 
         public void MarkAsDeleted(IDateTimeProvider timeProvider)
         {
             IsDeleted = true;
             DeletedAt = timeProvider.UtcNow;
+            RevokeRefreshToken();
+        }
+        public void Restore()
+        {
+            IsDeleted = false;
+            DeletedAt = null;
         }
         public void UpdateLastLogin(IDateTimeProvider timeProvider)
         {
@@ -72,8 +77,8 @@ namespace Inventory.Domain.Entities.Users
             if (IsDeleted)
                 throw new InvalidOperationException("Cannot change role of a deleted user.");
 
-            if (newRole == UserRole.SuperAdmin)
-                throw new InvalidOperationException("SuperAdmin role can only be assigned through system initialization.");
+            if (newRole == UserRole.None)
+                throw new ArgumentException("User role cannot be None.");
 
             if (!Enum.IsDefined<UserRole>(newRole)) 
                 throw new ArgumentException("Invalid user role");
@@ -82,6 +87,7 @@ namespace Inventory.Domain.Entities.Users
         }
         public void SetRefreshToken(string token, DateTime expiresAt)
         {
+            if (IsDeleted) throw new InvalidOperationException("Cannot set refresh token for a deleted user.");
             RefreshToken = token;
             RefreshTokenExpiresAt = expiresAt;
         }

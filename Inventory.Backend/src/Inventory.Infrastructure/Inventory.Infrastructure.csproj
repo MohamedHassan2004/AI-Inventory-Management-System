@@ -28,8 +28,4 @@
     <ProjectReference Include="..\Inventory.Domain\Inventory.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Auth\" />
-  </ItemGroup>
-
 </Project>

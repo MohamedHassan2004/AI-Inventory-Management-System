@@ -48,7 +48,7 @@ namespace Inventory.API
                     await ApplicationDbContextSeed.SeedRolesAsync(roleManager);
 
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                    await ApplicationDbContextSeed.SeedSuperAdminUserAsync(userManager);
+                    await ApplicationDbContextSeed.SeedAdminUserAsync(userManager);
                 }
 
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
