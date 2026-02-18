@@ -4,13 +4,13 @@ public class Result
 {
     public bool IsSuccess { get; }
     public string Message { get; }
-    public string Code { get; }
+    public string ErrorCode { get; }
 
     protected Result(bool isSuccess, string message, string code)
     {
         IsSuccess = isSuccess;
         Message = message;
-        Code = code;
+        ErrorCode = code;
     }
 
     public static Result Success(string message = "") => new(true, message, string.Empty);

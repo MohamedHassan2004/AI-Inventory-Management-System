@@ -30,10 +30,14 @@ namespace Inventory.Application.Validation.Auth
                 .NotEmpty().WithMessage("Phone number is required.")
                 .Matches(@"^\d{11}$").WithMessage("Phone number must be exactly 11 digits.");
 
-            RuleFor(x => x.Role)
-                .NotEmpty().WithMessage("Role is required.")
-                .NotEqual(UserRole.None).WithMessage("Please select a valid role.")
-                .IsInEnum().WithMessage("The selected role does not exist.");
+            RuleFor(x => x.Roles)
+            .NotNull().WithMessage("Roles Cannot be empty.")
+            .Must(roles => roles != null && roles.Count > 0).WithMessage("User must have at least one role.")
+            .Must(roles => roles.Distinct().Count() == roles.Count).WithMessage("Cannot repeat the same role.");
+
+            RuleForEach(x => x.Roles)
+                .IsInEnum().WithMessage((dto, role) => $"This Value ({role}) is not allowed.");
+
         }
     }
 }

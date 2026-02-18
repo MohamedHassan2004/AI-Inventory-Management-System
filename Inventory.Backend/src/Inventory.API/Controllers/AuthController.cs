@@ -1,0 +1,61 @@
+using Inventory.Application.DTOs.Auth;
+using Inventory.Application.Interfaces.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace Inventory.API.Controllers
+{
+    [Route("api/auth")]
+    public class AuthController : ApiBaseController
+    {
+        private readonly IAuthService _authService;
+
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            var result = await _authService.LoginAsync(loginDto);
+            return HandleResult(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        {
+            var result = await _authService.RegisterAsync(registerDto);
+            return HandleResult(result);
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            await _authService.LogoutAsync(userId);
+            return Ok(new { Message = "Logged out successfully." });
+        }
+
+        [Authorize]
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _authService.RefreshTokenAsync(userId, dto.RefreshToken);
+            return HandleResult(result);
+        }
+
+        [Authorize]
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _authService.ChangePasswordAsync(userId, changePasswordDto);
+            return HandleResult(result);
+        }
+    }
+}

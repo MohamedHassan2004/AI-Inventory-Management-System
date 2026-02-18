@@ -204,7 +204,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("file exceeds maximum allowed size");
-        result.Code.Should().Be("FILE_TOO_LARGE");
+        result.ErrorCode.Should().Be("FILE_TOO_LARGE");
         result.Message.Should().Contain("5MB", "error message should indicate the limit");
     }
 
@@ -250,7 +250,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse($"'{Path.GetExtension(fileName)}' extension should be blocked");
-        result.Code.Should().Be("INVALID_FILE_TYPE");
+        result.ErrorCode.Should().Be("INVALID_FILE_TYPE");
     }
 
     /// <summary>
@@ -319,7 +319,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("MIME type should be validated");
-        result.Code.Should().Be("INVALID_MIME_TYPE");
+        result.ErrorCode.Should().Be("INVALID_MIME_TYPE");
     }
 
     #endregion
@@ -370,7 +370,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("absolute paths should be rejected");
-        result.Code.Should().Be("INVALID_PATH");
+        result.ErrorCode.Should().Be("INVALID_PATH");
     }
 
     /// <summary>
@@ -432,7 +432,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("non-existent file cannot be deleted");
-        result.Code.Should().Be("NOT_FOUND");
+        result.ErrorCode.Should().Be("NOT_FOUND");
     }
 
     /// <summary>
@@ -449,7 +449,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("null or empty path should be rejected");
-        result.Code.Should().Be("INVALID_PATH");
+        result.ErrorCode.Should().Be("INVALID_PATH");
     }
 
     /// <summary>
@@ -466,7 +466,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("path traversal attempts should be blocked");
-        result.Code.Should().Be("INVALID_PATH");
+        result.ErrorCode.Should().Be("INVALID_PATH");
     }
 
     #endregion

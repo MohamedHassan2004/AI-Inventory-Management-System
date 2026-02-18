@@ -30,8 +30,7 @@ namespace Inventory.Infrastructure.Data
                 userName: "super.admin@pos.com",
                 fullName: "System Super Admin",
                 email: "super.admin@pos.com",
-                phoneNumber: "0123456789",
-                role: UserRole.Admin
+                phoneNumber: "0123456789"
             );
 
             if (userManager.Users.All(u => u.Id != defaultUser.Id))

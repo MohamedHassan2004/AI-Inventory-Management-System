@@ -6,6 +6,7 @@ using Inventory.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Context;
+using System.Text.Json.Serialization;
 
 namespace Inventory.API
 {
@@ -24,10 +25,16 @@ namespace Inventory.API
             {
                 Log.Information("Starting web application");
                 builder.Host.UseSerilog();
+                builder.Logging.AddConsole();
 
                 // Add services to the container.
-                builder.Services.AddControllers();
-                builder.Services.AddOpenApi();
+                builder.Services.AddControllers()
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    });
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
 
                 // Add Application and Infrastructure services
                 builder.Services.AddApplication();
@@ -38,7 +45,8 @@ namespace Inventory.API
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
-                    app.MapOpenApi();
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
                 }
 
                 // seed roles and super admin user
@@ -52,6 +60,7 @@ namespace Inventory.API
                 }
 
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
                 app.Use(async (context, next) =>
                 {
                     using (LogContext.PushProperty("RequestId", context.TraceIdentifier))

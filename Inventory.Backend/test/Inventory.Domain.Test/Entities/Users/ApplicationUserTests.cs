@@ -30,22 +30,22 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Null(_user.DeletedAt);
             Assert.Null(_user.LastLoginAt);
             Assert.True(_user.MustChangePassword);
-            Assert.Null(_user.RefreshToken);
-            Assert.Null(_user.RefreshTokenExpiresAt);
-            Assert.Equal(UserRole.None, _user.Role);
+            Assert.Equal(AccountStatus.None, _user.AccountStatus);
+            Assert.Null(_user.RejectionReason);
         }
 
         [Theory]
-        [InlineData(" ", "Full Name", "email@test.com", "0123", UserRole.Manager)]
-        [InlineData("username", "", "email@test.com", "0123", UserRole.Admin)]
-        [InlineData("username", "Full Name", " ", "0123", UserRole.InventoryStaff)]
-        [InlineData("username", "Full Name", "email@test.com", "0123", UserRole.None)]
+        [InlineData("", "Full Name", "email@test.com", "0123")]
+        [InlineData("username", " ", "email@test.com", "0123")]
+        [InlineData("username", " ", "email$test.com", "0123")]
+        [InlineData("username", "Full Name", " ", "0123")]
+        [InlineData("username", "Full Name", "email@test.com", " ")]
         public void Constructor_WhenInvalidDataProvided_ShouldThrowArgumentException(
-            string user, string name, string mail, string phone, UserRole role)
+            string user, string name, string mail, string phone)
         {
             // Act & Assert
             Assert.Throws<ArgumentException>(() =>
-                new ApplicationUser(user, name, mail, phone, role));
+                new ApplicationUser(user, name, mail, phone));
         }
 
         [Fact]
@@ -56,17 +56,15 @@ namespace Inventory.Domain.Test.Entities.Users
             var fullName = "John Doe";
             var email = "john@example.com";
             var phone = "01000000000";
-            var role = UserRole.Manager;
 
             // Act
-            var newUser = new ApplicationUser(userName, fullName, email, phone, role);
+            var newUser = new ApplicationUser(userName, fullName, email, phone);
 
             // Assert
             Assert.Equal(userName, newUser.UserName);
             Assert.Equal(fullName, newUser.FullName);
             Assert.Equal(email, newUser.Email);
             Assert.Equal(phone, newUser.PhoneNumber);
-            Assert.Equal(role, newUser.Role);
         }
         #endregion
 
@@ -82,8 +80,6 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.True(_user.IsDeleted);
             Assert.Equal(expectedDateTime, _user.DeletedAt);
-            Assert.Null(_user.RefreshToken);
-            Assert.Null(_user.RefreshTokenExpiresAt);
         }
 
         #endregion
@@ -158,90 +154,42 @@ namespace Inventory.Domain.Test.Entities.Users
         }
         #endregion
 
-        #region  ChangeRole
+        #region SetIdentityImg
         [Fact]
-        public void ChangeRole_WhenUserDeleted_ShouldThrowInvalidOperationException()
+        public void SetIdentityImgUrl_WhenCalled_ShouldUpdateIdentityImgUrl()
         {
             // Arrange
-            _user.MarkAsDeleted(_dateTimeProviderMock.Object);
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => _user.ChangeRole(UserRole.Cashier));
-            Assert.Equal("Cannot change role of a deleted user.", exception.Message);
-        }
-
-
-        [Fact]
-        public void ChangeRole_WhenNewRoleIsNone_ShouldThrowArgumentException()
-        {
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => _user.ChangeRole(UserRole.None));
-            Assert.Equal("User role cannot be None.", exception.Message);
-        }
-
-        [Fact]
-        public void ChangeRole_WhenCalledWithNotValidRole_ShouldThrowArgumentException()
-        {
-            // Arrange
-            var invalidRole = (UserRole)999;
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => _user.ChangeRole(invalidRole));
-            Assert.Equal("Invalid user role", exception.Message);
-        }
-
-        [Fact]
-        public void ChangeRole_WhenCalledWithValidRole_ShouldUpdateUserRole()
-        {
-            // Arrange
-            var newRole = UserRole.Manager;
+            var newUrl = "http://example.com/identity.jpg";
             // Act
-            _user.ChangeRole(newRole);
+            _user.SetIdentityImgUrl(newUrl);
             // Assert
-            Assert.Equal(newRole, _user.Role);
+            Assert.Equal(newUrl, _user.IdentityImgUrl);
+            Assert.Equal(AccountStatus.Pending, _user.AccountStatus);
         }
 
         #endregion
 
-        #region  RefreshToken
-
+        #region Account Status Management
         [Fact]
-        public void SetRefreshToken_WhenUserNotDeleted_ShouldUpdateTokenAndExpiry()
+        public void ApproveAccount_WhenCalled_ShouldSetAccountStatusToApproved()
         {
-            // Arrange
-            var token = "sample-refresh-token";
-            var expiry = DateTime.UtcNow.AddDays(7);
-
             // Act
-            _user.SetRefreshToken(token, expiry);
-
+            _user.ApproveAccount();
             // Assert
-            Assert.Equal(token, _user.RefreshToken);
-            Assert.Equal(expiry, _user.RefreshTokenExpiresAt);
+            Assert.Equal(AccountStatus.Approved, _user.AccountStatus);
         }
 
         [Fact]
-        public void SetRefreshToken_WhenUserDeleted_ShouldThrowInvalidOperationException()
+        public void RejectAccount_WhenCalled_ShouldSetAccountStatusToRejectedAndSetRejectionReason()
         {
             // Arrange
-            _user.MarkAsDeleted(_dateTimeProviderMock.Object);
-            var token = "sample-refresh-token";
-            var expiry = DateTime.UtcNow.AddDays(7);
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => _user.SetRefreshToken(token, expiry));
-            Assert.Equal("Cannot set refresh token for a deleted user.", exception.Message);
-        }
-
-        [Fact]
-        public void RevokeRefreshToken_WhenCalled_ShouldSetTokenAndExpiryToNull()
-        {
-            // Arrange
-            _user.SetRefreshToken("token", DateTime.UtcNow);
-
+            string rejectionReason = "Insufficient documentation";
             // Act
-            _user.RevokeRefreshToken();
-
+            _user.RejectAccount(rejectionReason);
             // Assert
-            Assert.Null(_user.RefreshToken);
-            Assert.Null(_user.RefreshTokenExpiresAt);
+            Assert.Equal(AccountStatus.Rejected, _user.AccountStatus);
+            Assert.NotNull(_user.RejectionReason);
+            Assert.Equal(rejectionReason, _user.RejectionReason);
         }
 
         #endregion
