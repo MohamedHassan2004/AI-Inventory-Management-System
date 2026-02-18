@@ -16,6 +16,7 @@ public class UserServiceTests
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<IFileService> _fileServiceMock;
     private readonly Mock<ILogger<UserService>> _loggerMock;
+    private readonly Mock<ILocalizationService> _localizationServiceMock;
     private readonly UserService _userService;
 
     public UserServiceTests()
@@ -27,12 +28,22 @@ public class UserServiceTests
 
         _fileServiceMock = new Mock<IFileService>();
         _loggerMock = new Mock<ILogger<UserService>>();
+        _localizationServiceMock = new Mock<ILocalizationService>();
+
+        // Setup localization mock to return the key as the message
+        _localizationServiceMock
+            .Setup(l => l.GetMessage(It.IsAny<string>()))
+            .Returns<string>(key => key);
+        _localizationServiceMock
+            .Setup(l => l.GetMessage(It.IsAny<string>(), It.IsAny<object[]>()))
+            .Returns<string, object[]>((key, args) => string.Format(key, args));
 
         // 2. Initialize the System Under Test (SUT)
         _userService = new UserService(
             _userManagerMock.Object,
             _fileServiceMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object,
+            _localizationServiceMock.Object);
     }
 
     #region UploadUserIdentityAsync Tests

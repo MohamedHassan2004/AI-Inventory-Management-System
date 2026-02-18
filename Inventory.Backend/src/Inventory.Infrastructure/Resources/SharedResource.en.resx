@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Auth Messages -->
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>User signed in successfully!</value>
+  </data>
+  <data name="LogoutSuccess" xml:space="preserve">
+    <value>Logged out successfully.</value>
+  </data>
+  <data name="RegisterSuccess" xml:space="preserve">
+    <value>User registered successfully.</value>
+  </data>
+  <data name="UsernameAlreadyExists" xml:space="preserve">
+    <value>Username already exists.</value>
+  </data>
+  <data name="EmailAlreadyExists" xml:space="preserve">
+    <value>Email already exists.</value>
+  </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Invalid Username or password.</value>
+  </data>
+  <data name="UserLockedOut" xml:space="preserve">
+    <value>User is locked out.</value>
+  </data>
+  <data name="CannotLoginDeletedUser" xml:space="preserve">
+    <value>Cannot login a deleted user.</value>
+  </data>
+  <data name="PasswordChangedSuccess" xml:space="preserve">
+    <value>Password changed successfully</value>
+  </data>
+  <data name="TokenRefreshedSuccess" xml:space="preserve">
+    <value>Token refreshed successfully</value>
+  </data>
+  <data name="InvalidRefreshToken" xml:space="preserve">
+    <value>Invalid refresh token.</value>
+  </data>
+  <data name="RefreshTokenRevoked" xml:space="preserve">
+    <value>Refresh token has been revoked.</value>
+  </data>
+  <data name="RefreshTokenExpired" xml:space="preserve">
+    <value>Refresh token has expired.</value>
+  </data>
+
+  <!-- User Admin Messages -->
+  <data name="UserDeletedSuccess" xml:space="preserve">
+    <value>User deleted successfully</value>
+  </data>
+  <data name="UserRestoredSuccess" xml:space="preserve">
+    <value>User restored successfully</value>
+  </data>
+  <data name="UserNotDeleted" xml:space="preserve">
+    <value>User is not deleted</value>
+  </data>
+  <data name="AccountApprovedSuccess" xml:space="preserve">
+    <value>User account approved successfully</value>
+  </data>
+  <data name="AccountRejectedSuccess" xml:space="preserve">
+    <value>User account rejected successfully</value>
+  </data>
+  <data name="PendingAccountsRetrieved" xml:space="preserve">
+    <value>Pending accounts retrieved successfully</value>
+  </data>
+  <data name="AllAccountsRetrieved" xml:space="preserve">
+    <value>All accounts retrieved successfully</value>
+  </data>
+
+  <!-- Role Messages -->
+  <data name="RoleAddedSuccess" xml:space="preserve">
+    <value>User role added successfully</value>
+  </data>
+  <data name="RoleRemovedSuccess" xml:space="preserve">
+    <value>User role removed successfully</value>
+  </data>
+  <data name="RolesRetrievedSuccess" xml:space="preserve">
+    <value>User roles retrieved successfully</value>
+  </data>
+  <data name="UserAlreadyHasRole" xml:space="preserve">
+    <value>User already has this role.</value>
+  </data>
+  <data name="UserDoesNotHaveRole" xml:space="preserve">
+    <value>User doesn't have this role.</value>
+  </data>
+  <data name="CannotRemoveOnlyRole" xml:space="preserve">
+    <value>Cannot remove the only role for this user.</value>
+  </data>
+
+  <!-- User Identity Messages -->
+  <data name="IdentityUploadedSuccess" xml:space="preserve">
+    <value>User identity uploaded successfully.</value>
+  </data>
+  <data name="IdentityUploadFailed" xml:space="preserve">
+    <value>Failed to upload identity image.</value>
+  </data>
+  <data name="IdentityUpdateFailed" xml:space="preserve">
+    <value>Failed to update user identity image.</value>
+  </data>
+
+  <!-- File Service Messages -->
+  <data name="FileSavedSuccess" xml:space="preserve">
+    <value>File saved successfully</value>
+  </data>
+  <data name="FileSaveFailed" xml:space="preserve">
+    <value>Error occurred during file save operation</value>
+  </data>
+  <data name="FileDeletedSuccess" xml:space="preserve">
+    <value>File deleted successfully</value>
+  </data>
+  <data name="FileDeleteFailed" xml:space="preserve">
+    <value>Error occurred during file deletion</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>File not found</value>
+  </data>
+  <data name="FileTooLarge" xml:space="preserve">
+    <value>File size exceeds maximum allowed size of {0}MB</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>File type '{0}' is not allowed. Allowed types: {1}</value>
+  </data>
+  <data name="InvalidMimeType" xml:space="preserve">
+    <value>MIME type '{0}' is not allowed</value>
+  </data>
+  <data name="InvalidPath" xml:space="preserve">
+    <value>Invalid file path</value>
+  </data>
+  <data name="PathCannotBeEmpty" xml:space="preserve">
+    <value>Path cannot be null or whitespace</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>Invalid folder path provided</value>
+  </data>
+
+  <!-- General Messages -->
+  <data name="InternalServerError" xml:space="preserve">
+    <value>An internal server error has occurred. Please try again later.</value>
+  </data>
+
+  <!-- Validation Messages -->
+  <data name="UsernameRequired" xml:space="preserve">
+    <value>Username is required.</value>
+  </data>
+  <data name="FullNameRequired" xml:space="preserve">
+    <value>Full name is required.</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="EmailInvalid" xml:space="preserve">
+    <value>A valid email is required.</value>
+  </data>
+  <data name="PhoneRequired" xml:space="preserve">
+    <value>Phone number is required.</value>
+  </data>
+  <data name="UsernameAlphanumeric" xml:space="preserve">
+    <value>Username can only contain alphanumeric characters and underscores.</value>
+  </data>
+  <data name="UsernameMaxLength" xml:space="preserve">
+    <value>Username must not exceed 50 characters.</value>
+  </data>
+  <data name="FullNameMaxLength" xml:space="preserve">
+    <value>Full name must not exceed 50 characters.</value>
+  </data>
+  <data name="EmailMaxLength" xml:space="preserve">
+    <value>Email must not exceed 100 characters.</value>
+  </data>
+  <data name="PhoneExactDigits" xml:space="preserve">
+    <value>Phone number must be exactly 11 digits.</value>
+  </data>
+  <data name="RolesRequired" xml:space="preserve">
+    <value>Roles Cannot be empty.</value>
+  </data>
+  <data name="AtLeastOneRole" xml:space="preserve">
+    <value>User must have at least one role.</value>
+  </data>
+  <data name="NoDuplicateRoles" xml:space="preserve">
+    <value>Cannot repeat the same role.</value>
+  </data>
+  <data name="InvalidRoleValue" xml:space="preserve">
+    <value>This Value ({0}) is not allowed.</value>
+  </data>
+  <data name="CurrentPasswordRequired" xml:space="preserve">
+    <value>Current password is required.</value>
+  </data>
+  <data name="NewPasswordRequired" xml:space="preserve">
+    <value>New password is required.</value>
+  </data>
+  <data name="NewPasswordMinLength" xml:space="preserve">
+    <value>New password must be at least 8 characters long.</value>
+  </data>
+  <data name="NewPasswordMaxLength" xml:space="preserve">
+    <value>New password must not exceed 100 characters.</value>
+  </data>
+  <data name="PasswordComplexity" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</value>
+  </data>
+  <data name="NewPasswordSameAsCurrent" xml:space="preserve">
+    <value>New password cannot be the same as the current password.</value>
+  </data>
+  <data name="ConfirmPasswordMismatch" xml:space="preserve">
+    <value>Confirm new password must match the new password.</value>
+  </data>
+</root>

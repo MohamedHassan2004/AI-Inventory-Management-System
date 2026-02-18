@@ -1,9 +1,11 @@
+using System.Globalization;
 using Inventory.API.Middlewares;
 using Inventory.Application;
 using Inventory.Domain.Entities.Users;
 using Inventory.Infrastructure;
 using Inventory.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Serilog.Context;
 using System.Text.Json.Serialization;
@@ -32,13 +34,39 @@ namespace Inventory.API
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    });
+                    })
+                    .AddDataAnnotationsLocalization();
                 builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen();
 
                 // Add Application and Infrastructure services
+                // Add Localization
+                builder.Services.AddLocalization();
+
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
+
+                // Configure Request Localization
+                builder.Services.Configure<RequestLocalizationOptions>(options =>
+                {
+                    var supportedCultures = new[]
+                    {
+                        new CultureInfo("en"),
+                        new CultureInfo("ar")
+                    };
+
+                    options.DefaultRequestCulture = new RequestCulture("en");
+                    options.SupportedCultures = supportedCultures;
+                    options.SupportedUICultures = supportedCultures;
+
+                    // Remove AcceptLanguageHeaderRequestCultureProvider to enforce DefaultRequestCulture
+                    // unless overridden by QueryString or Cookie
+                    options.RequestCultureProviders = new List<IRequestCultureProvider>
+                    {
+                        new QueryStringRequestCultureProvider(),
+                        new CookieRequestCultureProvider()
+                    };
+                });
 
                 var app = builder.Build();
 
@@ -59,15 +87,21 @@ namespace Inventory.API
                     await ApplicationDbContextSeed.SeedAdminUserAsync(userManager);
                 }
 
+                app.UseRequestLocalization();
+
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
                 app.Use(async (context, next) =>
                 {
                     using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
                     using (LogContext.PushProperty("RequestPath", context.Request.Path))
-                    {
-                        await next();
-                    }
+                    using (LogContext.PushProperty("Culture", CultureInfo.CurrentCulture.Name))
+                    using (LogContext.PushProperty("UICulture", CultureInfo.CurrentUICulture.Name))
+                {
+                    Log.Information("Request Culture: {Culture}, UI Culture: {UICulture}, Accept-Language: {AcceptLanguage}", 
+                        CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name, context.Request.Headers["Accept-Language"]);
+                    await next();
+                }
                 });
 
                 app.UseHttpsRedirection();

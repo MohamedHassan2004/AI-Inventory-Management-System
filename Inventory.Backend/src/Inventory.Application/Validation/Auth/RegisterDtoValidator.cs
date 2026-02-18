@@ -1,42 +1,40 @@
 ﻿using FluentValidation;
 using Inventory.Application.DTOs.Auth;
+using Inventory.Application.Interfaces;
 using Inventory.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Inventory.Application.Validation.Auth
 {
     public class RegisterDtoValidator : AbstractValidator<RegisterDto>
     {
-        public RegisterDtoValidator()
+        public RegisterDtoValidator(ILocalizationService localizationService)
         {
             RuleFor(x => x.UserName)
-                .NotEmpty().WithMessage("Username is required.")
-                .Matches(@"^[a-zA-Z0-9_]+$").WithMessage("Username can only contain alphanumeric characters and underscores.")
-                .MaximumLength(50).WithMessage("Username must not exceed 50 characters.");
+                .NotEmpty().WithMessage(localizationService.GetMessage("UsernameRequired"))
+                .Matches(@"^[a-zA-Z0-9_]+$").WithMessage(localizationService.GetMessage("UsernameAlphanumeric"))
+                .MaximumLength(50).WithMessage(localizationService.GetMessage("UsernameMaxLength"));
 
             RuleFor(x => x.FullName)
-                .NotEmpty().WithMessage("Full name is required.")
-                .Matches(@"^[a-zA-Z0-9_]+$").WithMessage("Username can only contain alphanumeric characters and underscores.")
-                .MaximumLength(50).WithMessage("Full name must not exceed 50 characters.");
+                .NotEmpty().WithMessage(localizationService.GetMessage("FullNameRequired"))
+                .Matches(@"^[a-zA-Z0-9_]+$").WithMessage(localizationService.GetMessage("UsernameAlphanumeric"))
+                .MaximumLength(50).WithMessage(localizationService.GetMessage("FullNameMaxLength"));
 
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("A valid email is required.")
-                .MaximumLength(100).WithMessage("Email must not exceed 100 characters.");
+                .NotEmpty().WithMessage(localizationService.GetMessage("EmailRequired"))
+                .EmailAddress().WithMessage(localizationService.GetMessage("EmailInvalid"))
+                .MaximumLength(100).WithMessage(localizationService.GetMessage("EmailMaxLength"));
 
             RuleFor(x => x.PhoneNumber)
-                .NotEmpty().WithMessage("Phone number is required.")
-                .Matches(@"^\d{11}$").WithMessage("Phone number must be exactly 11 digits.");
+                .NotEmpty().WithMessage(localizationService.GetMessage("PhoneRequired"))
+                .Matches(@"^\d{11}$").WithMessage(localizationService.GetMessage("PhoneExactDigits"));
 
             RuleFor(x => x.Roles)
-            .NotNull().WithMessage("Roles Cannot be empty.")
-            .Must(roles => roles != null && roles.Count > 0).WithMessage("User must have at least one role.")
-            .Must(roles => roles.Distinct().Count() == roles.Count).WithMessage("Cannot repeat the same role.");
+            .NotNull().WithMessage(localizationService.GetMessage("RolesRequired"))
+            .Must(roles => roles != null && roles.Count > 0).WithMessage(localizationService.GetMessage("AtLeastOneRole"))
+            .Must(roles => roles.Distinct().Count() == roles.Count).WithMessage(localizationService.GetMessage("NoDuplicateRoles"));
 
             RuleForEach(x => x.Roles)
-                .IsInEnum().WithMessage((dto, role) => $"This Value ({role}) is not allowed.");
+                .IsInEnum().WithMessage((dto, role) => localizationService.GetMessage("InvalidRoleValue", role));
 
         }
     }

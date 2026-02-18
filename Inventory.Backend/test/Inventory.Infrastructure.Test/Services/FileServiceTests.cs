@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Inventory.Application.Interfaces;
 using Inventory.Infrastructure.Services.FileService;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ public class FileServiceTests : IDisposable
     private readonly Mock<IWebHostEnvironment> _mockEnvironment;
     private readonly Mock<ILogger<FileService>> _mockLogger;
     private readonly Mock<IOptions<FileServiceOptions>> _mockOptions;
+    private readonly Mock<ILocalizationService> _mockLocalizationService;
 
     private readonly FileService _fileService;
     private readonly FileServiceOptions _testOptions;
@@ -40,10 +42,20 @@ public class FileServiceTests : IDisposable
         _mockOptions = new Mock<IOptions<FileServiceOptions>>();
         _mockOptions.Setup(o => o.Value).Returns(_testOptions);
 
+        _mockLocalizationService = new Mock<ILocalizationService>();
+        // Setup localization mock to return the key as the message
+        _mockLocalizationService
+            .Setup(l => l.GetMessage(It.IsAny<string>()))
+            .Returns<string>(key => key);
+        _mockLocalizationService
+            .Setup(l => l.GetMessage(It.IsAny<string>(), It.IsAny<object[]>()))
+            .Returns<string, object[]>((key, args) => string.Format(key, args));
+
         _fileService = new FileService(
             _mockEnvironment.Object,
             _mockLogger.Object,
-            _mockOptions.Object);
+            _mockOptions.Object,
+            _mockLocalizationService.Object);
     }
 
     public void Dispose()
@@ -205,7 +217,7 @@ public class FileServiceTests : IDisposable
         // Assert
         result.IsSuccess.Should().BeFalse("file exceeds maximum allowed size");
         result.ErrorCode.Should().Be("FILE_TOO_LARGE");
-        result.Message.Should().Contain("5MB", "error message should indicate the limit");
+        result.Message.Should().Contain("5", "error message should indicate the limit");
     }
 
     /// <summary>

@@ -81,6 +81,8 @@ public static class DependencyInjection
         services.AddScoped<IUserAdminService, UserAdminService>();
         services.AddScoped<IAuthService, AuthService>();
 
+        // Register Localization
+        services.AddScoped<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
 
         return services;
     }

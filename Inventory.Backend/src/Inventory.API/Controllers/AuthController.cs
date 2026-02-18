@@ -1,4 +1,5 @@
 using Inventory.Application.DTOs.Auth;
+using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace Inventory.API.Controllers
     public class AuthController : ApiBaseController
     {
         private readonly IAuthService _authService;
+        private readonly ILocalizationService _localizationService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ILocalizationService localizationService)
         {
             _authService = authService;
+            _localizationService = localizationService;
         }
 
         [HttpPost("login")]
@@ -37,7 +40,7 @@ namespace Inventory.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             await _authService.LogoutAsync(userId);
-            return Ok(new { Message = "Logged out successfully." });
+            return Ok(new { Message = _localizationService.GetMessage("LogoutSuccess") });
         }
 
         [Authorize]

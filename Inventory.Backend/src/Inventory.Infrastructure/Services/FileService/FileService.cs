@@ -12,15 +12,18 @@ public class FileService : IFileService
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<FileService> _logger;
     private readonly FileServiceOptions _options;
+    private readonly ILocalizationService _localizationService;
 
     public FileService(
         IWebHostEnvironment env,
         ILogger<FileService> logger,
-        IOptions<FileServiceOptions> options)
+        IOptions<FileServiceOptions> options,
+        ILocalizationService localizationService)
     {
         _env = env;
         _logger = logger;
         _options = options.Value;
+        _localizationService = localizationService;
     }
 
     public async Task<Result<string>> SaveFileAsync(IFormFile file, string folderPath)
@@ -33,7 +36,7 @@ public class FileService : IFileService
             {
                 return Result.Failure<string>(
                     "FILE_TOO_LARGE",
-                    $"File size exceeds maximum allowed size of {_options.MaxFileSizeInMB}MB");
+                    _localizationService.GetMessage("FileTooLarge", _options.MaxFileSizeInMB));
             }
 
             // Validate file extension
@@ -42,7 +45,7 @@ public class FileService : IFileService
             {
                 return Result.Failure<string>(
                     "INVALID_FILE_TYPE",
-                    $"File type '{extension}' is not allowed. Allowed types: {string.Join(", ", _options.AllowedExtensions)}");
+                    _localizationService.GetMessage("InvalidFileType", extension, string.Join(", ", _options.AllowedExtensions)));
             }
 
             // Validate MIME type
@@ -50,7 +53,7 @@ public class FileService : IFileService
             {
                 return Result.Failure<string>(
                     "INVALID_MIME_TYPE",
-                    $"MIME type '{file.ContentType}' is not allowed");
+                    _localizationService.GetMessage("InvalidMimeType", file.ContentType));
             }
 
             // Sanitize and validate folder path to prevent path traversal
@@ -59,7 +62,7 @@ public class FileService : IFileService
             {
                 return Result.Failure<string>(
                     "INVALID_PATH",
-                    "Invalid folder path provided");
+                    _localizationService.GetMessage("InvalidFolderPath"));
             }
 
             // Create upload directory
@@ -82,12 +85,12 @@ public class FileService : IFileService
             var relativePath = Path.Combine(_options.UploadFolder, sanitizedFolderPath, fileName)
                 .Replace(Path.DirectorySeparatorChar, '/');
 
-            return Result.Success<string>(relativePath, "File saved successfully");
+            return Result.Success<string>(relativePath, _localizationService.GetMessage("FileSavedSuccess"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during file save operation");
-            return Result.Failure<string>("FILE_SAVE_FAILED", "Error occurred during file save operation");
+            return Result.Failure<string>("FILE_SAVE_FAILED", _localizationService.GetMessage("FileSaveFailed"));
         }
     }
 
@@ -95,7 +98,7 @@ public class FileService : IFileService
     {
         if (string.IsNullOrWhiteSpace(relativePath))
         {
-            return Result.Failure("INVALID_PATH", "Path cannot be null or whitespace");
+            return Result.Failure("INVALID_PATH", _localizationService.GetMessage("PathCannotBeEmpty"));
         }
 
         var fullPath = GetAbsolutePath(relativePath);
@@ -105,25 +108,25 @@ public class FileService : IFileService
         if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogWarning("Attempted to delete file outside uploads directory: {Path}", fullPath);
-            return Result.Failure("INVALID_PATH", "Invalid file path");
+            return Result.Failure("INVALID_PATH", _localizationService.GetMessage("InvalidPath"));
         }
 
         if (!File.Exists(fullPath))
         {
             _logger.LogWarning("File not found: {Path}", fullPath);
-            return Result.Failure("NOT_FOUND", "File not found");
+            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("FileNotFound"));
         }
 
         try
         {
             await Task.Run(() => File.Delete(fullPath));
             _logger.LogInformation("File deleted successfully: {Path}", fullPath);
-            return Result.Success("File deleted successfully");
+            return Result.Success(_localizationService.GetMessage("FileDeletedSuccess"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during file deletion: {Path}", fullPath);
-            return Result.Failure("FILE_DELETE_FAILED", "Error occurred during file deletion");
+            return Result.Failure("FILE_DELETE_FAILED", _localizationService.GetMessage("FileDeleteFailed"));
         }
     }
 

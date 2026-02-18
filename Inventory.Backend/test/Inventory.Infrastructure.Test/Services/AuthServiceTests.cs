@@ -1,4 +1,5 @@
 ﻿using Inventory.Application.DTOs.Auth;
+using Inventory.Application.Interfaces;
 using Inventory.Application.Services;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
@@ -13,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using Microsoft.Extensions.Options;
+using Inventory.Domain.Settings;
 
 namespace Inventory.Infrastructure.Test.Services
 {
@@ -23,7 +26,8 @@ namespace Inventory.Infrastructure.Test.Services
         private readonly ApplicationDbContext _context;
         private readonly Mock<ILogger<AuthService>> _loggerMock;
         private readonly Mock<IDateTimeProvider> _dateTimeProvider;
-        private readonly Mock<IConfiguration> _configMock;
+        private readonly Mock<IOptions<JwtSettings>> _jwtSettingsMock;
+        private readonly Mock<ILocalizationService> _localizationServiceMock;
         private readonly AuthService _authService;
 
         public AuthServiceTests()
@@ -47,8 +51,16 @@ namespace Inventory.Infrastructure.Test.Services
 
             _loggerMock = new Mock<ILogger<AuthService>>();
             _dateTimeProvider = new Mock<IDateTimeProvider>();
-            _configMock = new Mock<IConfiguration>();
-            
+            _jwtSettingsMock = new Mock<IOptions<JwtSettings>>();
+            _localizationServiceMock = new Mock<ILocalizationService>();
+
+            // Setup localization mock to return the key as the message
+            _localizationServiceMock
+                .Setup(l => l.GetMessage(It.IsAny<string>()))
+                .Returns<string>(key => key);
+            _localizationServiceMock
+                .Setup(l => l.GetMessage(It.IsAny<string>(), It.IsAny<object[]>()))
+                .Returns<string, object[]>((key, args) => string.Format(key, args));
 
             _authService = new AuthService(
                 _userManagerMock.Object,
@@ -56,7 +68,8 @@ namespace Inventory.Infrastructure.Test.Services
                 _context,
                 _loggerMock.Object,
                 _dateTimeProvider.Object,
-                _configMock.Object);
+                _jwtSettingsMock.Object,
+                _localizationServiceMock.Object);
 
         }
 
@@ -85,7 +98,7 @@ namespace Inventory.Infrastructure.Test.Services
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.Equal("Password changed successfully", result.Message);
+            Assert.Equal("PasswordChangedSuccess", result.Message);
 
             _userManagerMock.Verify(x => x.UpdateAsync(user), Times.Once);
         }

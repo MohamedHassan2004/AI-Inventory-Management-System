@@ -1,4 +1,5 @@
-﻿using Inventory.Domain.Shared;
+﻿using Inventory.Application.Interfaces;
+using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -17,7 +18,7 @@ public class GlobalErrorHandlingMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, ILocalizationService localizationService)
     {
         try
         {
@@ -34,7 +35,7 @@ public class GlobalErrorHandlingMiddleware
             var response = new
             {
                 context.Response.StatusCode,
-                Message = "An internal server error has occurred. Please try again later."
+                Message = localizationService.GetMessage("InternalServerError")
             };
 
             var jsonResponse = JsonSerializer.Serialize(response);

@@ -1,3 +1,4 @@
+using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Shared;
@@ -10,13 +11,16 @@ public class RoleService : IRoleService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<RoleService> _logger;
+    private readonly ILocalizationService _localizationService;
 
     public RoleService(
         UserManager<ApplicationUser> userManager,
-        ILogger<RoleService> logger)
+        ILogger<RoleService> logger,
+        ILocalizationService localizationService)
     {
         _userManager = userManager;
         _logger = logger;
+        _localizationService = localizationService;
     }
 
     public async Task<Result> AddUserRoleAsync(string userId, string role)
@@ -27,13 +31,13 @@ public class RoleService : IRoleService
         if (user is null)
         {
             _logger.LogWarning("Add role failed: User with ID {UserId} not found", userId);
-            return Result.Failure("NOT_FOUND", "User not found");
+            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
         }
 
         if (await _userManager.IsInRoleAsync(user, role))
         {
             _logger.LogWarning("Add role failed: User '{UserName}' already has role '{Role}'", user.UserName, role);
-            return Result.Failure("ALREADY_EXIST", "User already has this role.");
+            return Result.Failure("ALREADY_EXIST", _localizationService.GetMessage("UserAlreadyHasRole"));
         }
 
         var result = await _userManager.AddToRoleAsync(user, role);
@@ -45,7 +49,7 @@ public class RoleService : IRoleService
         }
 
         _logger.LogInformation("Role '{Role}' added to user '{UserName}' (ID: {UserId})", role, user.UserName, userId);
-        return Result.Success("User role added successfully");
+        return Result.Success(_localizationService.GetMessage("RoleAddedSuccess"));
     }
 
     public async Task<Result> RemoveUserRoleAsync(string userId, string role)
@@ -56,20 +60,20 @@ public class RoleService : IRoleService
         if (user is null)
         {
             _logger.LogWarning("Remove role failed: User with ID {UserId} not found", userId);
-            return Result.Failure("NOT_FOUND", "User not found");
+            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
         }
 
         if (!await _userManager.IsInRoleAsync(user, role))
         {
             _logger.LogWarning("Remove role failed: User '{UserName}' doesn't have role '{Role}'", user.UserName, role);
-            return Result.Failure("NOT_FOUND", "User doesn't have this role.");
+            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("UserDoesNotHaveRole"));
         }
 
         var userRoles = await _userManager.GetRolesAsync(user);
         if (userRoles.Count <= 1)
         {
             _logger.LogWarning("Remove role failed: Cannot remove the only role from user '{UserName}'", user.UserName);
-            return Result.Failure("WRONG_OPERATION", "Cannot remove the only role for this user.");
+            return Result.Failure("WRONG_OPERATION", _localizationService.GetMessage("CannotRemoveOnlyRole"));
         }
 
         var result = await _userManager.RemoveFromRoleAsync(user, role);
@@ -81,7 +85,7 @@ public class RoleService : IRoleService
         }
 
         _logger.LogInformation("Role '{Role}' removed from user '{UserName}' (ID: {UserId})", role, user.UserName, userId);
-        return Result.Success("User role removed successfully");
+        return Result.Success(_localizationService.GetMessage("RoleRemovedSuccess"));
     }
 
     public async Task<Result<List<string>>> GetUserRolesAsync(string userId)
@@ -92,12 +96,12 @@ public class RoleService : IRoleService
         if (user is null)
         {
             _logger.LogWarning("Get roles failed: User with ID {UserId} not found", userId);
-            return Result.Failure<List<string>>("NOT_FOUND", "User not found");
+            return Result.Failure<List<string>>("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
         }
 
         var roles = await _userManager.GetRolesAsync(user);
         _logger.LogInformation("Retrieved {Count} roles for user '{UserName}'", roles.Count, user.UserName);
 
-        return Result.Success(roles.ToList(), "User roles retrieved successfully");
+        return Result.Success(roles.ToList(), _localizationService.GetMessage("RolesRetrievedSuccess"));
     }
 }
