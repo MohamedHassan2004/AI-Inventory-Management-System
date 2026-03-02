@@ -1,5 +1,6 @@
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
+using Inventory.Application.Services;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
 using Inventory.Domain.Settings;
@@ -80,6 +81,8 @@ public static class DependencyInjection
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserAdminService, UserAdminService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICategoryRepository,CategoryRepository>();
+
 
         // Register Localization
         services.AddScoped<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
