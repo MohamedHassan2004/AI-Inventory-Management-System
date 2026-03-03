@@ -186,5 +186,39 @@ namespace Inventory.Application.Services
 
             return Result.Success<IEnumerable<CategoryResponseDto>>(response);
         }
+        public async Task<Result> DeleteAsync(int id)
+        {
+            _logger.LogInformation("Soft deleting category with Id: {Id}", id);
+
+            // 1️⃣ Check existence
+            var category = await _categoryRepository.GetByIdAsync(id);
+
+            if (category is null)
+            {
+                _logger.LogWarning("Category not found with Id: {Id}", id);
+
+                return Result.Failure(
+                    "NOT_FOUND",
+                    "Category not found");
+            }
+
+            // 2️⃣ Soft Delete
+            category.IsDeleted = true;
+
+            _categoryRepository.Update(category);
+
+            // 3️⃣ Save changes
+            await _unitOfWork.SaveChangesAsync();
+
+            // 4️⃣ Delete image after success
+            if (!string.IsNullOrWhiteSpace(category.ImgUrl))
+            {
+                await _fileService.DeleteFileAsync(category.ImgUrl);
+            }
+
+            _logger.LogInformation("Category soft deleted successfully with Id: {Id}", id);
+
+            return Result.Success("Category deleted successfully");
+        }
     }
 }

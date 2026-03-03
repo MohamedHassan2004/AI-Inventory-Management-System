@@ -45,5 +45,13 @@ namespace Inventory.API.Controllers
             var result = await _categoryService.GetAllAsync();
             return HandleResult(result);
         }
+
+        // DELETE: api/categories/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _categoryService.DeleteAsync(id);
+            return HandleResult(result);
+        }
     }
 }

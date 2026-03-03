@@ -12,6 +12,8 @@ namespace Inventory.Domain.Entities
 
         public string ImgUrl { get; private set; } = string.Empty;
 
+        public bool IsDeleted { get; set; } = false;
+
         private Category() { } // For EF
 
         public Category(string name, string imgUrl)

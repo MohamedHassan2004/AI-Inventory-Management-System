@@ -12,5 +12,8 @@ namespace Inventory.Application.Interfaces
         Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto);
         Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto);
         Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto);
+
+        // ✅ Soft Delete
+        Task<Result> DeleteAsync(int id);
     }
 }
