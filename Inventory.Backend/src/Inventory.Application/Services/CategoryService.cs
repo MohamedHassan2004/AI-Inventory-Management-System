@@ -33,10 +33,7 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Creating category with name: {Name}", dto.Name);
 
             // 1️⃣ Check duplicate name
-            var existingCategories = await _categoryRepository.GetAllAsync();
-
-            if (existingCategories.Any(c =>
-                c.Name.ToLower() == dto.Name.ToLower()))
+            if (await _categoryRepository.ExistsByNameAsync(dto.Name))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -90,12 +87,7 @@ namespace Inventory.Application.Services
                     "Category not found");
             }
 
-            // 2️⃣ Check duplicate name (مع استثناء نفس الكاتيجوري)
-            var existingCategories = await _categoryRepository.GetAllAsync();
-
-            if (existingCategories.Any(c =>
-                c.Id != id &&
-                c.Name.ToLower() == dto.Name.ToLower()))
+            if (await _categoryRepository.ExistsByNameAsync(dto.Name, id))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -203,7 +195,7 @@ namespace Inventory.Application.Services
             }
 
             // 2️⃣ Soft Delete
-            category.IsDeleted = true;
+            category.Delete() ;
 
             _categoryRepository.Update(category);
 

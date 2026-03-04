@@ -12,7 +12,7 @@ namespace Inventory.Domain.Entities
 
         public string ImgUrl { get; private set; } = string.Empty;
 
-        public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; private set; } = false;
 
         private Category() { } // For EF
 
@@ -44,6 +44,10 @@ namespace Inventory.Domain.Entities
         public void Rename(string newName)
         {
             UpdateName(newName);
+        }
+        public void Delete()
+        {
+            IsDeleted = true;
         }
     }
 }

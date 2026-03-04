@@ -5,7 +5,8 @@ using System.Text;
 
 namespace Inventory.Domain.Interfaces
 {
-    public interface ICategoryRepository: IRepository<Category>
+    public interface ICategoryRepository : IRepository<Category>
     {
+        Task<bool> ExistsByNameAsync(string name, int? excludeId = null);
     }
 }
