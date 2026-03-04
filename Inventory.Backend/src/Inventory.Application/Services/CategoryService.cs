@@ -3,6 +3,7 @@ using Inventory.Application.Interfaces;
 using Inventory.Domain.Entities;
 using Inventory.Domain.Interfaces;
 using Inventory.Domain.Shared;
+using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,16 +17,19 @@ namespace Inventory.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
         private readonly ILogger<CategoryService> _logger;
+        private readonly IMapper _mapper;
 
         public CategoryService(
             ICategoryRepository categoryRepository,
             IUnitOfWork unitOfWork,
             IFileService fileService,
+            IMapper mapper,
             ILogger<CategoryService> logger)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _fileService = fileService;
+            _mapper = mapper;
             _logger = logger;
         }
         public async Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto)
@@ -61,13 +65,7 @@ namespace Inventory.Application.Services
             // 5️⃣ Commit
             await _unitOfWork.SaveChangesAsync();
 
-            // 6️⃣ Return response
-            var response = new CategoryResponseDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                ImgUrl = category.ImgUrl
-            };
+            var response = _mapper.Map<CategoryResponseDto>(category);
 
             return Result.Success(response, "Category created successfully");
         }
@@ -106,12 +104,7 @@ namespace Inventory.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             // 6️⃣ نرجع النتيجة
-            var response = new CategoryResponseDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                ImgUrl = category.ImgUrl
-            };
+            var response = _mapper.Map<CategoryResponseDto>(category);
 
             return Result.Success(response, "Category updated successfully");
         }
@@ -169,12 +162,7 @@ namespace Inventory.Application.Services
 
             var categories = await _categoryRepository.GetAllAsync();
 
-            var response = categories.Select(c => new CategoryResponseDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                ImgUrl = c.ImgUrl
-            });
+            var response = _mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
 
             return Result.Success<IEnumerable<CategoryResponseDto>>(response);
         }

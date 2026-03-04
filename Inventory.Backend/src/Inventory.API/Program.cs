@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Serilog.Context;
 using System.Text.Json.Serialization;
+using Mapster;
+using MapsterMapper;
+using Inventory.Application.Mappings;
 
 namespace Inventory.API
 {
