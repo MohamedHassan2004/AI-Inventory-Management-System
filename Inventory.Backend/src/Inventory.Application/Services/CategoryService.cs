@@ -18,19 +18,22 @@ namespace Inventory.Application.Services
         private readonly IFileService _fileService;
         private readonly ILogger<CategoryService> _logger;
         private readonly IMapper _mapper;
+        private readonly ILocalizationService _localizationService;
 
         public CategoryService(
             ICategoryRepository categoryRepository,
             IUnitOfWork unitOfWork,
             IFileService fileService,
             IMapper mapper,
-            ILogger<CategoryService> logger)
+            ILogger<CategoryService> logger,
+            ILocalizationService localizationService)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _fileService = fileService;
             _mapper = mapper;
             _logger = logger;
+            _localizationService = localizationService;
         }
         public async Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto)
         {
@@ -43,7 +46,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure<CategoryResponseDto>(
                     "DUPLICATED_NAME",
-                    "Category name already exists");
+                    _localizationService.GetMessage("CategoryDuplicateName"));
             }
 
             // 2️⃣ Save image
@@ -69,7 +72,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure<CategoryResponseDto>(
                     "INVALID_CATEGORY_DATA",
-                    ex.Message);
+                    _localizationService.GetMessage("InvalidCategoryData"));
             }
             // 4️⃣ Add
             await _categoryRepository.AddAsync(category);
@@ -79,7 +82,7 @@ namespace Inventory.Application.Services
 
             var response = _mapper.Map<CategoryResponseDto>(category);
 
-            return Result.Success(response, "Category created successfully");
+            return Result.Success(response, _localizationService.GetMessage("CategoryCreatedSuccess"));
         }
         public async Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto)
         {
@@ -94,7 +97,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure<CategoryResponseDto>(
                     "NOT_FOUND",
-                    "Category not found");
+                    _localizationService.GetMessage("CategoryNotFound"));
             }
 
             if (await _categoryRepository.ExistsByNameAsync(dto.Name, id))
@@ -103,7 +106,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure<CategoryResponseDto>(
                     "DUPLICATED_NAME",
-                    "Category name already exists");
+                    _localizationService.GetMessage("CategoryDuplicateName"));
             }
 
             // 3️⃣ نعدل الاسم
@@ -120,7 +123,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure<CategoryResponseDto>(
                     "INVALID_CATEGORY_NAME",
-                    ex.Message);
+                    _localizationService.GetMessage("InvalidCategoryData"));
             }
             // 4️⃣ نعمل Update
             _categoryRepository.Update(category);
@@ -131,7 +134,7 @@ namespace Inventory.Application.Services
             // 6️⃣ نرجع النتيجة
             var response = _mapper.Map<CategoryResponseDto>(category);
 
-            return Result.Success(response, "Category updated successfully");
+            return Result.Success(response, _localizationService.GetMessage("CategoryUpdatedSuccess"));
         }
         public async Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto)
         {
@@ -146,7 +149,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure(
                     "NOT_FOUND",
-                    "Category not found");
+                    _localizationService.GetMessage("CategoryNotFound"));
             }
 
             // 2️⃣ حفظ الصورة الجديدة
@@ -176,7 +179,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure(
                     "INVALID_IMAGE_PATH",
-                    ex.Message);
+                    _localizationService.GetMessage("InvalidCategoryImage"));
             }
             _categoryRepository.Update(category);
 
@@ -191,7 +194,7 @@ namespace Inventory.Application.Services
 
             _logger.LogInformation("Category image updated successfully for Id: {Id}", id);
 
-            return Result.Success("Category image updated successfully");
+            return Result.Success(_localizationService.GetMessage("CategoryImageUpdatedSuccess"));
         }
         public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync()
         {
@@ -216,7 +219,7 @@ namespace Inventory.Application.Services
 
                 return Result.Failure(
                     "NOT_FOUND",
-                    "Category not found");
+                    _localizationService.GetMessage("CategoryNotFound"));
             }
 
             // 2️⃣ Soft Delete
@@ -235,7 +238,7 @@ namespace Inventory.Application.Services
 
             _logger.LogInformation("Category soft deleted successfully with Id: {Id}", id);
 
-            return Result.Success("Category deleted successfully");
+            return Result.Success(_localizationService.GetMessage("CategoryDeletedSuccess"));
         }
     }
 }

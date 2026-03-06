@@ -242,4 +242,39 @@
   <data name="ConfirmPasswordMismatch" xml:space="preserve">
     <value>تأكيد كلمة المرور الجديدة يجب أن يتطابق مع كلمة المرور الجديدة.</value>
   </data>
+
+  <!-- Category Messages -->
+  <data name="CategoryNameRequired" xml:space="preserve">
+    <value>اسم الفئة مطلوب.</value>
+  </data>
+  <data name="CategoryNameMaxLength" xml:space="preserve">
+    <value>يجب ألا يتجاوز اسم الفئة 100 حرف.</value>
+  </data>
+  <data name="CategoryImageRequired" xml:space="preserve">
+    <value>صورة الفئة مطلوبة.</value>
+  </data>
+  <data name="CategoryDuplicateName" xml:space="preserve">
+    <value>اسم الفئة موجود بالفعل.</value>
+  </data>
+  <data name="CategoryNotFound" xml:space="preserve">
+    <value>الفئة غير موجودة.</value>
+  </data>
+  <data name="InvalidCategoryData" xml:space="preserve">
+    <value>بيانات الفئة غير صالحة.</value>
+  </data>
+  <data name="InvalidCategoryImage" xml:space="preserve">
+    <value>صورة الفئة غير صالحة.</value>
+  </data>
+  <data name="CategoryCreatedSuccess" xml:space="preserve">
+    <value>تم إنشاء الفئة بنجاح</value>
+  </data>
+  <data name="CategoryUpdatedSuccess" xml:space="preserve">
+    <value>تم تحديث الفئة بنجاح</value>
+  </data>
+  <data name="CategoryImageUpdatedSuccess" xml:space="preserve">
+    <value>تم تحديث صورة الفئة بنجاح</value>
+  </data>
+  <data name="CategoryDeletedSuccess" xml:space="preserve">
+    <value>تم حذف الفئة بنجاح</value>
+  </data>
 </root>
