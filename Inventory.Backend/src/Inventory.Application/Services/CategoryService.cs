@@ -13,7 +13,6 @@ namespace Inventory.Application.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
         private readonly ILogger<CategoryService> _logger;
@@ -21,14 +20,12 @@ namespace Inventory.Application.Services
         private readonly ILocalizationService _localizationService;
 
         public CategoryService(
-            ICategoryRepository categoryRepository,
             IUnitOfWork unitOfWork,
             IFileService fileService,
             IMapper mapper,
             ILogger<CategoryService> logger,
             ILocalizationService localizationService)
         {
-            _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _fileService = fileService;
             _mapper = mapper;
@@ -40,7 +37,7 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Creating category with name: {Name}", dto.Name);
 
             // 1️⃣ Check duplicate name
-            if (await _categoryRepository.ExistsByNameAsync(dto.Name))
+            if (await _unitOfWork.Categories.ExistsByNameAsync(dto.Name))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -75,7 +72,7 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("InvalidCategoryData"));
             }
             // 4️⃣ Add
-            await _categoryRepository.AddAsync(category);
+            await _unitOfWork.Categories.AddAsync(category);
 
             // 5️⃣ Commit
             await _unitOfWork.SaveChangesAsync();
@@ -89,7 +86,7 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Updating category with Id: {Id}", id);
 
             // 1️⃣ نتأكد إنها موجودة
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
 
             if (category is null)
             {
@@ -100,7 +97,7 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("CategoryNotFound"));
             }
 
-            if (await _categoryRepository.ExistsByNameAsync(dto.Name, id))
+            if (await _unitOfWork.Categories.ExistsByNameAsync(dto.Name, id))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -109,7 +106,6 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("CategoryDuplicateName"));
             }
 
-            // 3️⃣ نعدل الاسم
             // 3️⃣ نعدل الاسم
             try
             {
@@ -126,7 +122,7 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("InvalidCategoryData"));
             }
             // 4️⃣ نعمل Update
-            _categoryRepository.Update(category);
+            _unitOfWork.Categories.Update(category);
 
             // 5️⃣ نحفظ
             await _unitOfWork.SaveChangesAsync();
@@ -141,7 +137,7 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Updating image for category Id: {Id}", id);
 
             // 1️⃣ التأكد من وجود الكاتيجوري
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
 
             if (category is null)
             {
@@ -181,7 +177,7 @@ namespace Inventory.Application.Services
                     "INVALID_IMAGE_PATH",
                     _localizationService.GetMessage("InvalidCategoryImage"));
             }
-            _categoryRepository.Update(category);
+            _unitOfWork.Categories.Update(category);
 
             // 4️⃣ حفظ التغييرات
             await _unitOfWork.SaveChangesAsync();
@@ -200,7 +196,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Fetching all categories");
 
-            var categories = await _categoryRepository.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllAsync();
 
             var response = _mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
 
@@ -211,7 +207,7 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Soft deleting category with Id: {Id}", id);
 
             // 1️⃣ Check existence
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
 
             if (category is null)
             {
@@ -225,7 +221,7 @@ namespace Inventory.Application.Services
             // 2️⃣ Soft Delete
             category.Delete() ;
 
-            _categoryRepository.Update(category);
+            _unitOfWork.Categories.Update(category);
 
             // 3️⃣ Save changes
             await _unitOfWork.SaveChangesAsync();
