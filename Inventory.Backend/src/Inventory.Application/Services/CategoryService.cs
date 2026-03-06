@@ -57,8 +57,20 @@ namespace Inventory.Application.Services
             }
 
             // 3️⃣ Create entity
-            var category = new Category(dto.Name, fileResult.Value);
+            Category category;
 
+            try
+            {
+                category = new Category(dto.Name, fileResult.Value);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid category data provided. Name: {Name}", dto.Name);
+
+                return Result.Failure<CategoryResponseDto>(
+                    "INVALID_CATEGORY_DATA",
+                    ex.Message);
+            }
             // 4️⃣ Add
             await _categoryRepository.AddAsync(category);
 
@@ -95,8 +107,21 @@ namespace Inventory.Application.Services
             }
 
             // 3️⃣ نعدل الاسم
-            category.UpdateName(dto.Name);
+            // 3️⃣ نعدل الاسم
+            try
+            {
+                category.UpdateName(dto.Name);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Invalid category name provided while updating category. Id: {Id}, Name: {Name}",
+                    id, dto.Name);
 
+                return Result.Failure<CategoryResponseDto>(
+                    "INVALID_CATEGORY_NAME",
+                    ex.Message);
+            }
             // 4️⃣ نعمل Update
             _categoryRepository.Update(category);
 
@@ -139,8 +164,20 @@ namespace Inventory.Application.Services
             var oldImagePath = category.ImgUrl;
 
             // 3️⃣ تحديث الكيان
-            category.UpdateImage(fileResult.Value);
+            try
+            {
+                category.UpdateImage(fileResult.Value);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Invalid image path provided while updating category image. Id: {Id}, ImagePath: {ImagePath}",
+                    id, fileResult.Value);
 
+                return Result.Failure(
+                    "INVALID_IMAGE_PATH",
+                    ex.Message);
+            }
             _categoryRepository.Update(category);
 
             // 4️⃣ حفظ التغييرات
