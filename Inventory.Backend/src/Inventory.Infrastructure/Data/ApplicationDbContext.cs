@@ -1,3 +1,4 @@
+using Inventory.Domain.Entities;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ namespace Inventory.Infrastructure.Data;
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Category> Categories { get; set; }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
