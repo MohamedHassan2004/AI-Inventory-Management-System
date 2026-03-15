@@ -1,4 +1,4 @@
-﻿using Inventory.Application.DTOs.Auth;
+using Inventory.Application.DTOs.Auth;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Services;
 using Inventory.Domain.Entities.Users;
@@ -98,7 +98,7 @@ namespace Inventory.Infrastructure.Test.Services
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.Equal("PasswordChangedSuccess", result.Message);
+
 
             _userManagerMock.Verify(x => x.UpdateAsync(user), Times.Once);
         }
@@ -117,7 +117,7 @@ namespace Inventory.Infrastructure.Test.Services
             var result = await _authService.ChangePasswordAsync(userId, dto);
             // assert
             Assert.False(result.IsSuccess);
-            Assert.Equal("NOT_FOUND", result.ErrorCode);
+            Assert.Equal("NOT_FOUND", result.Error.Code);
 
             _userManagerMock.Verify(x => x.ChangePasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Never);
@@ -143,8 +143,8 @@ namespace Inventory.Infrastructure.Test.Services
 
             // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal("PASSWORD_CHANGE_FAILED", result.ErrorCode);
-            Assert.Contains("Invalid password.", result.Message);
+            Assert.Equal("PASSWORD_CHANGE_FAILED", result.Error.Code);
+            Assert.Contains("Invalid password.", result.Error.Description);
 
             _userManagerMock.Verify(x => x.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword), Times.Once);
             _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<ApplicationUser>()), Times.Never);

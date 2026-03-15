@@ -1,31 +1,29 @@
-﻿namespace Inventory.Domain.Shared;
+namespace Inventory.Domain.Shared;
 
 public class Result
 {
     public bool IsSuccess { get; }
-    public string Message { get; }
-    public string ErrorCode { get; }
+    public Error Error { get; }
 
-    protected Result(bool isSuccess, string message, string code)
+    protected Result(bool isSuccess, Error error)
     {
         IsSuccess = isSuccess;
-        Message = message;
-        ErrorCode = code;
+        Error = error;
     }
 
-    public static Result Success(string message = "") => new(true, message, string.Empty);
-    public static Result Failure(string code, string message) => new(false, message, code);
+    public static Result Success() => new(true, Error.None);
+    public static Result Failure(Error error) => new(false, error);
 
-    public static Result<TValue> Success<TValue>(TValue value, string message = "") => new(value, true, message, string.Empty);
-    public static Result<TValue> Failure<TValue>(string code, string message) => new(default!, false, message, code);
+    public static Result<TValue> Success<TValue>(TValue value) => new(value, true, Error.None);
+    public static Result<TValue> Failure<TValue>(Error error) => new(default!, false, error);
 }
 
 public class Result<TValue> : Result
 {
     private readonly TValue? _value;
 
-    protected internal Result(TValue? value, bool isSuccess, string message, string code)
-        : base(isSuccess, message, code)
+    protected internal Result(TValue? value, bool isSuccess, Error error)
+        : base(isSuccess, error)
     {
         _value = value;
     }

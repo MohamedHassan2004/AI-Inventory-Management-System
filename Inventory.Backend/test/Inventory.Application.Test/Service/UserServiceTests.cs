@@ -1,4 +1,4 @@
-﻿using Inventory.Application.DTOs.Auth;
+using Inventory.Application.DTOs.Auth;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Services;
 using Inventory.Domain.Entities.Users;
@@ -88,7 +88,7 @@ public class UserServiceTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("NOT_FOUND", result.ErrorCode);
+        Assert.Equal("NOT_FOUND", result.Error.Code);
         _fileServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -104,14 +104,14 @@ public class UserServiceTests
         _userManagerMock.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
 
         _fileServiceMock.Setup(x => x.SaveFileAsync(fileMock.Object, "user-identities"))
-            .ReturnsAsync(Result.Failure<string>("ERR", "Disk Full"));
+            .ReturnsAsync(Result.Failure<string>(new Error("ERR", "Disk Full", ErrorType.Failure)));
 
         // Act
         var result = await _userService.UploadUserIdentityAsync(userId, dto);
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("FILE_UPLOAD_ERROR", result.ErrorCode);
+        Assert.Equal("FILE_UPLOAD_ERROR", result.Error.Code);
         _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }
 

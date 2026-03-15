@@ -49,7 +49,7 @@ public class FileServiceTests : IDisposable
             .Returns<string>(key => key);
         _mockLocalizationService
             .Setup(l => l.GetMessage(It.IsAny<string>(), It.IsAny<object[]>()))
-            .Returns<string, object[]>((key, args) => string.Format(key, args));
+            .Returns<string, object[]>((key, args) => key + " " + string.Join(" ", args));
 
         _fileService = new FileService(
             _mockEnvironment.Object,
@@ -216,8 +216,8 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("file exceeds maximum allowed size");
-        result.ErrorCode.Should().Be("FILE_TOO_LARGE");
-        result.Message.Should().Contain("5", "error message should indicate the limit");
+        result.Error.Code.Should().Be("FILE_TOO_LARGE");
+        result.Error.Description.Should().Contain("5", "error message should indicate the limit");
     }
 
     /// <summary>
@@ -262,7 +262,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse($"'{Path.GetExtension(fileName)}' extension should be blocked");
-        result.ErrorCode.Should().Be("INVALID_FILE_TYPE");
+        result.Error.Code.Should().Be("INVALID_FILE_TYPE");
     }
 
     /// <summary>
@@ -331,7 +331,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("MIME type should be validated");
-        result.ErrorCode.Should().Be("INVALID_MIME_TYPE");
+        result.Error.Code.Should().Be("INVALID_MIME_TYPE");
     }
 
     #endregion
@@ -382,7 +382,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("absolute paths should be rejected");
-        result.ErrorCode.Should().Be("INVALID_PATH");
+        result.Error.Code.Should().Be("INVALID_PATH");
     }
 
     /// <summary>
@@ -444,7 +444,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("non-existent file cannot be deleted");
-        result.ErrorCode.Should().Be("NOT_FOUND");
+        result.Error.Code.Should().Be("NOT_FOUND");
     }
 
     /// <summary>
@@ -461,7 +461,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("null or empty path should be rejected");
-        result.ErrorCode.Should().Be("INVALID_PATH");
+        result.Error.Code.Should().Be("INVALID_PATH");
     }
 
     /// <summary>
@@ -478,7 +478,7 @@ public class FileServiceTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeFalse("path traversal attempts should be blocked");
-        result.ErrorCode.Should().Be("INVALID_PATH");
+        result.Error.Code.Should().Be("INVALID_PATH");
     }
 
     #endregion

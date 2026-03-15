@@ -34,14 +34,14 @@ public class UserService : IUserService
         if (user == null)
         {
             _logger.LogWarning("Upload identity failed: User with ID {UserId} not found", userId);
-            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
+            return Result.Failure(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
         }
 
         var saveResult = await _fileService.SaveFileAsync(uploadIdentity.IdentityImageFile, "user-identities");
         if (!saveResult.IsSuccess)
         {
-            _logger.LogError("Failed to save identity image for user {UserId}: {Error}", userId, saveResult.Message);
-            return Result.Failure("FILE_UPLOAD_ERROR", _localizationService.GetMessage("IdentityUploadFailed"));
+            _logger.LogError("Failed to save identity image for user {UserId}: {Error}", userId, saveResult.Error.Description);
+            return Result.Failure(new Error("FILE_UPLOAD_ERROR", _localizationService.GetMessage("IdentityUploadFailed"), ErrorType.Failure));
         }
 
         user.SetIdentityImgUrl(saveResult.Value);
@@ -51,12 +51,12 @@ public class UserService : IUserService
         {
             var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
             _logger.LogError("Failed to update user {UserId} with identity image: {Errors}", userId, errors);
-            return Result.Failure("USER_UPDATE_ERROR", _localizationService.GetMessage("IdentityUpdateFailed"));
+            return Result.Failure(new Error("USER_UPDATE_ERROR", _localizationService.GetMessage("IdentityUpdateFailed"), ErrorType.Failure));
         }
 
         _logger.LogInformation("Identity image uploaded successfully for user '{UserName}'", user.UserName);
 
-        return Result.Success(_localizationService.GetMessage("IdentityUploadedSuccess"));
+        return Result.Success();
     }
 
     

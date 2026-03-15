@@ -1,9 +1,8 @@
-﻿using Inventory.Domain.Shared;
+using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventory.API.Controllers
 {
-
     [ApiController]
     public class ApiBaseController : ControllerBase
     {
@@ -14,7 +13,7 @@ namespace Inventory.API.Controllers
                 return NoContent();
             }
 
-            return CreateProblemDetails(result.ErrorCode, result.Message);
+            return CreateProblemDetails(result.Error);
         }
 
         protected IActionResult HandleResult<T>(Result<T> result)
@@ -24,39 +23,38 @@ namespace Inventory.API.Controllers
                 return Ok(result.Value);
             }
 
-            return CreateProblemDetails(result.ErrorCode, result.Message);
+            return CreateProblemDetails(result.Error);
         }
 
-        private IActionResult CreateProblemDetails(string errorCode, string message)
+        private IActionResult CreateProblemDetails(Error error)
         {
-            var statusCode = GetStatusCodeFromErrorCode(errorCode);
+            var statusCode = error.Type switch
+            {
+                ErrorType.NotFound => StatusCodes.Status404NotFound,
+                ErrorType.Validation => StatusCodes.Status400BadRequest,
+                ErrorType.Conflict => StatusCodes.Status409Conflict,
+                ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+                _ => StatusCodes.Status500InternalServerError
+            };
 
             return Problem(
                 statusCode: statusCode,
-                title: GetTitleForStatusCode(statusCode),
-                detail: message,
+                title: GetTitleForErrorType(error.Type),
+                detail: error.Description,
                 extensions: new Dictionary<string, object?>
                 {
-                { "customErrorCode", errorCode }
+                    { "customErrorCode", error.Code }
                 });
         }
 
-        private static int GetStatusCodeFromErrorCode(string errorCode) =>
-            errorCode switch
+        private static string GetTitleForErrorType(ErrorType errorType) =>
+            errorType switch
             {
-                var c when c.Contains("NOT_FOUND") || c.StartsWith("NO_") => StatusCodes.Status404NotFound,
-                var c when c.Contains("UNAUTHORIZED") || c.Contains("CREDENTIALS") => StatusCodes.Status401Unauthorized,
-                var c when c.Contains("DUPLICATE") || c.Contains("ALREADY_EXIST") => StatusCodes.Status409Conflict,
-                _ => StatusCodes.Status400BadRequest
-            };
-
-        private static string GetTitleForStatusCode(int statusCode) =>
-            statusCode switch
-            {
-                StatusCodes.Status404NotFound => "Resource Not Found",
-                StatusCodes.Status401Unauthorized => "Unauthorized Access",
-                StatusCodes.Status409Conflict => "Resource Conflict",
-                _ => "Bad Request"
+                ErrorType.NotFound => "Resource Not Found",
+                ErrorType.Validation => "Bad Request",
+                ErrorType.Conflict => "Resource Conflict",
+                ErrorType.Unauthorized => "Unauthorized Access",
+                _ => "Internal Server Error"
             };
     }
 }

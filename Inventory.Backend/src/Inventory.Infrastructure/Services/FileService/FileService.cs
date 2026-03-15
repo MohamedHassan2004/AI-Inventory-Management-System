@@ -34,35 +34,39 @@ public class FileService : IFileService
             var maxSizeInBytes = _options.MaxFileSizeInMB * 1024 * 1024;
             if (file.Length > maxSizeInBytes)
             {
-                return Result.Failure<string>(
+                return Result.Failure<string>(new Error(
                     "FILE_TOO_LARGE",
-                    _localizationService.GetMessage("FileTooLarge", _options.MaxFileSizeInMB));
+                    _localizationService.GetMessage("FileTooLarge", _options.MaxFileSizeInMB),
+                    ErrorType.Validation));
             }
 
             // Validate file extension
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!_options.AllowedExtensions.Contains(extension))
             {
-                return Result.Failure<string>(
+                return Result.Failure<string>(new Error(
                     "INVALID_FILE_TYPE",
-                    _localizationService.GetMessage("InvalidFileType", extension, string.Join(", ", _options.AllowedExtensions)));
+                    _localizationService.GetMessage("InvalidFileType", extension, string.Join(", ", _options.AllowedExtensions)),
+                    ErrorType.Validation));
             }
 
             // Validate MIME type
             if (!_options.AllowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
             {
-                return Result.Failure<string>(
+                return Result.Failure<string>(new Error(
                     "INVALID_MIME_TYPE",
-                    _localizationService.GetMessage("InvalidMimeType", file.ContentType));
+                    _localizationService.GetMessage("InvalidMimeType", file.ContentType),
+                    ErrorType.Validation));
             }
 
             // Sanitize and validate folder path to prevent path traversal
             var sanitizedFolderPath = SanitizePath(folderPath);
             if (sanitizedFolderPath == null)
             {
-                return Result.Failure<string>(
+                return Result.Failure<string>(new Error(
                     "INVALID_PATH",
-                    _localizationService.GetMessage("InvalidFolderPath"));
+                    _localizationService.GetMessage("InvalidFolderPath"),
+                    ErrorType.Validation));
             }
 
             // Create upload directory
@@ -85,12 +89,12 @@ public class FileService : IFileService
             var relativePath = Path.Combine(_options.UploadFolder, sanitizedFolderPath, fileName)
                 .Replace(Path.DirectorySeparatorChar, '/');
 
-            return Result.Success<string>(relativePath, _localizationService.GetMessage("FileSavedSuccess"));
+            return Result.Success<string>(relativePath);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during file save operation");
-            return Result.Failure<string>("FILE_SAVE_FAILED", _localizationService.GetMessage("FileSaveFailed"));
+            return Result.Failure<string>(new Error("FILE_SAVE_FAILED", _localizationService.GetMessage("FileSaveFailed"), ErrorType.Failure));
         }
     }
 
@@ -98,7 +102,7 @@ public class FileService : IFileService
     {
         if (string.IsNullOrWhiteSpace(relativePath))
         {
-            return Result.Failure("INVALID_PATH", _localizationService.GetMessage("PathCannotBeEmpty"));
+            return Result.Failure(new Error("INVALID_PATH", _localizationService.GetMessage("PathCannotBeEmpty"), ErrorType.Validation));
         }
 
         var fullPath = GetAbsolutePath(relativePath);
@@ -108,25 +112,25 @@ public class FileService : IFileService
         if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogWarning("Attempted to delete file outside uploads directory: {Path}", fullPath);
-            return Result.Failure("INVALID_PATH", _localizationService.GetMessage("InvalidPath"));
+            return Result.Failure(new Error("INVALID_PATH", _localizationService.GetMessage("InvalidPath"), ErrorType.Validation));
         }
 
         if (!File.Exists(fullPath))
         {
             _logger.LogWarning("File not found: {Path}", fullPath);
-            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("FileNotFound"));
+            return Result.Failure(new Error("NOT_FOUND", _localizationService.GetMessage("FileNotFound"), ErrorType.NotFound));
         }
 
         try
         {
             await Task.Run(() => File.Delete(fullPath));
             _logger.LogInformation("File deleted successfully: {Path}", fullPath);
-            return Result.Success(_localizationService.GetMessage("FileDeletedSuccess"));
+            return Result.Success();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during file deletion: {Path}", fullPath);
-            return Result.Failure("FILE_DELETE_FAILED", _localizationService.GetMessage("FileDeleteFailed"));
+            return Result.Failure(new Error("FILE_DELETE_FAILED", _localizationService.GetMessage("FileDeleteFailed"), ErrorType.Failure));
         }
     }
 

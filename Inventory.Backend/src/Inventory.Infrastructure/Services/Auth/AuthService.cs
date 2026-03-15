@@ -1,4 +1,4 @@
-﻿using Inventory.Application.DTOs.Auth;
+using Inventory.Application.DTOs.Auth;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Inventory.Domain.Entities.Users;
@@ -54,13 +54,13 @@ public class AuthService : IAuthService
         if (user is null)
         {
             _logger.LogWarning("Login failed: User '{UserName}' not found", loginDto.UserName);
-            return Result.Failure<TokenDto>("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
+            return Result.Failure<TokenDto>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
         }
 
         if (await _userManager.IsLockedOutAsync(user))
         {
             _logger.LogWarning("Login failed: User '{UserName}' is locked out", user.UserName);
-            return Result.Failure<TokenDto>("LOCKED_OUT", _localizationService.GetMessage("UserLockedOut"));
+            return Result.Failure<TokenDto>(new Error("LOCKED_OUT", _localizationService.GetMessage("UserLockedOut"), ErrorType.Unauthorized));
         }
 
         var checkPasswordResult = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
@@ -70,7 +70,7 @@ public class AuthService : IAuthService
             var failedAttempts = await _userManager.GetAccessFailedCountAsync(user);
             _logger.LogWarning("Login failed: Invalid password for user '{UserName}'. Attempts: {Attempts}",
                 user.UserName, failedAttempts);
-            return Result.Failure<TokenDto>("INVALID_CREDENTIAL", _localizationService.GetMessage("InvalidCredentials"));
+            return Result.Failure<TokenDto>(new Error("INVALID_CREDENTIAL", _localizationService.GetMessage("InvalidCredentials"), ErrorType.Unauthorized));
         }
 
         try
@@ -80,7 +80,7 @@ public class AuthService : IAuthService
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning("Login failed: User '{UserName}' cannot login - {Reason}", user.UserName, ex.Message);
-            return Result.Failure<TokenDto>("INVALID_OPERATION", ex.Message);
+            return Result.Failure<TokenDto>(new Error("INVALID_OPERATION", ex.Message, ErrorType.Validation));
         }
 
         var claims = await GenerateUserClaimsAsync(user);
@@ -112,7 +112,7 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("User '{UserName}' logged in successfully", user.UserName);
 
-        return Result.Success(new TokenDto(accessToken, refreshTokenString), _localizationService.GetMessage("LoginSuccess"));
+        return Result.Success(new TokenDto(accessToken, refreshTokenString));
     }
 
     public async Task LogoutAsync(string userId)
@@ -147,14 +147,14 @@ public class AuthService : IAuthService
         if (userNameExist != null)
         {
             _logger.LogWarning("Registration failed: Username '{UserName}' already exists", registerDto.UserName);
-            return Result.Failure("USERNAME_ALREADY_EXIST", _localizationService.GetMessage("UsernameAlreadyExists"));
+            return Result.Failure(new Error("USERNAME_ALREADY_EXIST", _localizationService.GetMessage("UsernameAlreadyExists"), ErrorType.Conflict));
         }
 
         var emailExist = await _userManager.FindByEmailAsync(registerDto.Email);
         if (emailExist != null)
         {
             _logger.LogWarning("Registration failed: Email '{Email}' already exists", registerDto.Email);
-            return Result.Failure("EMAIL_ALREADY_EXIST", _localizationService.GetMessage("EmailAlreadyExists"));
+            return Result.Failure(new Error("EMAIL_ALREADY_EXIST", _localizationService.GetMessage("EmailAlreadyExists"), ErrorType.Conflict));
         }
 
         try
@@ -171,7 +171,7 @@ public class AuthService : IAuthService
                 var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
                 _logger.LogError("Registration failed: Could not create user '{UserName}'. Errors: {Errors}",
                     registerDto.UserName, errors);
-                return Result.Failure("UNEXPECTED_ERROR", errors);
+                return Result.Failure(new Error("UNEXPECTED_ERROR", errors, ErrorType.Failure));
             }
 
             foreach (var role in registerDto.Roles)
@@ -182,12 +182,12 @@ public class AuthService : IAuthService
             _logger.LogInformation("User '{UserName}' (ID: {UserId}) registered successfully with roles: {Roles}",
                 user.UserName, user.Id, string.Join(", ", registerDto.Roles));
 
-            return Result.Success(_localizationService.GetMessage("RegisterSuccess"));
+            return Result.Success();
         }
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Registration failed: Invalid data for user '{UserName}'", registerDto.UserName);
-            return Result.Failure("INVALID_DATA", ex.Message);
+            return Result.Failure(new Error("INVALID_DATA", ex.Message, ErrorType.Validation));
         }
     }
 
@@ -199,7 +199,7 @@ public class AuthService : IAuthService
         if (user is null)
         {
             _logger.LogWarning("Password change failed: User with ID {UserId} not found", userId);
-            return Result.Failure("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
+            return Result.Failure(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
         }
 
         var changeResult = await _userManager.ChangePasswordAsync(
@@ -211,7 +211,7 @@ public class AuthService : IAuthService
         {
             var errors = string.Join(", ", changeResult.Errors.Select(e => e.Description));
             _logger.LogWarning("Password change failed for user '{UserName}': {Errors}", user.UserName, errors);
-            return Result.Failure("PASSWORD_CHANGE_FAILED", errors);
+            return Result.Failure(new Error("PASSWORD_CHANGE_FAILED", errors, ErrorType.Failure));
         }
 
         user.PasswordChanged();
@@ -219,7 +219,7 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Password changed successfully for user '{UserName}'", user.UserName);
 
-        return Result.Success(_localizationService.GetMessage("PasswordChangedSuccess"));
+        return Result.Success();
     }
 
     public async Task<Result<TokenDto>> RefreshTokenAsync(string userId, string refreshToken)
@@ -230,7 +230,7 @@ public class AuthService : IAuthService
         if (user is null)
         {
             _logger.LogWarning("Token refresh failed: User with ID {UserId} not found", userId);
-            return Result.Failure<TokenDto>("NOT_FOUND", _localizationService.GetMessage("UserNotFound"));
+            return Result.Failure<TokenDto>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
         }
 
         // Validate the provided refresh token against the database
@@ -240,19 +240,19 @@ public class AuthService : IAuthService
         if (storedToken is null)
         {
             _logger.LogWarning("Token refresh failed: Refresh token not found for user '{UserName}'", user.UserName);
-            return Result.Failure<TokenDto>("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("InvalidRefreshToken"));
+            return Result.Failure<TokenDto>(new Error("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("InvalidRefreshToken"), ErrorType.Unauthorized));
         }
 
         if (storedToken.IsRevoked)
         {
             _logger.LogWarning("Token refresh failed: Refresh token is revoked for user '{UserName}'", user.UserName);
-            return Result.Failure<TokenDto>("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("RefreshTokenRevoked"));
+            return Result.Failure<TokenDto>(new Error("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("RefreshTokenRevoked"), ErrorType.Unauthorized));
         }
 
         if (storedToken.ExpiryDate <= _dateTimeProvider.UtcNow)
         {
             _logger.LogWarning("Token refresh failed: Refresh token expired for user '{UserName}'", user.UserName);
-            return Result.Failure<TokenDto>("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("RefreshTokenExpired"));
+            return Result.Failure<TokenDto>(new Error("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("RefreshTokenExpired"), ErrorType.Unauthorized));
         }
 
         // Revoke the old refresh token
@@ -277,7 +277,7 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Token refreshed successfully for user '{UserName}'", user.UserName);
 
-        return Result.Success(new TokenDto(newAccessToken, newRefreshTokenString), _localizationService.GetMessage("TokenRefreshedSuccess"));
+        return Result.Success(new TokenDto(newAccessToken, newRefreshTokenString));
     }
 
     public async Task<bool> IsUserNameExist(string userName)
