@@ -277,4 +277,59 @@
   <data name="CategoryDeletedSuccess" xml:space="preserve">
     <value>Category deleted successfully</value>
   </data>
+
+  <!-- Product Messages -->
+  <data name="ProductSkuRequired" xml:space="preserve">
+    <value>Product SKU is required.</value>
+  </data>
+  <data name="ProductSkuMaxLength" xml:space="preserve">
+    <value>Product SKU must not exceed 50 characters.</value>
+  </data>
+  <data name="ProductNameRequired" xml:space="preserve">
+    <value>Product Name is required.</value>
+  </data>
+  <data name="ProductNameMaxLength" xml:space="preserve">
+    <value>Product Name must not exceed 200 characters.</value>
+  </data>
+  <data name="ProductPriceInvalid" xml:space="preserve">
+    <value>Selling price must be greater than or equal to 0.</value>
+  </data>
+  <data name="ProductReorderPointInvalid" xml:space="preserve">
+    <value>Reorder point must be greater than or equal to 0.</value>
+  </data>
+  <data name="ProductDuplicateSku" xml:space="preserve">
+    <value>Product SKU already exists.</value>
+  </data>
+  <data name="ProductDuplicateName" xml:space="preserve">
+    <value>Product Name already exists.</value>
+  </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>Product not found.</value>
+  </data>
+
+  <!-- StockBatch Messages -->
+  <data name="BatchProductRequired" xml:space="preserve">
+    <value>A valid Product must be selected.</value>
+  </data>
+  <data name="BatchSupplierRequired" xml:space="preserve">
+    <value>A valid Supplier must be selected.</value>
+  </data>
+  <data name="BatchPurchaseDateRequired" xml:space="preserve">
+    <value>Purchase date is required.</value>
+  </data>
+  <data name="BatchExpireDateRequired" xml:space="preserve">
+    <value>Expiry date is required.</value>
+  </data>
+  <data name="BatchExpireDateInvalid" xml:space="preserve">
+    <value>Expiry date must be after the purchase date.</value>
+  </data>
+  <data name="BatchCostInvalid" xml:space="preserve">
+    <value>Unit cost must be greater than or equal to 0.</value>
+  </data>
+  <data name="BatchQuantityInvalid" xml:space="preserve">
+    <value>Quantity must be greater than or equal to 0.</value>
+  </data>
+  <data name="BatchNotFound" xml:space="preserve">
+    <value>Stock Batch not found.</value>
+  </data>
 </root>

@@ -49,6 +49,13 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
+        [HttpPut("{id}/restore")]
+        public async Task<IActionResult> Restore(int id, CancellationToken cancellationToken)
+        {
+            var result = await _supplierService.RestoreSupplierAsync(id, cancellationToken);
+            return HandleResult(result);
+        }
+
         [HttpGet("{id}/notes")]
         public async Task<IActionResult> GetNotes(int id, CancellationToken cancellationToken)
         {

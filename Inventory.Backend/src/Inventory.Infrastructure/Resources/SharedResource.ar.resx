@@ -277,4 +277,59 @@
   <data name="CategoryDeletedSuccess" xml:space="preserve">
     <value>تم حذف الفئة بنجاح</value>
   </data>
+
+  <!-- Product Messages -->
+  <data name="ProductSkuRequired" xml:space="preserve">
+    <value>رمز المنتج (SKU) مطلوب.</value>
+  </data>
+  <data name="ProductSkuMaxLength" xml:space="preserve">
+    <value>يجب ألا يتجاوز رمز المنتج (SKU) 50 حرفاً.</value>
+  </data>
+  <data name="ProductNameRequired" xml:space="preserve">
+    <value>اسم المنتج مطلوب.</value>
+  </data>
+  <data name="ProductNameMaxLength" xml:space="preserve">
+    <value>يجب ألا يتجاوز اسم المنتج 200 حرف.</value>
+  </data>
+  <data name="ProductPriceInvalid" xml:space="preserve">
+    <value>يجب أن يكون سعر البيع أكبر من أو يساوي الصفر.</value>
+  </data>
+  <data name="ProductReorderPointInvalid" xml:space="preserve">
+    <value>يجب أن تكون نقطة إعادة الطلب أكبر من أو تساوي الصفر.</value>
+  </data>
+  <data name="ProductDuplicateSku" xml:space="preserve">
+    <value>رمز المنتج (SKU) موجود بالفعل.</value>
+  </data>
+  <data name="ProductDuplicateName" xml:space="preserve">
+    <value>اسم المنتج موجود بالفعل.</value>
+  </data>
+  <data name="ProductNotFound" xml:space="preserve">
+    <value>المنتج غير موجود.</value>
+  </data>
+
+  <!-- StockBatch Messages -->
+  <data name="BatchProductRequired" xml:space="preserve">
+    <value>يجب اختيار منتج صحيح.</value>
+  </data>
+  <data name="BatchSupplierRequired" xml:space="preserve">
+    <value>يجب اختيار مورد صحيح.</value>
+  </data>
+  <data name="BatchPurchaseDateRequired" xml:space="preserve">
+    <value>تاريخ الشراء مطلوب.</value>
+  </data>
+  <data name="BatchExpireDateRequired" xml:space="preserve">
+    <value>تاريخ الانتهاء مطلوب.</value>
+  </data>
+  <data name="BatchExpireDateInvalid" xml:space="preserve">
+    <value>يجب أن يكون تاريخ الانتهاء بعد تاريخ الشراء.</value>
+  </data>
+  <data name="BatchCostInvalid" xml:space="preserve">
+    <value>يجب أن تكون تكلفة الوحدة أكبر من أو تساوي صفر.</value>
+  </data>
+  <data name="BatchQuantityInvalid" xml:space="preserve">
+    <value>يجب أن تكون الكمية أكبر من أو تساوي صفر.</value>
+  </data>
+  <data name="BatchNotFound" xml:space="preserve">
+    <value>دفعة المخزون غير موجودة.</value>
+  </data>
 </root>

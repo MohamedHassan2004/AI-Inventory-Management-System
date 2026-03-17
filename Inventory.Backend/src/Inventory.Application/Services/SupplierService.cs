@@ -71,7 +71,21 @@ namespace Inventory.Application.Services
             if (supplier == null)
                 return Result.Failure(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
 
-            _supplierRepository.Delete(supplier);
+            supplier.MarkAsDeleted();
+            _supplierRepository.Update(supplier);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+        public async Task<Result> RestoreSupplierAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var supplier = await _supplierRepository.GetByIdAsync(id, cancellationToken);
+            if (supplier == null)
+                return Result.Failure(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
+
+            supplier.Restore();
+            _supplierRepository.Update(supplier);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
