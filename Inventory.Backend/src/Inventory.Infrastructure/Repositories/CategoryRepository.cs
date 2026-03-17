@@ -16,12 +16,12 @@ namespace Inventory.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null)
+        public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)
         {
             return await _context.Categories
                 .Where(c => c.Name == name)
                 .Where(c => !excludeId.HasValue || c.Id != excludeId.Value)
-                .AnyAsync();
+                .AnyAsync(cancellationToken);
         }
     }
 }

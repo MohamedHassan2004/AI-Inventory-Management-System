@@ -17,6 +17,7 @@ public static class DependencyInjection
 
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ISupplierService, SupplierService>();
 
         // Register Mapster with Auto Scan
         var config = TypeAdapterConfig.GlobalSettings;

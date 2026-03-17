@@ -13,6 +13,7 @@ namespace Inventory.Domain.Entities
         public string ImgUrl { get; private set; } = string.Empty;
 
         public bool IsDeleted { get; private set; } = false;
+        public List<Product> Products { get; private set; } = new();
 
         private Category() { } // For EF
 
