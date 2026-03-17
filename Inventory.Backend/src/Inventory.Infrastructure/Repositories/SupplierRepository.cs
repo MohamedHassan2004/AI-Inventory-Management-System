@@ -18,5 +18,12 @@ namespace Inventory.Infrastructure.Repositories
         {
             return await _context.Set<Supplier>().AnyAsync(x => x.Name == name, cancellationToken);
         }
+
+        public async Task<Supplier?> GetSupplierWithNotesAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Supplier>()
+                .Include(s => s.SupplierNotes)
+                .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+        }
     }
 }

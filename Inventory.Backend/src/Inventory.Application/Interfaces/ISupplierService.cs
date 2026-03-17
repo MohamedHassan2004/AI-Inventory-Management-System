@@ -10,5 +10,7 @@ namespace Inventory.Application.Interfaces
         Task<Result<SupplierDto>> CreateSupplierAsync(CreateSupplierDto dto, CancellationToken cancellationToken = default);
         Task<Result<SupplierDto>> UpdateSupplierAsync(int id, UpdateSupplierDto dto, CancellationToken cancellationToken = default);
         Task<Result> DeleteSupplierAsync(int id, CancellationToken cancellationToken = default);
+        Task<Result<IEnumerable<SupplierNoteDto>>> GetSupplierNotesAsync(int supplierId, CancellationToken cancellationToken = default);
+        Task<Result<SupplierDto>> AddSupplierRatingAsync(int supplierId, AddSupplierRatingDto dto, CancellationToken cancellationToken = default);
     }
 }

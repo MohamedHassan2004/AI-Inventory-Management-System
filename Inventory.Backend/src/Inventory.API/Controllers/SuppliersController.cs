@@ -48,5 +48,19 @@ namespace Inventory.API.Controllers
             var result = await _supplierService.DeleteSupplierAsync(id, cancellationToken);
             return HandleResult(result);
         }
+
+        [HttpGet("{id}/notes")]
+        public async Task<IActionResult> GetNotes(int id, CancellationToken cancellationToken)
+        {
+            var result = await _supplierService.GetSupplierNotesAsync(id, cancellationToken);
+            return HandleResult(result);
+        }
+
+        [HttpPost("{id}/ratings")]
+        public async Task<IActionResult> AddRating(int id, [FromBody] AddSupplierRatingDto dto, CancellationToken cancellationToken)
+        {
+            var result = await _supplierService.AddSupplierRatingAsync(id, dto, cancellationToken);
+            return HandleResult(result);
+        }
     }
 }

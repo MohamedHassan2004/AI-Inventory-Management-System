@@ -76,5 +76,37 @@ namespace Inventory.Application.Services
 
             return Result.Success();
         }
+
+        public async Task<Result<IEnumerable<SupplierNoteDto>>> GetSupplierNotesAsync(int supplierId, CancellationToken cancellationToken = default)
+        {
+            var supplier = await _supplierRepository.GetSupplierWithNotesAsync(supplierId, cancellationToken);
+            if (supplier == null)
+                return Result.Failure<IEnumerable<SupplierNoteDto>>(new Error("Supplier.NotFound", $"Supplier with ID {supplierId} not found", ErrorType.NotFound));
+
+            var dtos = supplier.SupplierNotes.Select(n => new SupplierNoteDto(n.Id, n.Note, n.CreatedAt));
+            return Result.Success(dtos);
+        }
+
+        public async Task<Result<SupplierDto>> AddSupplierRatingAsync(int supplierId, AddSupplierRatingDto dto, CancellationToken cancellationToken = default)
+        {
+            var supplier = await _supplierRepository.GetSupplierWithNotesAsync(supplierId, cancellationToken);
+            if (supplier == null)
+                return Result.Failure<SupplierDto>(new Error("Supplier.NotFound", $"Supplier with ID {supplierId} not found", ErrorType.NotFound));
+
+            try
+            {
+                supplier.AddRating(dto.Rating, dto.Note);
+
+                _supplierRepository.Update(supplier);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                var resultDto = new SupplierDto(supplier.Id, supplier.Name, supplier.PhoneNumber, supplier.ContactInfo, supplier.Address, supplier.TotalRating, supplier.RatingCount, supplier.AvgRating, supplier.DeliveryCount, supplier.AvgDeliveryTime);
+                return Result.Success(resultDto);
+            }
+            catch (ArgumentException ex)
+            {
+                return Result.Failure<SupplierDto>(new Error("Supplier.InvalidRating", ex.Message, ErrorType.Validation));
+            }
+        }
     }
 }
