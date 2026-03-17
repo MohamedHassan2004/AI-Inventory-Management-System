@@ -12,6 +12,8 @@ using System.Text.Json.Serialization;
 using Mapster;
 using MapsterMapper;
 using Inventory.Application.Mappings;
+using Inventory.API.Extensions;
+using Inventory.API.Middleware;
 
 namespace Inventory.API
 {
@@ -33,6 +35,8 @@ namespace Inventory.API
                 builder.Logging.AddConsole();
 
                 // Add services to the container.
+
+                builder.Services.AddRateLimiting();
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>
                     {
@@ -100,14 +104,17 @@ namespace Inventory.API
                     using (LogContext.PushProperty("RequestPath", context.Request.Path))
                     using (LogContext.PushProperty("Culture", CultureInfo.CurrentCulture.Name))
                     using (LogContext.PushProperty("UICulture", CultureInfo.CurrentUICulture.Name))
-                {
-                    Log.Information("Request Culture: {Culture}, UI Culture: {UICulture}, Accept-Language: {AcceptLanguage}", 
-                        CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name, context.Request.Headers["Accept-Language"]);
-                    await next();
-                }
+                    {
+                        Log.Information("Request Culture: {Culture}, UI Culture: {UICulture}, Accept-Language: {AcceptLanguage}",
+                            CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name, context.Request.Headers["Accept-Language"]);
+                        await next();
+                    }
                 });
 
                 app.UseHttpsRedirection();
+
+                app.UseRateLimiter();
+                app.UseRateLimitHeaders();
 
                 app.UseAuthentication();
                 app.UseAuthorization();

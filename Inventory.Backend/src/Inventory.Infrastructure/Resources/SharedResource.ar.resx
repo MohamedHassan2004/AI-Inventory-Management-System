@@ -178,6 +178,11 @@
     <value>حدث خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى لاحقاً.</value>
   </data>
 
+  <!-- Rate Limiter Messages -->
+  <data name="RateLimitExceeded" xml:space="preserve">
+    <value>لقد تجاوزت الحد المسموح للطلبات، حاول في وقت لاحق.</value>
+  </data>
+
   <!-- Validation Messages -->
   <data name="UsernameRequired" xml:space="preserve">
     <value>اسم المستخدم مطلوب.</value>

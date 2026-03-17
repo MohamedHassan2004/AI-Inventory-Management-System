@@ -178,6 +178,11 @@
     <value>An internal server error has occurred. Please try again later.</value>
   </data>
 
+  <!-- Rate Limiter Messages -->
+  <data name="RateLimitExceeded" xml:space="preserve">
+    <value>Too many requests. Please try again later.</value>
+  </data>
+
   <!-- Validation Messages -->
   <data name="UsernameRequired" xml:space="preserve">
     <value>Username is required.</value>
