@@ -1,5 +1,6 @@
 using FluentValidation;
 using Inventory.Application.DTOs.Supplier;
+using Inventory.Application.Services;
 
 namespace Inventory.Application.Validation.Supplier
 {
@@ -7,9 +8,6 @@ namespace Inventory.Application.Validation.Supplier
     {
         public UpdateSupplierDtoValidator()
         {
-            RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("Valid Id is required.");
-                
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required.")
                 .MaximumLength(100).WithMessage("Name must not exceed 100 characters.");

@@ -8,14 +8,14 @@ namespace Inventory.Domain.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string PhoneNumber { get; private set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
         public string? ContactInfo { get; set; }
         public string? Address { get; set; }
         public int TotalRating { get; private set; } = 0;
         public int RatingCount { get; private set; } = 0;
         public double AvgRating => RatingCount > 0 ? (double)TotalRating / RatingCount: 0;
-        public int DeliveryCount { get; private set; } = 0;
-        public double AvgDeliveryTime { get; private set; } = 0;
+        public int DeliveryCount { get; set; } = 0;
+        public double AvgDeliveryTime { get; set; } = 0;
         public bool IsDeleted { get; private set; } = false;
 
         public List<SupplierNotes> SupplierNotes { get; set; } = new();

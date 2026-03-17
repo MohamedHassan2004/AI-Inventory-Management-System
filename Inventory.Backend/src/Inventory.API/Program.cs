@@ -118,7 +118,14 @@ namespace Inventory.API
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Application terminated unexpectedly");
+                if (ex is Microsoft.Extensions.Hosting.HostAbortedException)
+                {
+                    Log.Information("Host aborted successfully (e.g., by EF Core tools).");
+                }
+                else
+                {
+                    Log.Fatal(ex, "Application terminated unexpectedly");
+                }
             }
             finally
             {

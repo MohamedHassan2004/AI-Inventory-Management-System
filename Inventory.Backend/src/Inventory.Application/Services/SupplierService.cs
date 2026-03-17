@@ -47,11 +47,11 @@ namespace Inventory.Application.Services
             return Result.Success(resultDto);
         }
 
-        public async Task<Result<SupplierDto>> UpdateSupplierAsync(UpdateSupplierDto dto, CancellationToken cancellationToken = default)
+        public async Task<Result<SupplierDto>> UpdateSupplierAsync(int id, UpdateSupplierDto dto, CancellationToken cancellationToken = default)
         {
-            var supplier = await _supplierRepository.GetByIdAsync(dto.Id, cancellationToken);
+            var supplier = await _supplierRepository.GetByIdAsync(id, cancellationToken);
             if (supplier == null)
-                return Result.Failure<SupplierDto>(new Error("Supplier.NotFound", $"Supplier with ID {dto.Id} not found", ErrorType.NotFound));
+                return Result.Failure<SupplierDto>(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
 
             supplier.Name = dto.Name;
             supplier.PhoneNumber = dto.PhoneNumber;
@@ -71,7 +71,7 @@ namespace Inventory.Application.Services
             if (supplier == null)
                 return Result.Failure(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
 
-            _supplierRepository.Remove(supplier);
+            _supplierRepository.Delete(supplier);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();

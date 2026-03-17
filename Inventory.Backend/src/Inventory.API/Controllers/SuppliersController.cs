@@ -38,9 +38,7 @@ namespace Inventory.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierDto dto, CancellationToken cancellationToken)
         {
-            if (id != dto.Id) return BadRequest("ID mismatch");
-
-            var result = await _supplierService.UpdateSupplierAsync(dto, cancellationToken);
+            var result = await _supplierService.UpdateSupplierAsync(id, dto, cancellationToken);
             return HandleResult(result);
         }
 
