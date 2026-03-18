@@ -8,12 +8,12 @@ namespace Inventory.Application.Interfaces
 {
     public interface ICategoryService
     {
-        Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync();
-        Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto);
-        Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto);
-        Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto);
+        Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto, CancellationToken cancellationToken = default);
+        Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto, CancellationToken cancellationToken = default);
+        Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default);
 
         // ✅ Soft Delete
-        Task<Result> DeleteAsync(int id);
+        Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default);
     }
 }

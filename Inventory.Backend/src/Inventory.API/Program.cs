@@ -47,9 +47,6 @@ namespace Inventory.API
                 builder.Services.AddSwaggerGen();
 
                 // Add Application and Infrastructure services
-                // Add Localization
-                builder.Services.AddLocalization();
-
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -62,12 +59,10 @@ namespace Inventory.API
                         new CultureInfo("ar")
                     };
 
-                    options.DefaultRequestCulture = new RequestCulture("en");
+                    options.DefaultRequestCulture = new RequestCulture("ar");
                     options.SupportedCultures = supportedCultures;
                     options.SupportedUICultures = supportedCultures;
 
-                    // Remove AcceptLanguageHeaderRequestCultureProvider to enforce DefaultRequestCulture
-                    // unless overridden by QueryString or Cookie
                     options.RequestCultureProviders = new List<IRequestCultureProvider>
                     {
                         new QueryStringRequestCultureProvider(),
@@ -125,7 +120,14 @@ namespace Inventory.API
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Application terminated unexpectedly");
+                if (ex is Microsoft.Extensions.Hosting.HostAbortedException)
+                {
+                    Log.Information("Host aborted successfully (e.g., by EF Core tools).");
+                }
+                else
+                {
+                    Log.Fatal(ex, "Application terminated unexpectedly");
+                }
             }
             finally
             {

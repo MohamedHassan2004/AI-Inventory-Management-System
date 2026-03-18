@@ -11,6 +11,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<SupplierNotes> SupplierNotes { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<StockBatch> StockBatches { get; set; }
+    
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }

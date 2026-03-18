@@ -82,10 +82,12 @@ public static class DependencyInjection
         services.AddScoped<IUserAdminService, UserAdminService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICategoryRepository,CategoryRepository>();
-
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IStockBatchRepository, StockBatchRepository>();
 
         // Register Localization
-        services.AddScoped<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
+        services.AddSingleton<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
 
         return services;
     }

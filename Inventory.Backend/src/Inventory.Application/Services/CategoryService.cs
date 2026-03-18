@@ -13,31 +13,34 @@ namespace Inventory.Application.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IUnitOfWork _unitOfWork;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
         private readonly ILogger<CategoryService> _logger;
         private readonly IMapper _mapper;
         private readonly ILocalizationService _localizationService;
 
         public CategoryService(
+            ICategoryRepository categoryRepository,
             IUnitOfWork unitOfWork,
             IFileService fileService,
             IMapper mapper,
             ILogger<CategoryService> logger,
             ILocalizationService localizationService)
         {
+            _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _fileService = fileService;
             _mapper = mapper;
             _logger = logger;
             _localizationService = localizationService;
         }
-        public async Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto)
+        public async Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Creating category with name: {Name}", dto.Name);
 
             // 1️⃣ Check duplicate name
-            if (await _unitOfWork.Categories.ExistsByNameAsync(dto.Name))
+            if (await _categoryRepository.ExistsByNameAsync(dto.Name, null, cancellationToken))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -72,21 +75,21 @@ namespace Inventory.Application.Services
                     ErrorType.Validation));
             }
             // 4️⃣ Add
-            await _unitOfWork.Categories.AddAsync(category);
+            await _categoryRepository.AddAsync(category, cancellationToken);
 
             // 5️⃣ Commit
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var response = _mapper.Map<CategoryResponseDto>(category);
 
             return Result.Success(response);
         }
-        public async Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto)
+        public async Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Updating category with Id: {Id}", id);
 
             // 1️⃣ نتأكد إنها موجودة
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
             {
@@ -98,7 +101,7 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            if (await _unitOfWork.Categories.ExistsByNameAsync(dto.Name, id))
+            if (await _categoryRepository.ExistsByNameAsync(dto.Name, id, cancellationToken))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
 
@@ -125,22 +128,22 @@ namespace Inventory.Application.Services
                     ErrorType.Validation));
             }
             // 4️⃣ نعمل Update
-            _unitOfWork.Categories.Update(category);
+            _categoryRepository.Update(category);
 
             // 5️⃣ نحفظ
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 6️⃣ نرجع النتيجة
             var response = _mapper.Map<CategoryResponseDto>(category);
 
             return Result.Success(response);
         }
-        public async Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto)
+        public async Task<Result> UpdateCategoryImageAsync(int id, UpdateCategoryImageDto dto, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Updating image for category Id: {Id}", id);
 
             // 1️⃣ التأكد من وجود الكاتيجوري
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
             {
@@ -180,10 +183,10 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("InvalidCategoryImage"),
                     ErrorType.Validation));
             }
-            _unitOfWork.Categories.Update(category);
+            _categoryRepository.Update(category);
 
             // 4️⃣ حفظ التغييرات
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 5️⃣ حذف الصورة القديمة (بعد نجاح الحفظ)
             if (!string.IsNullOrWhiteSpace(oldImagePath))
@@ -195,22 +198,22 @@ namespace Inventory.Application.Services
 
             return Result.Success();
         }
-        public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync()
+        public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Fetching all categories");
 
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync(cancellationToken);
 
             var response = _mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
 
             return Result.Success<IEnumerable<CategoryResponseDto>>(response);
         }
-        public async Task<Result> DeleteAsync(int id)
+        public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Soft deleting category with Id: {Id}", id);
 
             // 1️⃣ Check existence
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
             {
@@ -225,10 +228,10 @@ namespace Inventory.Application.Services
             // 2️⃣ Soft Delete
             category.Delete() ;
 
-            _unitOfWork.Categories.Update(category);
+            _categoryRepository.Update(category);
 
             // 3️⃣ Save changes
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 4️⃣ Delete image after success
             if (!string.IsNullOrWhiteSpace(category.ImgUrl))
