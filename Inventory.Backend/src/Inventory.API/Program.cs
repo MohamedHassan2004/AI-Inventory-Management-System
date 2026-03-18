@@ -43,9 +43,6 @@ namespace Inventory.API
                 builder.Services.AddSwaggerGen();
 
                 // Add Application and Infrastructure services
-                // Add Localization
-                builder.Services.AddLocalization();
-
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -62,8 +59,6 @@ namespace Inventory.API
                     options.SupportedCultures = supportedCultures;
                     options.SupportedUICultures = supportedCultures;
 
-                    // Remove AcceptLanguageHeaderRequestCultureProvider to enforce DefaultRequestCulture
-                    // unless overridden by QueryString or Cookie
                     options.RequestCultureProviders = new List<IRequestCultureProvider>
                     {
                         new QueryStringRequestCultureProvider(),

@@ -87,7 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IStockBatchRepository, StockBatchRepository>();
 
         // Register Localization
-        services.AddScoped<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
+        services.AddSingleton<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
 
         return services;
     }
