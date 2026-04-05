@@ -13,7 +13,6 @@
   "InvalidRefreshToken": "Invalid refresh token.",
   "RefreshTokenRevoked": "Refresh token has been revoked.",
   "RefreshTokenExpired": "Refresh token has expired.",
-
   "UserDeletedSuccess": "User deleted successfully",
   "UserRestoredSuccess": "User restored successfully",
   "UserNotDeleted": "User is not deleted",
@@ -21,18 +20,15 @@
   "AccountRejectedSuccess": "User account rejected successfully",
   "PendingAccountsRetrieved": "Pending accounts retrieved successfully",
   "AllAccountsRetrieved": "All accounts retrieved successfully",
-
   "RoleAddedSuccess": "User role added successfully",
   "RoleRemovedSuccess": "User role removed successfully",
   "RolesRetrievedSuccess": "User roles retrieved successfully",
   "UserAlreadyHasRole": "User already has this role.",
   "UserDoesNotHaveRole": "User doesn't have this role.",
   "CannotRemoveOnlyRole": "Cannot remove the only role for this user.",
-
   "IdentityUploadedSuccess": "User identity uploaded successfully.",
   "IdentityUploadFailed": "Failed to upload identity image.",
   "IdentityUpdateFailed": "Failed to update user identity image.",
-
   "FileSavedSuccess": "File saved successfully",
   "FileSaveFailed": "Error occurred during file save operation",
   "FileDeletedSuccess": "File deleted successfully",
@@ -44,9 +40,14 @@
   "InvalidPath": "Invalid file path",
   "PathCannotBeEmpty": "Path cannot be null or whitespace",
   "InvalidFolderPath": "Invalid folder path provided",
-
   "InternalServerError": "An internal server error has occurred. Please try again later.",
-
+  "GlobalErrorTitle": "Error While Processing HTTP Request",
+  "EndpointNotFoundTitle": "Error While Processing the HTTP Request - Endpoint Not Found",
+  "EndpointNotFoundDetail": "Endpoint {0} Not Found",
+  "ResourceNotFound": "Resource Not Found",
+  "BadRequest": "Bad Request",
+  "ResourceConflict": "Resource Conflict",
+  "UnauthorizedAccess": "Unauthorized Access",
   "UsernameRequired": "Username is required.",
   "FullNameRequired": "Full name is required.",
   "EmailRequired": "Email is required.",
@@ -68,7 +69,6 @@
   "PasswordComplexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
   "NewPasswordSameAsCurrent": "New password cannot be the same as the current password.",
   "ConfirmPasswordMismatch": "Confirm new password must match the new password.",
-
   "CategoryNameRequired": "Category name is required.",
   "CategoryNameMaxLength": "Category name must not exceed 100 characters.",
   "CategoryImageRequired": "Category image is required.",
@@ -80,7 +80,6 @@
   "CategoryUpdatedSuccess": "Category updated successfully",
   "CategoryImageUpdatedSuccess": "Category image updated successfully",
   "CategoryDeletedSuccess": "Category deleted successfully",
-
   "ProductSkuRequired": "Product SKU is required.",
   "ProductSkuMaxLength": "Product SKU must not exceed 50 characters.",
   "ProductNameRequired": "Product Name is required.",
@@ -90,7 +89,6 @@
   "ProductDuplicateSku": "Product SKU already exists.",
   "ProductDuplicateName": "Product Name already exists.",
   "ProductNotFound": "Product not found.",
-
   "BatchProductRequired": "A valid Product must be selected.",
   "BatchSupplierRequired": "A valid Supplier must be selected.",
   "BatchPurchaseDateRequired": "Purchase date is required.",
@@ -98,5 +96,5 @@
   "BatchExpireDateInvalid": "Expiry date must be after the purchase date.",
   "BatchCostInvalid": "Unit cost must be greater than or equal to 0.",
   "BatchQuantityInvalid": "Quantity must be greater than or equal to 0.",
-  "BatchNotFound": "Stock Batch not found."
+  "BatchNotFound": "Stock batch not found."
 }

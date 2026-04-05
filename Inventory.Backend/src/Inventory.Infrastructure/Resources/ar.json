@@ -46,6 +46,13 @@
   "InvalidFolderPath": "مسار المجلد المقدم غير صالح",
 
   "InternalServerError": "حدث خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى لاحقاً.",
+  "GlobalErrorTitle": "خطأ أثناء معالجة طلب HTTP",
+  "EndpointNotFoundTitle": "خطأ أثناء معالجة طلب HTTP - المسار غير موجود",
+  "EndpointNotFoundDetail": "المسار {0} غير موجود",
+  "ResourceNotFound": "المورد غير موجود",
+  "BadRequest": "طلب غير صالح",
+  "ResourceConflict": "تعارض في المورد",
+  "UnauthorizedAccess": "وصول غير مصرح به",
 
   "UsernameRequired": "اسم المستخدم مطلوب.",
   "FullNameRequired": "الاسم الكامل مطلوب.",

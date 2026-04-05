@@ -1,4 +1,4 @@
-﻿using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -23,23 +23,36 @@ public class GlobalErrorHandlingMiddleware
         try
         {
             await _next(context);
+            await HandelNotFoundEndpointAsync(context, localizationService);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception has occurred. Request Path: {Path}", context.Request.Path);
+            _logger.LogError(ex, "Something Went Wrong");
 
-            context.Response.ContentType = "application/json";
-
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            var response = new
+            var problem = new ProblemDetails
             {
-                context.Response.StatusCode,
-                Message = localizationService.GetMessage("InternalServerError")
+                Title = localizationService.GetMessage("GlobalErrorTitle"),
+                Detail = ex.Message,
+                Status = StatusCodes.Status500InternalServerError,
+                Instance = context.Request.Path
             };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-            await context.Response.WriteAsync(jsonResponse);
+            context.Response.StatusCode = problem.Status.Value;
+            await context.Response.WriteAsJsonAsync(problem);
+        }
+    }
+    
+    private static async Task HandelNotFoundEndpointAsync(HttpContext httpContext, ILocalizationService localizationService)
+    {
+        if (httpContext.Response.StatusCode == StatusCodes.Status404NotFound && !httpContext.Response.HasStarted)
+        {
+            var problem = new ProblemDetails
+            {
+                Title = localizationService.GetMessage("EndpointNotFoundTitle"),
+                Detail = localizationService.GetMessage("EndpointNotFoundDetail", httpContext.Request.Path),
+                Status = StatusCodes.Status404NotFound,
+                Instance = httpContext.Request.Path
+            };
+            await httpContext.Response.WriteAsJsonAsync(problem);
         }
     }
 }

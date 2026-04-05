@@ -1,3 +1,4 @@
+using Inventory.Application.Interfaces;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,8 @@ namespace Inventory.API.Controllers
 
         private IActionResult CreateProblemDetails(Error error)
         {
+            var localizationService = HttpContext.RequestServices.GetRequiredService<ILocalizationService>();
+
             var statusCode = error.Type switch
             {
                 ErrorType.NotFound => StatusCodes.Status404NotFound,
@@ -37,24 +40,21 @@ namespace Inventory.API.Controllers
                 _ => StatusCodes.Status500InternalServerError
             };
 
-            return Problem(
-                statusCode: statusCode,
-                title: GetTitleForErrorType(error.Type),
-                detail: error.Description,
-                extensions: new Dictionary<string, object?>
-                {
-                    { "customErrorCode", error.Code }
-                });
-        }
-
-        private static string GetTitleForErrorType(ErrorType errorType) =>
-            errorType switch
+            var typeKey = error.Type switch
             {
-                ErrorType.NotFound => "Resource Not Found",
-                ErrorType.Validation => "Bad Request",
-                ErrorType.Conflict => "Resource Conflict",
-                ErrorType.Unauthorized => "Unauthorized Access",
-                _ => "Internal Server Error"
+                ErrorType.NotFound => "ResourceNotFound",
+                ErrorType.Validation => "BadRequest",
+                ErrorType.Conflict => "ResourceConflict",
+                ErrorType.Unauthorized => "UnauthorizedAccess",
+                _ => "InternalServerError"
             };
+
+            return Problem(
+                statusCode : statusCode,
+                type: localizationService.GetMessage(typeKey),
+                title: error.Code,
+                detail: error.Description
+                );
+        }
     }
 }
