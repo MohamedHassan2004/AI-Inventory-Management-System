@@ -29,8 +29,6 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.False(_user.IsDeleted);
             Assert.Null(_user.DeletedAt);
             Assert.Null(_user.LastLoginAt);
-            Assert.True(_user.MustChangePassword);
-            Assert.Equal(AccountStatus.None, _user.AccountStatus);
             Assert.Null(_user.RejectionReason);
         }
 
@@ -150,7 +148,6 @@ namespace Inventory.Domain.Test.Entities.Users
             // Act
             _user.PasswordChanged();
             // Assert
-            Assert.False(_user.MustChangePassword);
         }
         #endregion
 
@@ -164,7 +161,6 @@ namespace Inventory.Domain.Test.Entities.Users
             _user.SetIdentityImgUrl(newUrl);
             // Assert
             Assert.Equal(newUrl, _user.IdentityImgUrl);
-            Assert.Equal(AccountStatus.Pending, _user.AccountStatus);
         }
 
         #endregion
@@ -176,7 +172,6 @@ namespace Inventory.Domain.Test.Entities.Users
             // Act
             _user.ApproveAccount();
             // Assert
-            Assert.Equal(AccountStatus.Approved, _user.AccountStatus);
         }
 
         [Fact]

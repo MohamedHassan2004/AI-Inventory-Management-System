@@ -1,19 +1,23 @@
-using System.Globalization;
+using Inventory.API.Extensions;
+using Inventory.API.Filter.Handlers;
+using Inventory.API.Filter.Requirements;
+using Inventory.API.Middleware;
 using Inventory.API.Middlewares;
 using Inventory.Application;
+using Inventory.Application.Mappings;
 using Inventory.Domain.Entities.Users;
+using Inventory.Domain.Enums;
 using Inventory.Infrastructure;
 using Inventory.Infrastructure.Data;
+using Mapster;
+using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Serilog;
 using Serilog.Context;
+using System.Globalization;
 using System.Text.Json.Serialization;
-using Mapster;
-using MapsterMapper;
-using Inventory.Application.Mappings;
-using Inventory.API.Extensions;
-using Inventory.API.Middleware;
 
 namespace Inventory.API
 {
@@ -36,19 +40,48 @@ namespace Inventory.API
 
                 // Add services to the container.
 
+                // Configure CORS — must allow Authorization header so JWT tokens reach the server
+                var allowedOrigins = builder.Configuration
+                    .GetSection("Cors:AllowedOrigins")
+                    .Get<string[]>() ?? Array.Empty<string>();
+
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowFrontend", policy =>
+                    {
+                        policy.WithOrigins(allowedOrigins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+                });
+
                 builder.Services.AddRateLimiting();
+
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     })
                     .AddDataAnnotationsLocalization();
+
                 builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen();
 
                 // Add Application and Infrastructure services
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
+
+                builder.Services.AddScoped<IAuthorizationHandler, StatusHandler>();
+
+                builder.Services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("Active", policy =>
+                        policy.Requirements.Add(new StatusRequirement(AccountStatus.Active)));
+
+                    options.AddPolicy("PendingIdentity", policy =>
+                        policy.Requirements.Add(new StatusRequirement(AccountStatus.PendingIdentityUpload)));
+                });
 
                 // Configure Request Localization
                 builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -107,6 +140,8 @@ namespace Inventory.API
                 });
 
                 app.UseHttpsRedirection();
+
+                app.UseCors("AllowFrontend");
 
                 app.UseRateLimiter();
                 app.UseRateLimitHeaders();

@@ -1,9 +1,8 @@
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
-using Inventory.Application.Services;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
-using Inventory.Domain.Settings;
+using Inventory.Infrastructure.Settings;
 using Inventory.Infrastructure.Data;
 using Inventory.Infrastructure.Repositories;
 using Inventory.Infrastructure.Services.Auth;
@@ -16,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Inventory.Infrastructure.Services;
 
 namespace Inventory.Infrastructure;
 
@@ -27,7 +27,6 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        // Configure Identity
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
             options.Password.RequireUppercase = true;
@@ -38,7 +37,8 @@ public static class DependencyInjection
             options.Lockout.MaxFailedAccessAttempts = 3;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
         })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         // Configure JWT Settings
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
@@ -47,6 +47,7 @@ public static class DependencyInjection
         // Configure JWT Authentication
         services.AddAuthentication(options =>
         {
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
@@ -54,15 +55,16 @@ public static class DependencyInjection
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    //ValidateIssuer = true,
-                    //ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
-                    //ValidIssuer = jwtSettings.Issuer,
-                    //ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-                    RoleClaimType = ClaimTypes.Role
+                    NameClaimType = ClaimTypes.Name,
+                    RoleClaimType = ClaimTypes.Role,
+                    ClockSkew = TimeSpan.FromSeconds(30)
                 };
             });
 
@@ -70,7 +72,7 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddSingleton<IDateTimeProvider, Inventory.Infrastructure.Services.DateTimeProvider>();
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         // Configure and register FileService
         services.Configure<FileServiceOptions>(
@@ -87,7 +89,7 @@ public static class DependencyInjection
         services.AddScoped<IStockBatchRepository, StockBatchRepository>();
 
         // Register Localization
-        services.AddSingleton<ILocalizationService, Inventory.Infrastructure.Services.LocalizationService>();
+        services.AddSingleton<ILocalizationService, LocalizationService>();
 
         return services;
     }

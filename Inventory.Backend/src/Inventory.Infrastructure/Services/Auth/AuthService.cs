@@ -3,9 +3,9 @@ using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
-using Inventory.Domain.Settings;
 using Inventory.Domain.Shared;
 using Inventory.Infrastructure.Data;
+using Inventory.Infrastructure.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -305,6 +305,7 @@ public class AuthService : IAuthService
             new(ClaimTypes.Email, user.Email!),
         };
 
+
         var userRoles = await _userManager.GetRolesAsync(user);
         foreach (var role in userRoles)
         {
@@ -321,6 +322,8 @@ public class AuthService : IAuthService
         var expiry = _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes);
 
         var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: claims,
             expires: expiry,
             signingCredentials: creds);

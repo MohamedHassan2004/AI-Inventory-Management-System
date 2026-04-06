@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Inventory.API.Controllers
 {
     [Route("api/[controller]")]
-    public class SuppliersController : ApiBaseController
+    public class SuppliersController : ActiveApiBaseController
     {
         private readonly ISupplierService _supplierService;
 

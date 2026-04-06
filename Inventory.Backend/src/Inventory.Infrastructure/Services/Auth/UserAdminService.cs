@@ -130,7 +130,7 @@ public class UserAdminService : IUserAdminService
 
         var accountDtos = await _userManager.Users
             .AsNoTracking()
-            .Where(u => u.AccountStatus == AccountStatus.Pending)
+            .Where(u => u.AccountStatus == AccountStatus.PendingAdminReview)
             .Select(u => new AccountDto
             {
                 UserId = u.Id,

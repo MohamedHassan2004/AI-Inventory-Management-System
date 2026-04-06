@@ -16,8 +16,7 @@ namespace Inventory.Domain.Entities.Users
         public DateTime? LastLoginAt { get; private set; } = null;
         public bool IsDeleted { get; private set; } = false;
         public DateTime? DeletedAt { get; private set; } = null;
-        public bool MustChangePassword { get; private set; } = true;
-        public AccountStatus AccountStatus { get; private set; } = AccountStatus.None;
+        public AccountStatus AccountStatus { get; private set; } = AccountStatus.PendingChangePassword;
         public string? RejectionReason { get; private set; } = null;
 
         public ApplicationUser() { }
@@ -44,11 +43,13 @@ namespace Inventory.Domain.Entities.Users
         {
             IsDeleted = true;
             DeletedAt = timeProvider.UtcNow;
+            AccountStatus = AccountStatus.Deleted;
         }
         public void Restore()
         {
             IsDeleted = false;
             DeletedAt = null;
+            AccountStatus = AccountStatus.Active;
         }
         public void UpdateLastLogin(IDateTimeProvider timeProvider)
         {
@@ -64,11 +65,11 @@ namespace Inventory.Domain.Entities.Users
         }
         public void PasswordChanged()
         {
-            MustChangePassword = false;
+            AccountStatus = AccountStatus.PendingIdentityUpload;
         }
         public void ApproveAccount()
         {
-            AccountStatus = AccountStatus.Approved;
+            AccountStatus = AccountStatus.Active;
         }
         public void RejectAccount(string reason)
         {
@@ -79,7 +80,7 @@ namespace Inventory.Domain.Entities.Users
         public void SetIdentityImgUrl(string url)
         {
             IdentityImgUrl = url;
-            AccountStatus = AccountStatus.Pending;
+            AccountStatus = AccountStatus.PendingAdminReview;
         }
     }
 }

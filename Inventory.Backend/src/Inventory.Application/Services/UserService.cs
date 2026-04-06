@@ -59,5 +59,18 @@ public class UserService : IUserService
         return Result.Success();
     }
 
+    public async Task<Result<string>> GetUserStatusAsync(string userId)
+    {
+        _logger.LogInformation("Get user status request for user ID: {UserId}", userId);
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("Get user status failed: User with ID {UserId} not found", userId);
+            return Result.Failure<string>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
+        }
+        var status = user.AccountStatus.ToString();
+        _logger.LogInformation("User '{UserName}' status retrieved successfully: {Status}", user.UserName, status);
+        return Result.Success(status);
+    }
     
 }

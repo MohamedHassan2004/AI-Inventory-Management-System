@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Inventory.API.Controllers
 {
     [Route("api/[controller]")]
-    public class StockBatchesController : ApiBaseController
+    public class StockBatchesController : ActiveApiBaseController
     {
         private readonly IStockBatchService _stockBatchService;
 

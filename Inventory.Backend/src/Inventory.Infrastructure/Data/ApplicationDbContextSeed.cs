@@ -38,6 +38,7 @@ namespace Inventory.Infrastructure.Data
                 var user = await userManager.FindByEmailAsync(defaultUser.Email!);
                 if (user == null)
                 {
+                    defaultUser.ApproveAccount();
                     await userManager.CreateAsync(defaultUser, "AdminPassword123!");
                     await userManager.AddToRoleAsync(defaultUser, UserRole.Admin.ToString());
                 }

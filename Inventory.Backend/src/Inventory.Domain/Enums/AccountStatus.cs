@@ -6,9 +6,11 @@ namespace Inventory.Domain.Enums
 {
     public enum AccountStatus
     {
-        None,
-        Pending,
-        Approved,
-        Rejected
+        PendingChangePassword = 0,
+        PendingIdentityUpload,
+        PendingAdminReview,
+        Rejected,
+        Active,
+        Deleted
     }
 }

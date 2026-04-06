@@ -6,7 +6,7 @@ namespace Inventory.API.Controllers
 {
     [Route("api/admin/users")]
     [Authorize(Roles = "Admin")]
-    public class UserAdminController : ApiBaseController
+    public class UserAdminController : ActiveApiBaseController
     {
         private readonly IUserAdminService _userAdminService;
 

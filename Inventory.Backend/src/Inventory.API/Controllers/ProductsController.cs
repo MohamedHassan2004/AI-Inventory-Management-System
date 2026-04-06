@@ -1,5 +1,6 @@
 using Inventory.Application.DTOs.Product;
 using Inventory.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace Inventory.API.Controllers
 {
     [Route("api/[controller]")]
-    public class ProductsController : ApiBaseController
+    public class ProductsController : ActiveApiBaseController
     {
         private readonly IProductService _productService;
 
@@ -48,6 +49,7 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
+        // GET: api/products
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {

@@ -1,11 +1,12 @@
 ﻿using Inventory.Application.DTOs.Category;
 using Inventory.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventory.API.Controllers
 {
     [Route("api/[controller]")]
-    public class CategoriesController : ApiBaseController
+    public class CategoriesController : ActiveApiBaseController
     {
         private readonly ICategoryService _categoryService;
 
@@ -43,7 +44,7 @@ namespace Inventory.API.Controllers
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = await _categoryService.GetAllAsync(cancellationToken);
-            return HandleResult(result);
+            return HandleResult(result);    
         }
 
         // DELETE: api/categories/{id}

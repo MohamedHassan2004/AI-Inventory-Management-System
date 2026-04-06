@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using Microsoft.Extensions.Options;
-using Inventory.Domain.Settings;
+using Inventory.Infrastructure.Settings;
 
 namespace Inventory.Infrastructure.Test.Services
 {
