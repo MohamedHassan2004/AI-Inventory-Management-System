@@ -68,6 +68,9 @@ namespace Inventory.API
                 builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen();
 
+                builder.Services.AddHealthChecks()
+                    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+
                 // Add Application and Infrastructure services
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
@@ -149,6 +152,7 @@ namespace Inventory.API
                 app.UseAuthentication();
                 app.UseAuthorization();
 
+                app.MapHealthChecks("/health");
                 app.MapControllers();
 
                 app.Run();
