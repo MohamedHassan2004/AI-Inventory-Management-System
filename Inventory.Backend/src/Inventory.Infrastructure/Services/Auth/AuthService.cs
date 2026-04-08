@@ -54,7 +54,7 @@ public class AuthService : IAuthService
         if (user is null)
         {
             _logger.LogWarning("Login failed: User '{UserName}' not found", loginDto.UserName);
-            return Result.Failure<TokenDto>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
+            return Result.Failure<TokenDto>(new Error("INVALID_CREDENTIAL", _localizationService.GetMessage("InvalidCredentials"), ErrorType.Unauthorized));
         }
 
         if (await _userManager.IsLockedOutAsync(user))

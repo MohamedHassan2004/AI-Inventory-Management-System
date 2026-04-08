@@ -1,4 +1,5 @@
 using Inventory.API.Extensions;
+using Inventory.API.Filter;
 using Inventory.API.Filter.Handlers;
 using Inventory.API.Filter.Requirements;
 using Inventory.API.Middleware;
@@ -39,6 +40,7 @@ namespace Inventory.API
                 builder.Logging.AddConsole();
 
                 // Add services to the container.
+                builder.Services.AddScoped<ValidationFilter>();
 
                 // Configure CORS — must allow Authorization header so JWT tokens reach the server
                 var allowedOrigins = builder.Configuration
@@ -58,10 +60,12 @@ namespace Inventory.API
 
                 builder.Services.AddRateLimiting();
 
-                builder.Services.AddControllers()
+                builder.Services.AddControllers(options => 
+                    options.Filters.Add<ValidationFilter>())
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
                     })
                     .AddDataAnnotationsLocalization();
 
@@ -95,12 +99,13 @@ namespace Inventory.API
                         new CultureInfo("ar")
                     };
 
-                    options.DefaultRequestCulture = new RequestCulture("ar");
+                    options.DefaultRequestCulture = new RequestCulture("en");
                     options.SupportedCultures = supportedCultures;
                     options.SupportedUICultures = supportedCultures;
 
                     options.RequestCultureProviders = new List<IRequestCultureProvider>
                     {
+                        new AcceptLanguageHeaderRequestCultureProvider(),
                         new QueryStringRequestCultureProvider(),
                         new CookieRequestCultureProvider()
                     };

@@ -68,18 +68,17 @@ public static class DependencyInjection
                 };
             });
 
-        // Register repositories
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        services.AddSingleton<ILocalizationService, LocalizationService>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         // Configure and register FileService
-        services.Configure<FileServiceOptions>(
-            configuration.GetSection(FileServiceOptions.SectionName));
+        services.Configure<FileServiceOptions>(configuration.GetSection(FileServiceOptions.SectionName));
         services.AddScoped<IFileService, FileService>();
 
-        // Register RoleService and UserAdminService
+        // Register repositories
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserAdminService, UserAdminService>();
         services.AddScoped<IAuthService, AuthService>();
@@ -88,8 +87,6 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IStockBatchRepository, StockBatchRepository>();
 
-        // Register Localization
-        services.AddSingleton<ILocalizationService, LocalizationService>();
 
         return services;
     }

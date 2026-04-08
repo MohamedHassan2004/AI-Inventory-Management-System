@@ -14,6 +14,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddMapster();
 
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICategoryService, CategoryService>();
@@ -21,13 +22,6 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IStockBatchService, StockBatchService>();
 
-        // Register Mapster with Auto Scan
-        var config = TypeAdapterConfig.GlobalSettings;
-
-        config.Scan(Assembly.GetExecutingAssembly());
-
-        services.AddSingleton(config);
-        services.AddScoped<IMapper, ServiceMapper>();
 
         return services;
     }

@@ -53,6 +53,7 @@
   "BadRequest": "طلب غير صالح",
   "ResourceConflict": "تعارض في المورد",
   "UnauthorizedAccess": "وصول غير مصرح به",
+  "ValidationErrorTitle": "حدث خطأ في التحقق من البيانات",
 
   "UsernameRequired": "اسم المستخدم مطلوب.",
   "FullNameRequired": "الاسم الكامل مطلوب.",

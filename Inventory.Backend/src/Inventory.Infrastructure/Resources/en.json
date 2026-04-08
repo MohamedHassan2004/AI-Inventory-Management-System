@@ -40,6 +40,7 @@
   "InvalidPath": "Invalid file path",
   "PathCannotBeEmpty": "Path cannot be null or whitespace",
   "InvalidFolderPath": "Invalid folder path provided",
+
   "InternalServerError": "An internal server error has occurred. Please try again later.",
   "GlobalErrorTitle": "Error While Processing HTTP Request",
   "EndpointNotFoundTitle": "Error While Processing the HTTP Request - Endpoint Not Found",
@@ -48,6 +49,8 @@
   "BadRequest": "Bad Request",
   "ResourceConflict": "Resource Conflict",
   "UnauthorizedAccess": "Unauthorized Access",
+  "ValidationErrorTitle": "Validation Error",
+
   "UsernameRequired": "Username is required.",
   "FullNameRequired": "Full name is required.",
   "EmailRequired": "Email is required.",
