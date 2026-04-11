@@ -25,13 +25,13 @@ namespace Inventory.Domain.Entities
 
         public Product(string sku, string name, decimal price, int reorderPoint)
         {
-            if(string.IsNullOrEmpty(sku))
+            if (string.IsNullOrEmpty(sku))
                 throw new ArgumentException("SKU cannot be null or empty.", nameof(sku));
-            if(string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("Name cannot be null or empty.", nameof(name));
             if (price < 0)
                 throw new ArgumentOutOfRangeException(nameof(price), "Selling Price cannot be negative.");
-            if(reorderPoint < 0)
+            if (reorderPoint < 0)
                 throw new ArgumentOutOfRangeException(nameof(reorderPoint), "Reorder point cannot be negative.");
 
             SKU = sku;
@@ -63,12 +63,15 @@ namespace Inventory.Domain.Entities
         #endregion
 
         #region Quantity Management
-        public void ReduceStock(decimal quantityToReduce)
+        public List<StockConsumption> ReduceStock(decimal quantityToReduce)
         {
-            if (quantityToReduce <= 0) return;
+            if (quantityToReduce <= 0)
+                throw new ArgumentException("Quantity must be greater than zero");
 
             if (quantityToReduce > StockQuantity)
-                throw new InvalidOperationException($"Insufficient stock for product {Name}. Available: {StockQuantity}");
+                throw new InvalidOperationException($"Insufficient stock for product {Name}");
+
+            var result = new List<StockConsumption>();
 
             var availableBatches = _batches
                 .Where(b => b.RemainingQuantity > 0)
@@ -78,14 +81,18 @@ namespace Inventory.Domain.Entities
             {
                 if (quantityToReduce <= 0) break;
 
-                var amountFromThisBatch = Math.Min(batch.RemainingQuantity, quantityToReduce);
+                var taken = Math.Min(batch.RemainingQuantity, quantityToReduce);
 
-                batch.RemainingQuantity -= amountFromThisBatch;
-                quantityToReduce -= amountFromThisBatch;
+                batch.RemainingQuantity -= taken;
+                quantityToReduce -= taken;
+
+                result.Add(new StockConsumption(batch, taken));
             }
+
+            return result;
         }
 
-        public void AddStock(IDateTimeProvider dateTimeProvider,decimal quantity, decimal unitCost, DateTime expiryDate)
+        public void AddStock(IDateTimeProvider dateTimeProvider, decimal quantity, decimal unitCost, DateTime expiryDate)
         {
             var batch = new StockBatch(Id, dateTimeProvider.UtcNow, expiryDate, unitCost, quantity);
             _batches.Add(batch);
