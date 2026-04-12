@@ -60,5 +60,29 @@ namespace Inventory.API.Controllers
             var result = await _authService.ChangePasswordAsync(userId, changePasswordDto);
             return HandleResult(result);
         }
+
+        [AllowAnonymous]
+        [HttpGet("is-username-exist")]
+        public async Task<IActionResult> IsUserNameExist([FromQuery] string userName)
+        {
+            var exists = await _authService.IsUserNameExist(userName);
+            return Ok(new { exists });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("is-email-exist")]
+        public async Task<IActionResult> IsEmailExist([FromQuery] string email)
+        {
+            var exists = await _authService.IsEmailExist(email);
+            return Ok(new { exists });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("is-phone-number-exist")]
+        public async Task<IActionResult> IsPhoneNumberExist([FromQuery] string phoneNumber)
+        {
+            var exists = await _authService.IsPhoneNumberExist(phoneNumber);
+            return Ok(new { exists });
+        }
     }
 }

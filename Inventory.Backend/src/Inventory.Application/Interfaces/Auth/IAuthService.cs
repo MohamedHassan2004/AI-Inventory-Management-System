@@ -12,4 +12,5 @@ public interface IAuthService
     Task<Result> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto);
     Task<bool> IsUserNameExist(string userName);
     Task<bool> IsEmailExist(string email);
+    Task<bool> IsPhoneNumberExist(string phoneNumber);
 }

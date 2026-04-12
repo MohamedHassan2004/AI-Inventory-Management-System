@@ -72,5 +72,18 @@ public class UserService : IUserService
         _logger.LogInformation("User '{UserName}' status retrieved successfully: {Status}", user.UserName, status);
         return Result.Success(status);
     }
-    
+
+    public async Task<Result<string>> GetIdentityRejectionReasonAsync(string userId)
+    {
+        _logger.LogInformation("Get user rejection reason request for user ID: {UserId}", userId);
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("Get user rejection reason failed: User with ID {UserId} not found", userId);
+            return Result.Failure<string>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
+        }
+        var rejectionReason = user.RejectionReason ?? "";
+        _logger.LogInformation("User '{UserName}' rejection reason retrieved successfully: {rejectionReason}", user.UserName, rejectionReason);
+        return Result.Success(rejectionReason);
+    }
 }

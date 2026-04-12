@@ -294,6 +294,13 @@ public class AuthService : IAuthService
         return exists;
     }
 
+    public async Task<bool> IsPhoneNumberExist(string phoneNumber)
+    {
+        var exists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
+        _logger.LogDebug("Phone number check: '{PhoneNumber}' exists = {Exists}", phoneNumber, exists);
+        return exists;
+    }
+
     #region Private Helpers
 
     private async Task<List<Claim>> GenerateUserClaimsAsync(ApplicationUser user)

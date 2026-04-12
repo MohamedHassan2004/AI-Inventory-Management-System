@@ -7,4 +7,5 @@ public interface IUserService
 {
     Task<Result> UploadUserIdentityAsync(string userId, UploadIdentityImgDto uploadIdentity);
     Task<Result<string>> GetUserStatusAsync(string userId);
+    Task<Result<string>> GetIdentityRejectionReasonAsync(string userId);
 }

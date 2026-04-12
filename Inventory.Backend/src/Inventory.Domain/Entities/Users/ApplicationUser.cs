@@ -65,7 +65,10 @@ namespace Inventory.Domain.Entities.Users
         }
         public void PasswordChanged()
         {
-            AccountStatus = AccountStatus.PendingIdentityUpload;
+            if (AccountStatus == AccountStatus.PendingChangePassword)
+            {
+                AccountStatus = AccountStatus.PendingIdentityUpload;
+            }
         }
         public void ApproveAccount()
         {

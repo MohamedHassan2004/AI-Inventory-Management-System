@@ -19,7 +19,6 @@ namespace Inventory.API.Filter.Handlers
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, StatusRequirement requirement)
         {
-            var isAuth = context.User.Identity?.IsAuthenticated;
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
