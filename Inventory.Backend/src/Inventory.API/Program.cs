@@ -86,8 +86,10 @@ namespace Inventory.API
                     options.AddPolicy("Active", policy =>
                         policy.Requirements.Add(new StatusRequirement(AccountStatus.Active)));
 
-                    options.AddPolicy("PendingIdentity", policy =>
-                        policy.Requirements.Add(new StatusRequirement(AccountStatus.PendingIdentityUpload)));
+                    options.AddPolicy("PendingIdentityUploadOrActive", policy =>
+                        policy.Requirements.Add(new StatusRequirement(
+                            AccountStatus.PendingIdentityUpload,
+                            AccountStatus.Active)));
                 });
 
                 // Configure Request Localization
