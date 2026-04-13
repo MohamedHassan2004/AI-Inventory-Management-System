@@ -101,18 +101,8 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("BatchNotFound") ?? "Batch not found.",
                     ErrorType.NotFound));
             }
-
-            // In a real scenario, changing properties like Expiry Date, Unit Cost, and Remaining Quantity may require
-            // separate domain methods depending on business context. Using reflection/direct assignment for now.
-            // A more DDD focused approach would be specific methods like UpdateExpiryDate(), AdjustQuantity()
             
-            // NOTE: The Entity 'StockBatch' has private setters for ExpireDate & UnitCost
-            // Let's add reflection or just use an approach to update if domain allows. Wait, Domain Entity "StockBatch.cs"
-            // ExpireDate and UnitCost are private set. I will use reflection or add an Update method to domain.
-            typeof(StockBatch).GetProperty(nameof(StockBatch.ExpireDate))?.SetValue(batch, dto.ExpireDate);
-            typeof(StockBatch).GetProperty(nameof(StockBatch.UnitCost))?.SetValue(batch, dto.UnitCost);
-            
-            batch.RemainingQuantity = dto.RemainingQuantity;
+            batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
 
             _stockBatchRepository.Update(batch);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

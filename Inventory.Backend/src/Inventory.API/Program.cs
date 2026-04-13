@@ -136,19 +136,6 @@ namespace Inventory.API
 
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
-                app.Use(async (context, next) =>
-                {
-                    using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
-                    using (LogContext.PushProperty("RequestPath", context.Request.Path))
-                    using (LogContext.PushProperty("Culture", CultureInfo.CurrentCulture.Name))
-                    using (LogContext.PushProperty("UICulture", CultureInfo.CurrentUICulture.Name))
-                    {
-                        Log.Information("Request Culture: {Culture}, UI Culture: {UICulture}, Accept-Language: {AcceptLanguage}",
-                            CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name, context.Request.Headers["Accept-Language"]);
-                        await next();
-                    }
-                });
-
                 app.UseHttpsRedirection();
 
                 app.UseCors("AllowFrontend");

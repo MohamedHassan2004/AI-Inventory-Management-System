@@ -12,6 +12,7 @@ namespace Inventory.Domain.Entities
         public decimal UnitCost { get; private set; }
         public decimal OriginalQuantity { get; private set; }
         public decimal RemainingQuantity { get; set; }
+
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; } = null!;
         public int ProductId { get; set; }
@@ -39,6 +40,19 @@ namespace Inventory.Domain.Entities
             UnitCost = unitCost;
             OriginalQuantity = quantity;
             RemainingQuantity = quantity;
+        }
+
+        public void UpdateBatch(DateTime expireDate, decimal unitCost, decimal remainingQuantity)
+        {
+            if (expireDate <= PurchaseDate)
+                throw new ArgumentException("Expire date must be after purchase date.", nameof(expireDate));
+            if (unitCost < 0)
+                throw new ArgumentOutOfRangeException(nameof(unitCost), "Unit cost cannot be negative.");
+            if (remainingQuantity < 0 || remainingQuantity > OriginalQuantity)
+                throw new ArgumentOutOfRangeException(nameof(remainingQuantity), "Remaining quantity must be between 0 and original quantity.");
+            ExpireDate = expireDate;
+            UnitCost = unitCost;
+            RemainingQuantity = remainingQuantity;
         }
 
     }
