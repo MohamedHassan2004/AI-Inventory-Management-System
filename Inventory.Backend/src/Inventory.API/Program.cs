@@ -4,6 +4,7 @@ using Inventory.API.Filter.Handlers;
 using Inventory.API.Filter.Requirements;
 using Inventory.API.Middleware;
 using Inventory.API.Middlewares;
+using Inventory.API.Settings;
 using Inventory.Application;
 using Inventory.Application.Mappings;
 using Inventory.Domain.Entities.Users;
@@ -78,6 +79,8 @@ namespace Inventory.API
                 // Add Application and Infrastructure services
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
+                builder.Services.Configure<RefreshTokenCookieSettings>(
+                    builder.Configuration.GetSection(RefreshTokenCookieSettings.SectionName));
 
                 builder.Services.AddScoped<IAuthorizationHandler, StatusHandler>();
 
