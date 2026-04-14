@@ -1,197 +1,123 @@
-﻿using Inventory.Domain.Entities.Users;
+using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-    namespace Inventory.Domain.Entities
+namespace Inventory.Domain.Entities
+{
+    public class Order
     {
-        public class Order
+        private const decimal DefaultTaxPercentage = 14m;
+        private const decimal MaxDiscountPercentage = 70m;
+
+        public int Id { get; private set; }
+        public DateTime OrderDate { get; private set; }
+
+        public string CashierId { get; private set; } = string.Empty;
+        public ApplicationUser Cashier { get; private set; } = null!;
+
+        public OrderStatus Status { get; private set; }
+        public OrderType Type { get; private set; }
+        public PaymentMethod? PaymentMethod { get; private set; }
+
+        public decimal SubTotal { get; private set; }
+        public decimal DiscountPercentage { get; private set; }
+        public decimal DiscountAmount { get; private set; }
+        public decimal TaxAmount { get; private set; }
+        public decimal FinalTotal { get; private set; }
+
+        private readonly List<OrderItem> _items = new();
+        public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+
+        private Order() { }
+
+        public Order(string cashierId)
         {
-            public int Id { get; private set; }
-            public DateTime OrderDate { get; private set; }
-            public string CashierId { get; private set; }
-            public virtual ApplicationUser Cashier { get; private set; }
-
-            public OrderStatus Status { get; private set; }
-            public OrderType Type { get; private set; }
-            public PaymentMethod? PaymentMethod { get; private set; }
-
-            public decimal SubTotal { get; private set; } = 0;
-            public decimal DiscountPercentage { get; private set; } = 0;
-            public decimal DiscountAmount { get; private set; }
-            public decimal TaxAmount { get; private set; }
-            public decimal FinalTotal { get; private set; }
-
-            private readonly List<OrderItem> _items = new();
-            public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
-
-            private Order() { }
-
-            public Order(string cashierId)
-            {
-                if (string.IsNullOrWhiteSpace(cashierId))
-                    throw new ArgumentException("CashierId is required");
-
-                OrderDate = DateTime.UtcNow;
-                CashierId = cashierId;
-                Status = OrderStatus.Pending;
-                Type = OrderType.InStore;
-            }
-
-            #region Guards
-
-            private void EnsureNotCompletedOrCancelled()
-            {
-                if (Status == OrderStatus.Completed)
-                    throw new InvalidOperationException("Order is already completed");
-
-                if (Status == OrderStatus.Cancelled)
-                    throw new InvalidOperationException("Order is cancelled");
-            }
-
-        #endregion
-
-
-        #region Items
-
-        public void AddItem(OrderItem item)
-        {
-            EnsureNotCompletedOrCancelled();
-
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
-
-            var existingItem = _items.FirstOrDefault(i => i.ProductId == item.ProductId);
-
-            if (existingItem != null)
-            {
-                existingItem.AddQuantity(item.Quantity);
-            }
-            else
-            {
-                _items.Add(item);
-            }
-
-            RecalculateTotals();
+            CashierId = cashierId ?? throw new ArgumentNullException(nameof(cashierId));
+            OrderDate = DateTime.UtcNow;
+            Status = OrderStatus.Pending;
+            Type = OrderType.InStore;
         }
 
-        public void RemoveItem(OrderItem item)
+        private void EnsureEditable()
         {
-            EnsureNotCompletedOrCancelled();
+            if (Status != OrderStatus.Pending)
+                throw new InvalidOperationException("Order is not editable.");
+        }
 
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
+        public void AddItem(Product product, decimal quantity)
+        {
+            EnsureEditable();
 
-            item.Remove();
+            var existing = _items.FirstOrDefault(i => i.ProductId == product.Id);
 
-            if (_items.Remove(item))
-            {
-                RecalculateTotals();
-            }
+            if (existing != null)
+                existing.AddQuantity(quantity);
+            else
+                _items.Add(new OrderItem(product, quantity));
+
+            Recalculate();
         }
 
         public void RemoveItem(int itemId)
         {
-            EnsureNotCompletedOrCancelled();
+            EnsureEditable();
 
-            var item = _items.FirstOrDefault(i => i.Id == itemId);
+            var item = _items.First(i => i.Id == itemId);
+            item.Rollback();
+            _items.Remove(item);
 
-            if (item == null)
-                throw new InvalidOperationException("Item not found");
-
-            // reuse method علشان نحافظ على DRY
-            RemoveItem(item);
+            Recalculate();
         }
 
-        public void UpdateItemQuantity(int itemId, decimal newQuantity)
+        public void UpdateQuantity(int itemId, decimal quantity)
         {
-            EnsureNotCompletedOrCancelled();
+            EnsureEditable();
 
-            var item = _items.FirstOrDefault(i => i.Id == itemId);
+            var item = _items.First(i => i.Id == itemId);
+            item.UpdateQuantity(quantity);
 
-            if (item == null)
-                throw new InvalidOperationException("Item not found");
-
-            if (newQuantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero");
-
-            // رجوع الكمية القديمة
-            item.Remove();
-
-            // إضافة الكمية الجديدة
-            item.AddQuantity(newQuantity);
-
-            RecalculateTotals();
+            Recalculate();
         }
 
-        #endregion
+        public void Complete(PaymentMethod method, OrderType type)
+        {
+            EnsureEditable();
 
+            if (!_items.Any())
+                throw new InvalidOperationException("Order is empty.");
 
-        #region Order Actions
+            PaymentMethod = method;
+            Type = type;
+            Status = OrderStatus.Completed;
+        }
 
-        public void CompleteOrder(PaymentMethod paymentMethod, OrderType orderType)
-            {
-                EnsureNotCompletedOrCancelled();
+        public void Cancel()
+        {
+            if (Status != OrderStatus.Pending) return;
 
-                if (!_items.Any())
-                    throw new InvalidOperationException("Cannot complete an order with no items.");
+            foreach (var item in _items)
+                item.Rollback();
 
-                PaymentMethod = paymentMethod;
-                Type = orderType;
-                Status = OrderStatus.Completed;
-            }
+            Status = OrderStatus.Cancelled;
+        }
 
-            public void Cancel()
-            {
-                if (Status == OrderStatus.Completed)
-                    throw new InvalidOperationException("Cannot cancel completed order");
+        public void ApplyDiscount(decimal percentage)
+        {
+            if (percentage < 0 || percentage > MaxDiscountPercentage)
+                throw new ArgumentException("Invalid discount.");
 
-                if (Status == OrderStatus.Cancelled)
-                    return;
+            DiscountPercentage = percentage;
+            Recalculate();
+        }
 
-                foreach (var item in _items)
-                {
-                    item.Remove(); // رجوع stock
-                }
+        private void Recalculate()
+        {
+            SubTotal = _items.Sum(i => i.TotalPrice);
+            DiscountAmount = SubTotal * DiscountPercentage / 100m;
 
-                Status = OrderStatus.Cancelled;
-            }
+            var taxable = SubTotal - DiscountAmount;
+            TaxAmount = taxable * DefaultTaxPercentage / 100m;
 
-            #endregion
-
-            #region Financial Calculations
-
-            public void ApplyDiscount(decimal discountPercentage)
-            {
-                EnsureNotCompletedOrCancelled();
-
-                if (discountPercentage < 0 || discountPercentage > 70)
-                    throw new ArgumentException("Invalid discount percentage");
-
-                DiscountPercentage = discountPercentage;
-
-                // 🔥 الحساب كله هنا فقط
-                RecalculateTotals();
-            }
-
-            public void CalculateTax(decimal taxPercentage = 14)
-            {
-                TaxAmount = (SubTotal - DiscountAmount) * (taxPercentage / 100);
-            }
-
-            private void RecalculateTotals()
-            {
-                SubTotal = _items.Sum(i => i.TotalPrice);
-
-                // 🔥 Single Source of Truth
-                DiscountAmount = DiscountPercentage / 100 * SubTotal;
-
-                CalculateTax();
-
-                FinalTotal = SubTotal - DiscountAmount + TaxAmount;
-            }
-
-            #endregion
+            FinalTotal = taxable + TaxAmount;
         }
     }
+}

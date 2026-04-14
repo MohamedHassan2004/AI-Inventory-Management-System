@@ -76,8 +76,7 @@ namespace Inventory.Application.Services
 
                 try
                 {
-                    var orderItem = new OrderItem(product, item.Quantity);
-                    order.AddItem(orderItem);
+                    order.AddItem(product, item.Quantity);
                 }
                 catch (Exception ex)
                 {
@@ -150,7 +149,7 @@ namespace Inventory.Application.Services
 
             try
             {
-                order.CompleteOrder(dto.PaymentMethod, dto.OrderType);
+                order.Complete(dto.PaymentMethod, dto.OrderType);
             }
             catch (Exception ex)
             {
@@ -259,8 +258,7 @@ namespace Inventory.Application.Services
 
             try
             {
-                var item = new OrderItem(product, dto.Quantity);
-                order.AddItem(item);
+                order.AddItem(product, dto.Quantity);
             }
             catch (Exception ex)
             {
@@ -288,7 +286,7 @@ namespace Inventory.Application.Services
 
             try
             {
-                order.UpdateItemQuantity(itemId, quantity);
+                order.UpdateQuantity(itemId, quantity);
             }
             catch (Exception ex)
             {

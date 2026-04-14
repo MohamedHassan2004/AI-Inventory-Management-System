@@ -1,3 +1,4 @@
+using Inventory.Application.DTOs.Category;
 using Inventory.Application.DTOs.Product;
 using Inventory.Application.Interfaces;
 using Inventory.Domain.Entities;
@@ -75,10 +76,8 @@ namespace Inventory.Application.Services
             Product product;
             try
             {
-                product = new Product(dto.SKU, dto.Name, dto.SellingPrice, dto.ReorderPoint)
-                {
-                    CategoryId = dto.CategoryId
-                };
+                product = new Product(dto.SKU, dto.Name, dto.SellingPrice, dto.ReorderPoint);
+                product.AssignCategory(dto.CategoryId);
             }
             catch (ArgumentException ex)
             {
@@ -110,15 +109,6 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            if (await _productRepository.ExistsBySkuAsync(dto.SKU, id, cancellationToken))
-            {
-                _logger.LogWarning("Duplicate product SKU detected: {SKU}", dto.SKU);
-                return Result.Failure<ProductResponseDto>(new Error(
-                    "DUPLICATE_SKU",
-                    _localizationService.GetMessage("ProductDuplicateSku") ?? "Duplicate SKU.",
-                    ErrorType.Conflict));
-            }
-
             if (await _productRepository.ExistsByNameAsync(dto.Name, id, cancellationToken))
             {
                 _logger.LogWarning("Duplicate product name detected: {Name}", dto.Name);
@@ -141,20 +131,14 @@ namespace Inventory.Application.Services
                 }
             }
 
-            product.SKU = dto.SKU;
-            product.Name = dto.Name;
-            product.CategoryId = dto.CategoryId;
+            product.Rename(dto.Name);
+            product.AssignCategory(dto.CategoryId);
 
             _productRepository.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Re-fetch category for DTO mapping if it was changed
-            if (dto.CategoryId.HasValue && product.Category == null)
-            {
-                product.Category = await _categoryRepository.GetByIdAsync(dto.CategoryId.Value, cancellationToken);
-            }
-
             var response = _mapper.Map<ProductResponseDto>(product);
+
             return Result.Success(response);
         }
 
