@@ -9,14 +9,18 @@ using System.Threading.Tasks;
 namespace Inventory.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "Cashier,Admin")] // 🔐 كل الـ endpoints محتاجة user authenticated
+    [Authorize(Roles = "Cashier,Admin")]
     public class OrdersController : ActiveApiBaseController
     {
         private readonly IOrderService _orderService;
+        private readonly IOrderQueryService _orderQueryService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(
+            IOrderService orderService,
+            IOrderQueryService orderQueryService)
         {
             _orderService = orderService;
+            _orderQueryService = orderQueryService;
         }
 
         // POST: api/orders
@@ -25,9 +29,7 @@ namespace Inventory.API.Controllers
             [FromBody] CreateOrderDto dto,
             CancellationToken cancellationToken)
         {
-           var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            //var userId = "0aab9e4b-0893-4b36-bb42-0c403064e327";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
             var result = await _orderService.CreateAsync(dto, userId, cancellationToken);
             return HandleResult(result);
@@ -71,17 +73,16 @@ namespace Inventory.API.Controllers
             int id,
             CancellationToken cancellationToken)
         {
-            var result = await _orderService.GetByIdAsync(id, cancellationToken);
+            var result = await _orderQueryService.GetByIdAsync(id, cancellationToken);
             return HandleResult(result);
         }
 
         // GET: api/orders/pending
         [HttpGet("pending")]
-
         public async Task<IActionResult> GetPending(
             CancellationToken cancellationToken)
         {
-            var result = await _orderService.GetPendingOrdersAsync(cancellationToken);
+            var result = await _orderQueryService.GetPendingAsync(cancellationToken);
             return HandleResult(result);
         }
     }

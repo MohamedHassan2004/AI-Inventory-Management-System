@@ -11,20 +11,17 @@ namespace Inventory.Application.Validation.Order
             RuleFor(x => x.Items)
                 .NotNull()
                 .NotEmpty()
-                .WithMessage(localizationService.GetMessage("OrderItemsRequired")
-                             ?? "Order must contain at least one item");
+                .WithMessage(localizationService.GetMessage("OrderItemsRequired"));
 
             RuleForEach(x => x.Items).ChildRules(item =>
             {
                 item.RuleFor(i => i.ProductId)
                     .GreaterThan(0)
-                    .WithMessage(localizationService.GetMessage("InvalidProductId")
-                                 ?? "Invalid product Id");
+                    .WithMessage(localizationService.GetMessage("InvalidProductId"));
 
                 item.RuleFor(i => i.Quantity)
                     .GreaterThan(0)
-                    .WithMessage(localizationService.GetMessage("InvalidQuantity")
-                                 ?? "Quantity must be greater than zero");
+                    .WithMessage(localizationService.GetMessage("InvalidQuantity"));
             });
         }
     }

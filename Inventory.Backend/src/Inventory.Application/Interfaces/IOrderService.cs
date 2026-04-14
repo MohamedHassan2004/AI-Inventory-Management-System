@@ -27,19 +27,11 @@ namespace Inventory.Application.Interfaces
             int orderId,
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> GetByIdAsync(
-            int id,
-            CancellationToken cancellationToken = default);
 
-        Task<Result<IEnumerable<OrderResponseDto>>> GetPendingOrdersAsync( CancellationToken cancellationToken = default);
         Task<Result> AddItemAsync(int orderId, OrderItemDto dto, CancellationToken cancellationToken = default);
 
         Task<Result> UpdateItemQuantityAsync(int orderId, int itemId, decimal quantity, CancellationToken cancellationToken = default);
 
         Task<Result> RemoveItemAsync(int orderId, int itemId, CancellationToken cancellationToken = default);
-
-        Task<Result<IEnumerable<OrderItemResponseDto>>> GetItemsByOrderIdAsync(int orderId, CancellationToken cancellationToken = default);
-
-        Task<Result<IEnumerable<OrderResponseDto>>> GetOrdersByProductIdAsync(int productId, CancellationToken cancellationToken = default);
     }
 }

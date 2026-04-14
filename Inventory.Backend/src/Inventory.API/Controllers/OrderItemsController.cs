@@ -12,10 +12,14 @@ namespace Inventory.API.Controllers
     public class OrderItemsController : ActiveApiBaseController
     {
         private readonly IOrderService _orderService;
+        private readonly IOrderQueryService _orderQueryService;
 
-        public OrderItemsController(IOrderService orderService)
+        public OrderItemsController(
+            IOrderService orderService,
+            IOrderQueryService orderQueryService)
         {
             _orderService = orderService;
+            _orderQueryService = orderQueryService;
         }
 
         // POST: api/orders/{orderId}/items
@@ -63,7 +67,7 @@ namespace Inventory.API.Controllers
             int orderId,
             CancellationToken cancellationToken)
         {
-            var result = await _orderService.GetItemsByOrderIdAsync(orderId, cancellationToken);
+            var result = await _orderQueryService.GetItemsByOrderIdAsync(orderId, cancellationToken);
             return HandleResult(result);
         }
 
@@ -73,7 +77,7 @@ namespace Inventory.API.Controllers
             int productId,
             CancellationToken cancellationToken)
         {
-            var result = await _orderService.GetOrdersByProductIdAsync(productId, cancellationToken);
+            var result = await _orderQueryService.GetByProductIdAsync(productId, cancellationToken);
             return HandleResult(result);
         }
     }

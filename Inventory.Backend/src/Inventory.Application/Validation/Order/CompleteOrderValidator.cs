@@ -10,13 +10,11 @@ namespace Inventory.Application.Validation.Order
         {
             RuleFor(x => x.PaymentMethod)
                 .IsInEnum()
-                .WithMessage(localizationService.GetMessage("InvalidPaymentMethod")
-                             ?? "Invalid payment method");
+                .WithMessage(localizationService.GetMessage("InvalidPaymentMethod"));
 
             RuleFor(x => x.OrderType)
                 .IsInEnum()
-                .WithMessage(localizationService.GetMessage("InvalidOrderType")
-                             ?? "Invalid order type");
+                .WithMessage(localizationService.GetMessage("InvalidOrderType"));
         }
     }
 }

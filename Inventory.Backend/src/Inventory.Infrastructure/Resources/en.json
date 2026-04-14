@@ -99,5 +99,17 @@
   "BatchExpireDateInvalid": "Expiry date must be after the purchase date.",
   "BatchCostInvalid": "Unit cost must be greater than or equal to 0.",
   "BatchQuantityInvalid": "Quantity must be greater than or equal to 0.",
-  "BatchNotFound": "Stock batch not found."
+  "BatchNotFound": "Stock batch not found.",
+  "OrderNotFound": "Order not found",
+
+  "InvalidOrder": "Invalid order data",
+  "InvalidOrderItem": "Invalid order item",
+  "InvalidDiscount": "Invalid discount",
+  "InvalidOrderOperation": "Invalid operation on order",
+  "EmptyOrder": "Order must contain items",
+  "InvalidPaymentMethod": "Invalid payment method",
+  "InvalidOrderType": "Invalid order type",
+  "OrderItemsRequired": "Order must contain at least one item",
+  "InvalidProductId": "Invalid product Id",
+  "InvalidQuantity": "Quantity must be greater than zero"
 }

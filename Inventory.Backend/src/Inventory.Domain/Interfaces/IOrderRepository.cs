@@ -7,9 +7,8 @@ namespace Inventory.Domain.Interfaces
 {
     public interface IOrderRepository : IRepository<Order>
     {
-        Task<IEnumerable<Order>> GetPendingOrdersAsync(CancellationToken cancellationToken = default);
+        Task<Order?> GetByIdWithItemsAsync(int id, CancellationToken cancellationToken = default);
 
-        Task<Order?> GetWithItemsAsync(int id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Order>> GetOrdersByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<Order?> GetByIdWithItemsAndProductsAsync(int id, CancellationToken cancellationToken = default);
     }
 }
