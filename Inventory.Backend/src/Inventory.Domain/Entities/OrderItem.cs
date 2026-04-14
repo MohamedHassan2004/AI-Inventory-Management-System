@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Inventory.Domain.Entities
 {
     public class OrderItem
@@ -9,13 +5,11 @@ namespace Inventory.Domain.Entities
         public int Id { get; private set; }
 
         public int ProductId { get; private set; }
-        public Product Product { get; private set; }
+        public Product Product { get; private set; } = null!;
 
-        public decimal Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
-        public int OrderId { get; private set; }
-        public virtual Order Order { get; private set; }
 
+        public decimal Quantity => _consumptions.Sum(c => c.Quantity);
         public decimal TotalPrice => Quantity * UnitPrice;
 
         private readonly List<StockConsumption> _consumptions = new();
@@ -25,13 +19,7 @@ namespace Inventory.Domain.Entities
 
         public OrderItem(Product product, decimal quantity)
         {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
-
-            if (quantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero");
-
-            Product = product;
+            Product = product ?? throw new ArgumentNullException(nameof(product));
             ProductId = product.Id;
             UnitPrice = product.SellingPrice;
 
@@ -40,28 +28,41 @@ namespace Inventory.Domain.Entities
 
         public void AddQuantity(decimal quantity)
         {
-            if (quantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero");
-
-            if (Product == null)
-                throw new InvalidOperationException("Product must be loaded");
-
             var consumptions = Product.ReduceStock(quantity);
             _consumptions.AddRange(consumptions);
-            Quantity += quantity;
         }
-        public void Remove()
-        {
-            if (!_consumptions.Any())
-                return;
 
+        public void UpdateQuantity(decimal newQuantity)
+        {
+            var delta = newQuantity - Quantity;
+
+            if (delta > 0)
+                AddQuantity(delta);
+            else if (delta < 0)
+                RollbackExcess(-delta);
+        }
+
+        public void Rollback()
+        {
             foreach (var c in _consumptions)
-            {
-                c.Batch.RemainingQuantity += c.Quantity;
-            }
+                c.Rollback();
 
             _consumptions.Clear();
-            Quantity = 0;
+        }
+
+        private void RollbackExcess(decimal quantity)
+        {
+            for (int i = _consumptions.Count - 1; i >= 0 && quantity > 0; i--)
+            {
+                var c = _consumptions[i];
+                var take = Math.Min(c.Quantity, quantity);
+
+                c.Batch.Restore(take);
+                quantity -= take;
+
+                if (take == c.Quantity)
+                    _consumptions.RemoveAt(i);
+            }
         }
     }
 }

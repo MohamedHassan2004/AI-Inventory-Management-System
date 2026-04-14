@@ -1,4 +1,4 @@
-﻿using Inventory.Domain.Entities;
+using Inventory.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,6 +32,7 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.HasOne(o => o.Cashier)
                 .WithMany()
                 .HasForeignKey(o => o.CashierId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
