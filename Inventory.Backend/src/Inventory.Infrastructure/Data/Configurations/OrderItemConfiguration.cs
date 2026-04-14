@@ -1,4 +1,4 @@
-﻿using Inventory.Domain.Entities;
+using Inventory.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Reflection.Emit;
@@ -11,7 +11,6 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(i => i.Id);
 
-            builder.Property(i => i.Quantity).IsRequired().HasPrecision(18, 2);
             builder.Property(i => i.UnitPrice).IsRequired().HasPrecision(18, 2);
 
             builder.Ignore(i => i.TotalPrice);
