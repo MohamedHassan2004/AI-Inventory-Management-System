@@ -1,5 +1,6 @@
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Enums;
+using Inventory.Domain.Exceptions;
 
 namespace Inventory.Domain.Entities
 {
@@ -40,7 +41,7 @@ namespace Inventory.Domain.Entities
         private void EnsureEditable()
         {
             if (Status != OrderStatus.Pending)
-                throw new InvalidOperationException("Order is not editable.");
+                throw new OrderNotEditableException(Status);
         }
 
         public void AddItem(Product product, decimal quantity)
@@ -61,7 +62,9 @@ namespace Inventory.Domain.Entities
         {
             EnsureEditable();
 
-            var item = _items.First(i => i.Id == itemId);
+            var item = _items.FirstOrDefault(i => i.Id == itemId)
+                ?? throw new OrderItemNotFoundException(itemId);
+
             item.Rollback();
             _items.Remove(item);
 
@@ -72,7 +75,9 @@ namespace Inventory.Domain.Entities
         {
             EnsureEditable();
 
-            var item = _items.First(i => i.Id == itemId);
+            var item = _items.FirstOrDefault(i => i.Id == itemId)
+                ?? throw new OrderItemNotFoundException(itemId);
+
             item.UpdateQuantity(quantity);
 
             Recalculate();
@@ -83,7 +88,7 @@ namespace Inventory.Domain.Entities
             EnsureEditable();
 
             if (!_items.Any())
-                throw new InvalidOperationException("Order is empty.");
+                throw new EmptyOrderException();
 
             PaymentMethod = method;
             Type = type;
@@ -92,7 +97,8 @@ namespace Inventory.Domain.Entities
 
         public void Cancel()
         {
-            if (Status != OrderStatus.Pending) return;
+            if (Status != OrderStatus.Pending)
+                throw new OrderNotEditableException(Status);
 
             foreach (var item in _items)
                 item.Rollback();
@@ -103,7 +109,7 @@ namespace Inventory.Domain.Entities
         public void ApplyDiscount(decimal percentage)
         {
             if (percentage < 0 || percentage > MaxDiscountPercentage)
-                throw new ArgumentException("Invalid discount.");
+                throw new InvalidDiscountException(percentage);
 
             DiscountPercentage = percentage;
             Recalculate();

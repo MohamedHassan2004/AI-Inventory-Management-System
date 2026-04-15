@@ -35,5 +35,14 @@ namespace Inventory.Domain.Entities
         {
             Batch.Restore(Quantity);
         }
+
+        public void ReduceQuantity(decimal amount)
+        {
+            if (amount <= 0 || amount > Quantity)
+                throw new ArgumentException("Invalid reduce amount.", nameof(amount));
+
+            Quantity -= amount;
+            Batch.Restore(amount);
+        }
     }
 }

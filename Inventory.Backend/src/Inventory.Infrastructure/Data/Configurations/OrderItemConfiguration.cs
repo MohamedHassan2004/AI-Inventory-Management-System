@@ -14,14 +14,22 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.Property(i => i.UnitPrice).IsRequired().HasPrecision(18, 2);
 
             builder.Ignore(i => i.TotalPrice);
-            builder.Ignore(o => o.Quantity);
+            builder.Property(i => i.Quantity).IsRequired().HasPrecision(18, 2);
 
             builder.HasOne(i => i.Product)
                 .WithMany()
                 .HasForeignKey(i => i.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany("_consumptions")
+                .WithOne()
+                .HasForeignKey("OrderItemId")
+                .OnDelete(DeleteBehavior.Cascade);
 
-    
+            builder.Navigation("_consumptions")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+
+
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using Inventory.Application.DTOs.Order;
+using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
 using Inventory.Domain.Entities;
 using Inventory.Domain.Interfaces;
 using Inventory.Domain.Shared;
+using Inventory.Domain.Exceptions;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 
@@ -61,9 +62,12 @@ namespace Inventory.Application.Services
                     ErrorType.Validation));
             }
 
+            var productIds = dto.Items.Select(i => i.ProductId).Distinct().ToList();
+            var products = await _productRepository.GetWithBatchesListAsync(productIds, cancellationToken);
+
             foreach (var item in dto.Items)
             {
-                var product = await _productRepository.GetWithBatchesAsync(item.ProductId, cancellationToken);
+                var product = products.FirstOrDefault(p => p.Id == item.ProductId);
 
                 if (product == null)
                 {
@@ -78,12 +82,21 @@ namespace Inventory.Application.Services
                 {
                     order.AddItem(product, item.Quantity);
                 }
-                catch (Exception ex)
+                catch (InsufficientStockException ex)
+                {
+                    _logger.LogWarning(ex, "Insufficient stock for product {ProductId}", item.ProductId);
+                    return Result.Failure<int>(new Error(
+                        "INSUFFICIENT_STOCK",
+                        _localizationService.GetMessage("InsufficientStock"),
+                        ErrorType.Validation));
+                }
+                catch (OrderNotEditableException ex)
                 {
                     _logger.LogWarning(ex, "Error adding item to order");
+
                     return Result.Failure<int>(new Error(
-                        "INVALID_ITEM",
-                        _localizationService.GetMessage("InvalidOrderItem"),
+                        "INVALID_ORDER_STATUS",
+                        ex.Message,
                         ErrorType.Validation));
                 }
             }
@@ -100,7 +113,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Applying discount {Discount} to order {OrderId}", discount, orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
@@ -115,9 +128,9 @@ namespace Inventory.Application.Services
             {
                 order.ApplyDiscount(discount);
             }
-            catch (Exception ex)
+            catch (InvalidDiscountException ex)
             {
-                _logger.LogWarning(ex, "Invalid discount for order {OrderId}", orderId);
+                _logger.LogWarning(ex, "Invalid discount for order {OrderId}. Provided: {Discount}", orderId, discount);
                 return Result.Failure(new Error(
                     "INVALID_DISCOUNT",
                     _localizationService.GetMessage("InvalidDiscount"),
@@ -136,7 +149,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Completing order {OrderId}", orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
@@ -151,12 +164,21 @@ namespace Inventory.Application.Services
             {
                 order.Complete(dto.PaymentMethod, dto.OrderType);
             }
-            catch (Exception ex)
+            catch (EmptyOrderException ex)
             {
-                _logger.LogWarning(ex, "Error completing order {OrderId}", orderId);
+                _logger.LogWarning(ex, "Cannot complete empty order {OrderId}", orderId);
                 return Result.Failure(new Error(
-                    "INVALID_OPERATION",
-                    _localizationService.GetMessage("InvalidOrderOperation"),
+                    "EMPTY_ORDER",
+                    _localizationService.GetMessage("EmptyOrder"),
+                    ErrorType.Validation));
+            }
+            catch (OrderNotEditableException ex)
+            {
+                _logger.LogWarning(ex, "Error adding item to order");
+
+                return Result.Failure<int>(new Error(
+                    "INVALID_ORDER_STATUS",
+                    ex.Message,
                     ErrorType.Validation));
             }
 
@@ -172,7 +194,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Cancelling order {OrderId}", orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAndProductsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
@@ -187,12 +209,13 @@ namespace Inventory.Application.Services
             {
                 order.Cancel();
             }
-            catch (Exception ex)
+            catch (OrderNotEditableException ex)
             {
-                _logger.LogWarning(ex, "Error cancelling order {OrderId}", orderId);
-                return Result.Failure(new Error(
-                    "INVALID_OPERATION",
-                    _localizationService.GetMessage("InvalidOrderOperation"),
+                _logger.LogWarning(ex, "Error adding item to order");
+
+                return Result.Failure<int>(new Error(
+                    "INVALID_ORDER_STATUS",
+                    ex.Message,
                     ErrorType.Validation));
             }
 
@@ -207,12 +230,15 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Adding item to order {OrderId}", orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAndProductsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
                 _logger.LogWarning("Order not found {OrderId}", orderId);
-                return Result.Failure(new Error("NOT_FOUND", _localizationService.GetMessage("OrderNotFound"), ErrorType.NotFound));
+                return Result.Failure(new Error(
+                    "NOT_FOUND",
+                    _localizationService.GetMessage("OrderNotFound"),
+                    ErrorType.NotFound));
             }
 
             var product = await _productRepository.GetWithBatchesAsync(dto.ProductId, cancellationToken);
@@ -220,19 +246,31 @@ namespace Inventory.Application.Services
             if (product == null)
             {
                 _logger.LogWarning("Product not found {ProductId}", dto.ProductId);
-                return Result.Failure(new Error("PRODUCT_NOT_FOUND", _localizationService.GetMessage("ProductNotFound"), ErrorType.NotFound));
+                return Result.Failure(new Error(
+                    "PRODUCT_NOT_FOUND",
+                    _localizationService.GetMessage("ProductNotFound"),
+                    ErrorType.NotFound));
             }
 
             try
             {
                 order.AddItem(product, dto.Quantity);
             }
-            catch (Exception ex)
+            catch (InsufficientStockException ex)
+            {
+                _logger.LogWarning(ex, "Insufficient stock for product {ProductId}", dto.ProductId);
+                return Result.Failure(new Error(
+                    "INSUFFICIENT_STOCK",
+                    _localizationService.GetMessage("InsufficientStock"),
+                    ErrorType.Validation));
+            }
+            catch (OrderNotEditableException ex)
             {
                 _logger.LogWarning(ex, "Error adding item to order");
-                return Result.Failure(new Error(
-                    "INVALID_ITEM",
-                    _localizationService.GetMessage("InvalidOrderItem"),
+
+                return Result.Failure<int>(new Error(
+                    "INVALID_ORDER_STATUS",
+                    ex.Message,
                     ErrorType.Validation));
             }
 
@@ -246,26 +284,51 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Updating item {ItemId} in order {OrderId}", itemId, orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
                 _logger.LogWarning("Order not found {OrderId}", orderId);
-                return Result.Failure(new Error("NOT_FOUND", _localizationService.GetMessage("OrderNotFound"), ErrorType.NotFound));
+                return Result.Failure(new Error(
+                    "NOT_FOUND",
+                    _localizationService.GetMessage("OrderNotFound"),
+                    ErrorType.NotFound));
             }
 
             try
             {
                 order.UpdateQuantity(itemId, quantity);
             }
-            catch (Exception ex)
+            catch (InsufficientStockException ex)
             {
-                _logger.LogWarning(ex, "Error updating item {ItemId} in order {OrderId}", itemId, orderId);
-                return Result.Failure(new Error("INVALID_OPERATION",_localizationService.GetMessage("InvalidOrderOperation"), ErrorType.Validation));
+                _logger.LogWarning(ex, "Insufficient stock while updating item {ItemId}", itemId);
+                return Result.Failure(new Error(
+                    "INSUFFICIENT_STOCK",
+                    _localizationService.GetMessage("InsufficientStock"),
+                    ErrorType.Validation));
+            }
+            catch (OrderNotEditableException ex)
+            {
+                _logger.LogWarning(ex, "Error adding item to order");
+
+                return Result.Failure<int>(new Error(
+                    "INVALID_ORDER_STATUS",
+                    ex.Message,
+                    ErrorType.Validation));
+            }
+            catch (OrderItemNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Item {ItemId} not found in order {OrderId}", itemId, orderId);
+                return Result.Failure(new Error(
+                    "ORDER_ITEM_NOT_FOUND",
+                    _localizationService.GetMessage("OrderItemNotFound"),
+                    ErrorType.NotFound));
             }
 
             _orderRepository.Update(order);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Item {ItemId} updated successfully in order {OrderId}", itemId, orderId);
 
             return Result.Success();
         }
@@ -273,7 +336,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Removing item {ItemId} from order {OrderId}", itemId, orderId);
 
-            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
 
             if (order == null)
             {
@@ -285,14 +348,27 @@ namespace Inventory.Application.Services
             {
                 order.RemoveItem(itemId);
             }
-            catch (Exception ex)
+            catch (OrderNotEditableException ex)
             {
-                _logger.LogWarning(ex, "Error removing item {ItemId} from order {OrderId}", itemId, orderId);
-                return Result.Failure(new Error("INVALID_OPERATION",_localizationService.GetMessage("InvalidOrderOperation"),ErrorType.Validation));
+                _logger.LogWarning(ex, "Error adding item to order");
+
+                return Result.Failure<int>(new Error(
+                    "INVALID_ORDER_STATUS",
+                    ex.Message,
+                    ErrorType.Validation));
+            }
+            catch (OrderItemNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Item {ItemId} not found in order {OrderId}", itemId, orderId);
+                return Result.Failure(new Error(
+                    "ORDER_ITEM_NOT_FOUND",
+                    _localizationService.GetMessage("OrderItemNotFound"),
+                    ErrorType.NotFound));
             }
 
             _orderRepository.Update(order);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Item {ItemId} removed successfully from order {OrderId}", itemId, orderId);
 
             return Result.Success();
         }

@@ -9,7 +9,7 @@ namespace Inventory.Domain.Entities
 
         public decimal UnitPrice { get; private set; }
 
-        public decimal Quantity => _consumptions.Sum(c => c.Quantity);
+        public decimal Quantity { get; private set; }
         public decimal TotalPrice => Quantity * UnitPrice;
 
         private readonly List<StockConsumption> _consumptions = new();
@@ -30,6 +30,7 @@ namespace Inventory.Domain.Entities
         {
             var consumptions = Product.ReduceStock(quantity);
             _consumptions.AddRange(consumptions);
+            Quantity += quantity;
         }
 
         public void UpdateQuantity(decimal newQuantity)
@@ -52,17 +53,19 @@ namespace Inventory.Domain.Entities
 
         private void RollbackExcess(decimal quantity)
         {
+            decimal totalToReduce = quantity;
             for (int i = _consumptions.Count - 1; i >= 0 && quantity > 0; i--)
             {
                 var c = _consumptions[i];
                 var take = Math.Min(c.Quantity, quantity);
 
-                c.Batch.Restore(take);
+                c.ReduceQuantity(take);
                 quantity -= take;
 
-                if (take == c.Quantity)
+                if (c.Quantity == 0)
                     _consumptions.RemoveAt(i);
             }
+            Quantity -= totalToReduce;
         }
     }
 }

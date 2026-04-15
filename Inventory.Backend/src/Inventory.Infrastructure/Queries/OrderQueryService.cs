@@ -1,4 +1,4 @@
-﻿using Inventory.Application.DTOs.Order;
+using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
 using Inventory.Domain.Enums;
 using Inventory.Domain.Shared;
@@ -27,12 +27,24 @@ namespace Inventory.Infrastructure.Queries
                 .Select(o => new OrderResponseDto
                 {
                     Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    CashierId = o.CashierId,
+                    Status = o.Status,
+                    Type = o.Type,
+                    PaymentMethod = o.PaymentMethod,
+                    SubTotal = o.SubTotal,
+                    DiscountPercentage = o.DiscountPercentage,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
                     FinalTotal = o.FinalTotal,
                     Items = o.Items.Select(i => new OrderItemResponseDto
                     {
                         Id = i.Id,
+                        ProductId = i.ProductId,
                         ProductName = i.Product.Name,
-                        Quantity = i.Quantity
+                        Quantity = i.Quantity,
+                        UnitPrice = i.UnitPrice,
+                        TotalPrice = i.Quantity * i.UnitPrice
                     }).ToList()
                 })
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken); // 🔥 optimized
@@ -55,6 +67,15 @@ namespace Inventory.Infrastructure.Queries
                 .Select(o => new OrderResponseDto
                 {
                     Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    CashierId = o.CashierId,
+                    Status = o.Status,
+                    Type = o.Type,
+                    PaymentMethod = o.PaymentMethod,
+                    SubTotal = o.SubTotal,
+                    DiscountPercentage = o.DiscountPercentage,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
                     FinalTotal = o.FinalTotal
                 })
                 .ToListAsync(cancellationToken);
@@ -64,29 +85,31 @@ namespace Inventory.Infrastructure.Queries
 
         public async Task<Result<IEnumerable<OrderItemResponseDto>>> GetItemsByOrderIdAsync(int orderId, CancellationToken cancellationToken = default)
         {
-            var exists = await _context.Orders
+            var order = await _context.Orders
                 .AsNoTracking()
-                .AnyAsync(o => o.Id == orderId, cancellationToken);
+                .Where(o => o.Id == orderId)
+                .Select(o => new 
+                {
+                    Items = o.Items.Select(i => new OrderItemResponseDto
+                    {
+                        Id = i.Id,
+                        ProductId = i.ProductId,
+                        ProductName = i.Product.Name,
+                        Quantity = i.Quantity,
+                        UnitPrice = i.UnitPrice,
+                        TotalPrice = i.Quantity * i.UnitPrice
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (!exists)
+            if (order == null)
                 return Result.Failure<IEnumerable<OrderItemResponseDto>>(
                     new Error(
                         "NOT_FOUND",
                         _localizationService.GetMessage("OrderNotFound"),
                         ErrorType.NotFound));
 
-            var items = await _context.OrderItems
-                .AsNoTracking()
-                .Where(i => i.OrderId == orderId)
-                .Select(i => new OrderItemResponseDto
-                {
-                    Id = i.Id,
-                    ProductName = i.Product.Name,
-                    Quantity = i.Quantity
-                })
-                .ToListAsync(cancellationToken);
-
-            return Result.Success<IEnumerable<OrderItemResponseDto>>(items);
+            return Result.Success<IEnumerable<OrderItemResponseDto>>(order.Items);
         }
 
         public async Task<Result<IEnumerable<OrderResponseDto>>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default)
@@ -97,6 +120,15 @@ namespace Inventory.Infrastructure.Queries
                 .Select(o => new OrderResponseDto
                 {
                     Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    CashierId = o.CashierId,
+                    Status = o.Status,
+                    Type = o.Type,
+                    PaymentMethod = o.PaymentMethod,
+                    SubTotal = o.SubTotal,
+                    DiscountPercentage = o.DiscountPercentage,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
                     FinalTotal = o.FinalTotal
                 })
                 .ToListAsync(cancellationToken);

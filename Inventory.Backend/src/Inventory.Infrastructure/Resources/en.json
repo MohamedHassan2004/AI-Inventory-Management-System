@@ -100,16 +100,19 @@
   "BatchCostInvalid": "Unit cost must be greater than or equal to 0.",
   "BatchQuantityInvalid": "Quantity must be greater than or equal to 0.",
   "BatchNotFound": "Stock batch not found.",
-  "OrderNotFound": "Order not found",
 
-  "InvalidOrder": "Invalid order data",
+  "OrderNotFound": "Order not found",
+  "InvalidOrder": "The provided order data is invalid",
   "InvalidOrderItem": "Invalid order item",
-  "InvalidDiscount": "Invalid discount",
-  "InvalidOrderOperation": "Invalid operation on order",
-  "EmptyOrder": "Order must contain items",
+  "InvalidDiscount": "Discount must be within the allowed range",
+  "InvalidOrderOperation": "This operation cannot be performed on the order",
   "InvalidPaymentMethod": "Invalid payment method",
   "InvalidOrderType": "Invalid order type",
-  "OrderItemsRequired": "Order must contain at least one item",
   "InvalidProductId": "Invalid product Id",
-  "InvalidQuantity": "Quantity must be greater than zero"
+  "InvalidQuantity": "Quantity must be greater than zero",
+  "OrderIsEmpty": "Order must contain at least one item",
+  "OrderNotEditable": "Only pending orders can be modified",
+  "CannotCancelOrder": "Cannot cancel this order in its current status",
+  "InsufficientStock": "Not enough stock available for the requested quantity",
+  "OrderItemNotFound": "Order item not found"
 }

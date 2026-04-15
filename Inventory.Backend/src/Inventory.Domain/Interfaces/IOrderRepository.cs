@@ -7,8 +7,6 @@ namespace Inventory.Domain.Interfaces
 {
     public interface IOrderRepository : IRepository<Order>
     {
-        Task<Order?> GetByIdWithItemsAsync(int id, CancellationToken cancellationToken = default);
-
-        Task<Order?> GetByIdWithItemsAndProductsAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default);
     }
 }

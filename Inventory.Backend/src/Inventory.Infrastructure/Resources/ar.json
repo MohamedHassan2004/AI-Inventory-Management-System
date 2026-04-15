@@ -108,15 +108,18 @@
   "BatchQuantityInvalid": "يجب أن تكون الكمية أكبر من أو تساوي صفر.",
   "BatchNotFound": "دفعة المخزون غير موجودة.",
 
-  "OrderNotFound": "الطلب غير موجود",
   "InvalidOrder": "بيانات الطلب غير صحيحة",
   "InvalidOrderItem": "عنصر الطلب غير صالح",
-  "InvalidDiscount": "الخصم غير صالح",
-  "InvalidOrderOperation": "عملية غير صالحة على الطلب",
-  "EmptyOrder": "يجب أن يحتوي الطلب على عناصر",
+  "InvalidDiscount": "نسبة الخصم غير صحيحة",
+  "InvalidOrderOperation": "لا يمكن تنفيذ هذه العملية على الطلب",
   "InvalidPaymentMethod": "طريقة الدفع غير صحيحة",
   "InvalidOrderType": "نوع الطلب غير صحيح",
-  "OrderItemsRequired": "يجب أن يحتوي الطلب على عنصر واحد على الأقل",
-  "InvalidProductId": "معرّف المنتج غير صالح",
-  "InvalidQuantity": "يجب أن تكون الكمية أكبر من صفر"
+  "InvalidProductId": "معرّف المنتج غير صحيح",
+  "InvalidQuantity": "يجب أن تكون الكمية أكبر من صفر",
+  "OrderNotFound": "الطلب غير موجود",
+  "OrderIsEmpty": "يجب أن يحتوي الطلب على عنصر واحد على الأقل",
+  "OrderNotEditable": "يمكن تعديل الطلبات قيد الانتظار فقط",
+  "CannotCancelOrder": "لا يمكن إلغاء هذا الطلب في حالته الحالية",
+  "InsufficientStock": "الكمية المطلوبة غير متوفرة في المخزون",
+  "OrderItemNotFound": "عنصر الطلب غير موجود"
 }

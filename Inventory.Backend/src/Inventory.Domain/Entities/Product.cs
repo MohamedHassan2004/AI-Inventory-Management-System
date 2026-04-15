@@ -1,4 +1,5 @@
 using Inventory.Domain.Interfaces;
+using Inventory.Domain.Exceptions;
 
 namespace Inventory.Domain.Entities
 {
@@ -112,8 +113,7 @@ namespace Inventory.Domain.Entities
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantityToReduce));
 
             if (quantityToReduce > StockQuantity)
-                throw new InvalidOperationException(
-                    $"Insufficient stock for product '{Name}'. Requested: {quantityToReduce}, Available: {StockQuantity}.");
+                throw new InsufficientStockException(Name, quantityToReduce, StockQuantity);
 
             var consumptions = new List<StockConsumption>();
 
@@ -135,8 +135,7 @@ namespace Inventory.Domain.Entities
 
             // Fallback: if expired batches needed to fulfil (shouldn't happen in healthy stock)
             if (quantityToReduce > 0)
-                throw new InvalidOperationException(
-                    $"Could not fulfil full quantity for '{Name}'. Remaining unfulfilled: {quantityToReduce}.");
+                throw new InsufficientStockException(Name, quantityToReduce, 0);
 
             return consumptions.AsReadOnly();
         }

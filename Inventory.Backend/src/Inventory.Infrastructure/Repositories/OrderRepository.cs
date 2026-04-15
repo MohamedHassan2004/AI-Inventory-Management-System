@@ -1,5 +1,4 @@
-﻿using Inventory.Domain.Entities;
-using Inventory.Domain.Enums;
+using Inventory.Domain.Entities;
 using Inventory.Domain.Interfaces;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -15,23 +14,20 @@ namespace Inventory.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Order?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
-        }
-        public async Task<Order?> GetByIdWithItemsAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
-        }
-        public async Task<Order?> GetByIdWithItemsAndProductsAsync(int id, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Get full order with all related data required for business logic
+        /// (items, products, batches, consumptions)
+        /// </summary>
+        public async Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.Batches)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Consumptions)
+                        .ThenInclude(c => c.Batch)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }
     }
