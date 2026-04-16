@@ -2,11 +2,13 @@ using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
-using Inventory.Infrastructure.Settings;
 using Inventory.Infrastructure.Data;
+using Inventory.Infrastructure.Queries;
 using Inventory.Infrastructure.Repositories;
+using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Services.Auth;
 using Inventory.Infrastructure.Services.FileService;
+using Inventory.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using Inventory.Infrastructure.Services;
 
 namespace Inventory.Infrastructure;
 
@@ -86,6 +87,8 @@ public static class DependencyInjection
         services.AddScoped<ISupplierRepository, SupplierRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IStockBatchRepository, StockBatchRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IOrderQueryService, OrderQueryService>();
 
 
         return services;

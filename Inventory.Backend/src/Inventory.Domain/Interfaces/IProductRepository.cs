@@ -12,6 +12,7 @@ namespace Inventory.Domain.Interfaces
         Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default);
         Task<bool> ExistsBySkuAsync(string sku, int? excludeId = null, CancellationToken cancellationToken = default);
         Task<Product?> GetWithBatchesAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetWithBatchesListAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetAllWithBatchesAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetLowStockProductsAsync(CancellationToken cancellationToken = default);
     }

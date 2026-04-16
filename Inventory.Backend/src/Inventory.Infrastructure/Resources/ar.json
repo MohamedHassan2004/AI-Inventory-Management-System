@@ -106,5 +106,20 @@
   "BatchExpireDateInvalid": "يجب أن يكون تاريخ الانتهاء بعد تاريخ الشراء.",
   "BatchCostInvalid": "يجب أن تكون تكلفة الوحدة أكبر من أو تساوي صفر.",
   "BatchQuantityInvalid": "يجب أن تكون الكمية أكبر من أو تساوي صفر.",
-  "BatchNotFound": "دفعة المخزون غير موجودة."
+  "BatchNotFound": "دفعة المخزون غير موجودة.",
+
+  "InvalidOrder": "بيانات الطلب غير صحيحة",
+  "InvalidOrderItem": "عنصر الطلب غير صالح",
+  "InvalidDiscount": "نسبة الخصم غير صحيحة",
+  "InvalidOrderOperation": "لا يمكن تنفيذ هذه العملية على الطلب",
+  "InvalidPaymentMethod": "طريقة الدفع غير صحيحة",
+  "InvalidOrderType": "نوع الطلب غير صحيح",
+  "InvalidProductId": "معرّف المنتج غير صحيح",
+  "InvalidQuantity": "يجب أن تكون الكمية أكبر من صفر",
+  "OrderNotFound": "الطلب غير موجود",
+  "OrderIsEmpty": "يجب أن يحتوي الطلب على عنصر واحد على الأقل",
+  "OrderNotEditable": "يمكن تعديل الطلبات قيد الانتظار فقط",
+  "CannotCancelOrder": "لا يمكن إلغاء هذا الطلب في حالته الحالية",
+  "InsufficientStock": "الكمية المطلوبة غير متوفرة في المخزون",
+  "OrderItemNotFound": "عنصر الطلب غير موجود"
 }

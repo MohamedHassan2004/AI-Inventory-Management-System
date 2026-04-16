@@ -67,10 +67,7 @@ namespace Inventory.Application.Services
             StockBatch batch;
             try
             {
-                batch = new StockBatch(dto.ProductId, dto.PurchaseDate, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity)
-                {
-                    SupplierId = dto.SupplierId
-                };
+                batch = new StockBatch(dto.ProductId, dto.SupplierId, dto.PurchaseDate, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity);
             }
             catch (ArgumentException ex)
             {
@@ -101,8 +98,19 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("BatchNotFound") ?? "Batch not found.",
                     ErrorType.NotFound));
             }
-            
-            batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
+
+            try
+            {
+                batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
+            }
+            catch(ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid StockBatch data provided for update.");
+                return Result.Failure<StockBatchResponseDto>(new Error(
+                    "INVALID_BATCH_DATA",
+                    _localizationService.GetMessage("InvalidBatchData") ?? "Invalid batch data.",
+                    ErrorType.Validation));
+            }
 
             _stockBatchRepository.Update(batch);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

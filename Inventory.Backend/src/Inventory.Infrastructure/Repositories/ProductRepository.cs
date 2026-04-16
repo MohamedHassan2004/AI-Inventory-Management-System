@@ -44,6 +44,15 @@ namespace Inventory.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
+        public async Task<IEnumerable<Product>> GetWithBatchesListAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        {
+            return await _context.Products
+                .Include(p => p.Batches)
+                .Include(p => p.Category)
+                .Where(p => ids.Contains(p.Id))
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<Product>> GetAllWithBatchesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.Products
