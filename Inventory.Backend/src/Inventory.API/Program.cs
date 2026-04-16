@@ -20,6 +20,9 @@ using Serilog;
 using Serilog.Context;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Scalar.AspNetCore;
+using Microsoft.OpenApi;
+
 
 namespace Inventory.API
 {
@@ -71,7 +74,7 @@ namespace Inventory.API
                     .AddDataAnnotationsLocalization();
 
                 builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddSwaggerGen();
+                builder.Services.AddOpenApiExtension();
 
                 builder.Services.AddHealthChecks()
                     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
@@ -121,8 +124,14 @@ namespace Inventory.API
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
+                    app.MapOpenApi();
+                    app.MapScalarApiReference(options => 
+                    {
+                        options.WithTitle("Inventory API Reference")
+                               .WithTheme(ScalarTheme.Moon)
+                               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                               .HideModels();
+                    });
                 }
 
                 // seed roles and super admin user
