@@ -79,12 +79,13 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
-        // GET: api/orders/pending
-        [HttpGet("pending")]
-        public async Task<IActionResult> GetPending(
+        // GET: api/orders?status=Pending&sortBy=FinalTotal&sortDescending=true&page=1&pageSize=20
+        [HttpGet]
+        public async Task<IActionResult> GetAll(
+            [FromQuery] OrderFilter filter,
             CancellationToken cancellationToken)
         {
-            var result = await _orderQueryService.GetPendingAsync(cancellationToken);
+            var result = await _orderQueryService.GetAllAsync(filter, cancellationToken);
             return HandleResult(result);
         }
     }

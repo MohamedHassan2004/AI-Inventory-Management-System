@@ -77,7 +77,7 @@ namespace Inventory.API.Controllers
             int productId,
             CancellationToken cancellationToken)
         {
-            var result = await _orderQueryService.GetByProductIdAsync(productId, cancellationToken);
+            var result = await _orderQueryService.GetAllAsync(new OrderFilter { ProductId = productId }, cancellationToken);
             return HandleResult(result);
         }
     }

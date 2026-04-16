@@ -99,7 +99,18 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
+            try
+            {
+                batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
+            }
+            catch(ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid StockBatch data provided for update.");
+                return Result.Failure<StockBatchResponseDto>(new Error(
+                    "INVALID_BATCH_DATA",
+                    _localizationService.GetMessage("InvalidBatchData") ?? "Invalid batch data.",
+                    ErrorType.Validation));
+            }
 
             _stockBatchRepository.Update(batch);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
