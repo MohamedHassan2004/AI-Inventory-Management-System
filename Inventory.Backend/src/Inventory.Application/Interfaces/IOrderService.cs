@@ -9,7 +9,6 @@ namespace Inventory.Application.Interfaces
     public interface IOrderService
     {
         Task<Result<int>> CreateAsync(
-            CreateOrderDto dto,
             string userId,
             CancellationToken cancellationToken = default);
 

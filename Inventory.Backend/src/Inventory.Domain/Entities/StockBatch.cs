@@ -18,7 +18,7 @@ namespace Inventory.Domain.Entities
         // Required by EF Core
         private StockBatch() { }
 
-        public StockBatch(int productId, int supplierId, DateTime purchaseDate, DateTime expireDate, decimal unitCost, decimal quantity)
+        public StockBatch(int productId, int supplierId, DateTime expireDate, decimal unitCost, decimal quantity)
         {
             if (productId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(productId), "Product ID must be greater than zero.");
@@ -26,7 +26,7 @@ namespace Inventory.Domain.Entities
             if (supplierId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(supplierId), "Supplier ID must be greater than zero.");
 
-            if (expireDate <= purchaseDate)
+            if (expireDate <= DateTime.UtcNow)
                 throw new ArgumentException("Expire date must be after purchase date.", nameof(expireDate));
 
             if (unitCost < 0)
@@ -37,7 +37,7 @@ namespace Inventory.Domain.Entities
 
             ProductId = productId;
             SupplierId = supplierId;
-            PurchaseDate = purchaseDate;
+            PurchaseDate = DateTime.UtcNow;
             ExpireDate = expireDate;
             UnitCost = unitCost;
             OriginalQuantity = quantity;

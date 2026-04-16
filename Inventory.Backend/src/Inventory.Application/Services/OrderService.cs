@@ -12,6 +12,7 @@ namespace Inventory.Application.Services
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IOrderQueryService _orderQueryService;
         private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,6 +21,7 @@ namespace Inventory.Application.Services
 
         public OrderService(
             IOrderRepository orderRepository,
+            IOrderQueryService orderQueryService,
             IProductRepository productRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -27,6 +29,7 @@ namespace Inventory.Application.Services
             ILocalizationService localizationService)
         {
             _orderRepository = orderRepository;
+            _orderQueryService = orderQueryService;
             _productRepository = productRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -34,21 +37,12 @@ namespace Inventory.Application.Services
             _localizationService = localizationService;
         }
 
-        public async Task<Result<int>> CreateAsync(CreateOrderDto dto, string userId, CancellationToken cancellationToken = default)
+        public async Task<Result<int>> CreateAsync(string userId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Creating order for user {UserId}", userId);
 
-            if (dto.Items == null || !dto.Items.Any())
-            {
-                _logger.LogWarning("Attempt to create empty order");
-                return Result.Failure<int>(new Error(
-                    "EMPTY_ORDER",
-                    _localizationService.GetMessage("EmptyOrder"),
-                    ErrorType.Validation));
-            }
-
             Order order;
-
+            
             try
             {
                 order = new Order(userId);
@@ -60,45 +54,6 @@ namespace Inventory.Application.Services
                     "INVALID_ORDER",
                     _localizationService.GetMessage("InvalidOrder"),
                     ErrorType.Validation));
-            }
-
-            var productIds = dto.Items.Select(i => i.ProductId).Distinct().ToList();
-            var products = await _productRepository.GetWithBatchesListAsync(productIds, cancellationToken);
-
-            foreach (var item in dto.Items)
-            {
-                var product = products.FirstOrDefault(p => p.Id == item.ProductId);
-
-                if (product == null)
-                {
-                    _logger.LogWarning("Product not found with Id: {ProductId}", item.ProductId);
-                    return Result.Failure<int>(new Error(
-                        "PRODUCT_NOT_FOUND",
-                        _localizationService.GetMessage("ProductNotFound"),
-                        ErrorType.NotFound));
-                }
-
-                try
-                {
-                    order.AddItem(product, item.Quantity);
-                }
-                catch (InsufficientStockException ex)
-                {
-                    _logger.LogWarning(ex, "Insufficient stock for product {ProductId}", item.ProductId);
-                    return Result.Failure<int>(new Error(
-                        "INSUFFICIENT_STOCK",
-                        _localizationService.GetMessage("InsufficientStock"),
-                        ErrorType.Validation));
-                }
-                catch (OrderNotEditableException ex)
-                {
-                    _logger.LogWarning(ex, "Error adding item to order");
-
-                    return Result.Failure<int>(new Error(
-                        "INVALID_ORDER_STATUS",
-                        ex.Message,
-                        ErrorType.Validation));
-                }
             }
 
             await _orderRepository.AddAsync(order, cancellationToken);
@@ -113,7 +68,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Applying discount {Discount} to order {OrderId}", discount, orderId);
 
-            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
+            var order = await _orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
 
             if (order == null)
             {
@@ -149,7 +104,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Completing order {OrderId}", orderId);
 
-            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
+            var order = await _orderRepository.GetOrderWithItemsAsync(orderId, cancellationToken);
 
             if (order == null)
             {

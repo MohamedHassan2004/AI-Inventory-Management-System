@@ -67,7 +67,7 @@ namespace Inventory.Application.Services
             StockBatch batch;
             try
             {
-                batch = new StockBatch(dto.ProductId, dto.SupplierId, dto.PurchaseDate, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity);
+                batch = new StockBatch(dto.ProductId, dto.SupplierId, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity);
             }
             catch (ArgumentException ex)
             {

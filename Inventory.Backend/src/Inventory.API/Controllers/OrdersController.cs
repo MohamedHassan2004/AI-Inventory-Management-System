@@ -26,14 +26,10 @@ namespace Inventory.API.Controllers
         // POST: api/orders
         [HttpPost]
         public async Task<IActionResult> Create(
-            [FromBody] CreateOrderDto dto,
             CancellationToken cancellationToken)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            //var userId = "0aab9e4b-0893-4b36-bb42-0c403064e327";   //for test
-
-            var result = await _orderService.CreateAsync(dto, userId, cancellationToken);
+            var result = await _orderService.CreateAsync(userId, cancellationToken);
             return HandleResult(result);
         }
 

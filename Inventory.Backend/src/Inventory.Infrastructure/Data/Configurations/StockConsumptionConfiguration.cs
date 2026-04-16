@@ -1,4 +1,4 @@
-﻿using Inventory.Domain.Entities;
+using Inventory.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,11 +18,6 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey(c => c.StockBatchId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne<OrderItem>()
-                .WithMany(i => i.Consumptions)
-                .HasForeignKey("OrderItemId")
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -15,12 +15,8 @@ namespace Inventory.Application.Validation.StockBatch
             RuleFor(x => x.SupplierId)
                 .GreaterThan(0).WithMessage(localizationService.GetMessage("BatchSupplierRequired"));
 
-            RuleFor(x => x.PurchaseDate)
-                .NotEmpty().WithMessage(localizationService.GetMessage("BatchPurchaseDateRequired"));
-
             RuleFor(x => x.ExpireDate)
-                .NotEmpty().WithMessage(localizationService.GetMessage("BatchExpireDateRequired"))
-                .GreaterThan(x => x.PurchaseDate).WithMessage(localizationService.GetMessage("BatchExpireDateInvalid"));
+                .NotEmpty().WithMessage(localizationService.GetMessage("BatchExpireDateRequired"));
 
             RuleFor(x => x.UnitCost)
                 .GreaterThanOrEqualTo(0).WithMessage(localizationService.GetMessage("BatchCostInvalid"));

@@ -14,10 +14,13 @@ namespace Inventory.Infrastructure.Repositories
             _context = context;
         }
 
-        /// <summary>
-        /// Get full order with all related data required for business logic
-        /// (items, products, batches, consumptions)
-        /// </summary>
+        public async Task<Order?> GetOrderWithItemsAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        }
+
         public async Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders

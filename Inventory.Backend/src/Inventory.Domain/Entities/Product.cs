@@ -97,9 +97,9 @@ namespace Inventory.Domain.Entities
         /// <summary>
         /// Adds a new stock batch for this product (FEFO-aware).
         /// </summary>
-        public void AddStock(int supplierId, DateTime purchaseDate, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
-            var batch = new StockBatch(Id, supplierId, purchaseDate, expiryDate, unitCost, quantity);
+            var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
             _batches.Add(batch);
         }
 

@@ -61,7 +61,6 @@ public class UserService : IUserService
 
     public async Task<Result<string>> GetUserStatusAsync(string userId)
     {
-        _logger.LogInformation("Get user status request for user ID: {UserId}", userId);
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
