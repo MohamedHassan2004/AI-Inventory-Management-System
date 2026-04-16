@@ -102,7 +102,7 @@ public class AuthService : IAuthService
         {
             Token = refreshTokenString,
             UserId = user.Id,
-            ExpiryDate = _dateTimeProvider.UtcNow.AddDays(7),
+            ExpiryDate = _dateTimeProvider.UtcNow.AddDays(_jwtSettings.RefreshTokenDurationInDays),
             IsRevoked = false
         };
 
@@ -222,25 +222,26 @@ public class AuthService : IAuthService
         return Result.Success();
     }
 
-    public async Task<Result<TokenDto>> RefreshTokenAsync(string userId, string refreshToken)
+    public async Task<Result<TokenDto>> RefreshTokenAsync(string refreshToken)
     {
-        _logger.LogDebug("Token refresh requested for user ID: {UserId}", userId);
-
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-        {
-            _logger.LogWarning("Token refresh failed: User with ID {UserId} not found", userId);
-            return Result.Failure<TokenDto>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
-        }
+        _logger.LogDebug("Token refresh requested using refresh token");
 
         // Validate the provided refresh token against the database
         var storedToken = await _context.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Token == refreshToken && rt.UserId == userId);
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
         if (storedToken is null)
         {
-            _logger.LogWarning("Token refresh failed: Refresh token not found for user '{UserName}'", user.UserName);
+            _logger.LogWarning("Token refresh failed: Refresh token not found");
             return Result.Failure<TokenDto>(new Error("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("InvalidRefreshToken"), ErrorType.Unauthorized));
+        }
+
+        var user = storedToken.User;
+        if (user is null)
+        {
+            _logger.LogWarning("Token refresh failed: User not found for refresh token ID {RefreshTokenId}", storedToken.Id);
+            return Result.Failure<TokenDto>(new Error("NOT_FOUND", _localizationService.GetMessage("UserNotFound"), ErrorType.NotFound));
         }
 
         if (storedToken.IsRevoked)
@@ -267,8 +268,8 @@ public class AuthService : IAuthService
         var newRefreshTokenEntity = new RefreshToken
         {
             Token = newRefreshTokenString,
-            UserId = userId,
-            ExpiryDate = _dateTimeProvider.UtcNow.AddDays(7),
+            UserId = user.Id,
+            ExpiryDate = _dateTimeProvider.UtcNow.AddDays(_jwtSettings.RefreshTokenDurationInDays),
             IsRevoked = false
         };
 
@@ -291,6 +292,13 @@ public class AuthService : IAuthService
     {
         var exists = await _userManager.FindByEmailAsync(email) is not null;
         _logger.LogDebug("Email check: '{Email}' exists = {Exists}", email, exists);
+        return exists;
+    }
+
+    public async Task<bool> IsPhoneNumberExist(string phoneNumber)
+    {
+        var exists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
+        _logger.LogDebug("Phone number check: '{PhoneNumber}' exists = {Exists}", phoneNumber, exists);
         return exists;
     }
 

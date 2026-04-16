@@ -19,7 +19,6 @@ namespace Inventory.API.Filter.Handlers
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, StatusRequirement requirement)
         {
-            var isAuth = context.User.Identity?.IsAuthenticated;
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
@@ -31,9 +30,12 @@ namespace Inventory.API.Filter.Handlers
             if (!userStatusResult.IsSuccess)
                 return;
 
-            if (userStatusResult.Value == requirement.RequiredStatus.ToString())
+            if (Enum.TryParse<AccountStatus>(userStatusResult.Value, out var status))
             {
-                context.Succeed(requirement);
+                if (requirement.AllowedStatuses.Contains(status))
+                {
+                    context.Succeed(requirement);
+                }
             }
         }
     }

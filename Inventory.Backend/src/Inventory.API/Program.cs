@@ -4,6 +4,7 @@ using Inventory.API.Filter.Handlers;
 using Inventory.API.Filter.Requirements;
 using Inventory.API.Middleware;
 using Inventory.API.Middlewares;
+using Inventory.API.Settings;
 using Inventory.Application;
 using Inventory.Application.Mappings;
 using Inventory.Domain.Entities.Users;
@@ -78,6 +79,8 @@ namespace Inventory.API
                 // Add Application and Infrastructure services
                 builder.Services.AddApplication();
                 builder.Services.AddInfrastructure(builder.Configuration);
+                builder.Services.Configure<RefreshTokenCookieSettings>(
+                    builder.Configuration.GetSection(RefreshTokenCookieSettings.SectionName));
 
                 builder.Services.AddScoped<IAuthorizationHandler, StatusHandler>();
 
@@ -86,8 +89,10 @@ namespace Inventory.API
                     options.AddPolicy("Active", policy =>
                         policy.Requirements.Add(new StatusRequirement(AccountStatus.Active)));
 
-                    options.AddPolicy("PendingIdentity", policy =>
-                        policy.Requirements.Add(new StatusRequirement(AccountStatus.PendingIdentityUpload)));
+                    options.AddPolicy("PendingIdentityUploadOrActive", policy =>
+                        policy.Requirements.Add(new StatusRequirement(
+                            AccountStatus.PendingIdentityUpload,
+                            AccountStatus.Active)));
                 });
 
                 // Configure Request Localization
@@ -133,19 +138,6 @@ namespace Inventory.API
                 app.UseRequestLocalization();
 
                 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
-
-                app.Use(async (context, next) =>
-                {
-                    using (LogContext.PushProperty("RequestId", context.TraceIdentifier))
-                    using (LogContext.PushProperty("RequestPath", context.Request.Path))
-                    using (LogContext.PushProperty("Culture", CultureInfo.CurrentCulture.Name))
-                    using (LogContext.PushProperty("UICulture", CultureInfo.CurrentUICulture.Name))
-                    {
-                        Log.Information("Request Culture: {Culture}, UI Culture: {UICulture}, Accept-Language: {AcceptLanguage}",
-                            CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name, context.Request.Headers["Accept-Language"]);
-                        await next();
-                    }
-                });
 
                 app.UseHttpsRedirection();
 

@@ -27,6 +27,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        modelBuilder.Entity<Supplier>().HasQueryFilter(supplier => !supplier.IsDeleted);
+
+        modelBuilder.Entity<SupplierNotes>()
+               .HasOne(x => x.Supplier)
+               .WithMany(x => x.SupplierNotes)
+               .IsRequired(false);
+
+
 
     }
 }

@@ -17,7 +17,7 @@ namespace Inventory.API.Controllers
             _userService = userService;
         }
 
-        [Authorize(Policy = "PendingIdentityUpload, Active")]
+        [Authorize(Policy = "PendingIdentityUploadOrActive")]
         [HttpPost("identity-image")]
         public async Task<IActionResult> UploadIdentityImage([FromForm] UploadIdentityImgDto uploadIdentity)
         {
@@ -26,11 +26,19 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet("{userId}/status")]
-        public async Task<IActionResult> GetUserStatus(string userId)
+        [HttpGet("status")]
+        public async Task<IActionResult> GetUserStatus()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _userService.GetUserStatusAsync(userId);
+            return HandleResult(result);
+        }
+
+        [HttpGet("rejection-reason")]
+        public async Task<IActionResult> GetRejectionReason()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _userService.GetIdentityRejectionReasonAsync(userId);
             return HandleResult(result);
         }
     }

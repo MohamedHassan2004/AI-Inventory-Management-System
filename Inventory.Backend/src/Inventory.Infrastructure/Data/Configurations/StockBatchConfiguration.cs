@@ -32,6 +32,7 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.HasOne(sb => sb.Supplier)
                 .WithMany()
                 .HasForeignKey(sb => sb.SupplierId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -27,7 +27,7 @@ namespace Inventory.Infrastructure.Data
         public static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
         {
             var defaultUser = new ApplicationUser(
-                userName: "super.admin@pos.com",
+                userName: "super_admin",
                 fullName: "System Super Admin",
                 email: "super.admin@pos.com",
                 phoneNumber: "0123456789"

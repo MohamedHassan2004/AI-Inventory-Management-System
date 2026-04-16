@@ -15,6 +15,12 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.Property(u => u.IdentityImgUrl)
                 .HasMaxLength(500);
 
+            builder.Property(u => u.PhoneNumber)
+                 .IsRequired();
+
+            builder.HasIndex(u => u.PhoneNumber)
+                .IsUnique();
+
             builder.Property(u => u.RejectionReason)
                 .HasMaxLength(500);
 

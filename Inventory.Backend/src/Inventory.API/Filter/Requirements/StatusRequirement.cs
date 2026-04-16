@@ -5,11 +5,11 @@ namespace Inventory.API.Filter.Requirements
 {
     public class StatusRequirement : IAuthorizationRequirement
     {
-        public AccountStatus RequiredStatus { get; }
+        public List<AccountStatus> AllowedStatuses { get; }
 
-        public StatusRequirement(AccountStatus status)
+        public StatusRequirement(params AccountStatus[] statuses)
         {
-            RequiredStatus = status;
+            AllowedStatuses = statuses.ToList();
         }
     }
 }
