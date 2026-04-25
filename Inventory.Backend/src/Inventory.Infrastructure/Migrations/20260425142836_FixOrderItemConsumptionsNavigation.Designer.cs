@@ -4,6 +4,7 @@ using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inventory.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425142836_FixOrderItemConsumptionsNavigation")]
+    partial class FixOrderItemConsumptionsNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,6 +206,33 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("SupplierId");
 
                     b.ToTable("StockBatches");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Entities.StockConsumption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("OrderItemId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("StockBatchId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderItemId");
+
+                    b.HasIndex("StockBatchId");
+
+                    b.ToTable("StockConsumptions");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.Supplier", b =>
@@ -593,6 +623,22 @@ namespace Inventory.Infrastructure.Migrations
                     b.Navigation("Supplier");
                 });
 
+            modelBuilder.Entity("Inventory.Domain.Entities.StockConsumption", b =>
+                {
+                    b.HasOne("Inventory.Domain.Entities.OrderItem", null)
+                        .WithMany("Consumptions")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Inventory.Domain.Entities.StockBatch", "Batch")
+                        .WithMany()
+                        .HasForeignKey("StockBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+                });
+
             modelBuilder.Entity("Inventory.Domain.Entities.SupplierNotes", b =>
                 {
                     b.HasOne("Inventory.Domain.Entities.Supplier", "Supplier")
@@ -672,6 +718,11 @@ namespace Inventory.Infrastructure.Migrations
             modelBuilder.Entity("Inventory.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Entities.OrderItem", b =>
+                {
+                    b.Navigation("Consumptions");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.Product", b =>

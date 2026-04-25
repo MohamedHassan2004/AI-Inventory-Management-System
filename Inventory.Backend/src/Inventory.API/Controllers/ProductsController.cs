@@ -80,5 +80,21 @@ namespace Inventory.API.Controllers
             var result = await _productService.DeleteAsync(id, cancellationToken);
             return HandleResult(result);
         }
+
+        // GET: api/products/search?q=pepsi
+        // Searches by product name (Full-Text Search) or exact SKU match.
+        // Intended for the cashier product-picker; returns lightweight lookup results.
+        [HttpGet("search")]
+        [Authorize(Roles = "Cashier,Admin")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string q,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+                return BadRequest(new { error = "Search term 'q' is required." });
+
+            var result = await _productService.SearchAsync(q, cancellationToken);
+            return HandleResult(result);
+        }
     }
 }

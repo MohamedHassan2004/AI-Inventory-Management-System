@@ -19,16 +19,6 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey(i => i.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
-            builder.HasMany("_consumptions")
-                .WithOne()
-                .HasForeignKey("OrderItemId")
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Navigation("_consumptions")
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-
-
         }
     }
 }

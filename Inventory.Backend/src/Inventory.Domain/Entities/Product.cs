@@ -105,17 +105,14 @@ namespace Inventory.Domain.Entities
 
         /// <summary>
         /// Reduces stock using FEFO (First Expire First Out) strategy.
-        /// Returns the list of consumptions for audit and rollback purposes.
         /// </summary>
-        public IReadOnlyList<StockConsumption> ReduceStock(decimal quantityToReduce)
+        public void ReduceStock(decimal quantityToReduce)
         {
             if (quantityToReduce <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantityToReduce));
 
             if (quantityToReduce > StockQuantity)
                 throw new InsufficientStockException(Name, quantityToReduce, StockQuantity);
-
-            var consumptions = new List<StockConsumption>();
 
             var availableBatches = _batches
                 .Where(b => b.HasStock && !b.IsExpired)
@@ -129,15 +126,11 @@ namespace Inventory.Domain.Entities
 
                 batch.Consume(taken);
                 quantityToReduce -= taken;
-
-                consumptions.Add(new StockConsumption(batch, taken));
             }
 
             // Fallback: if expired batches needed to fulfil (shouldn't happen in healthy stock)
             if (quantityToReduce > 0)
                 throw new InsufficientStockException(Name, quantityToReduce, 0);
-
-            return consumptions.AsReadOnly();
         }
     }
 }

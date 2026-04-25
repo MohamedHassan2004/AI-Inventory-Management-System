@@ -27,9 +27,6 @@ namespace Inventory.Infrastructure.Repositories
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.Batches)
-                .Include(o => o.Items)
-                    .ThenInclude(i => i.Consumptions)
-                        .ThenInclude(c => c.Batch)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }

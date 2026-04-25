@@ -3,8 +3,6 @@ using Inventory.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Inventory.API.Controllers
 {
@@ -23,47 +21,24 @@ namespace Inventory.API.Controllers
             _orderQueryService = orderQueryService;
         }
 
-        // POST: api/orders
-        [HttpPost]
-        public async Task<IActionResult> Create(
+        // ─────────────────────────────────────────────────────────────
+        //  SUBMIT  — the primary cashier action
+        // ─────────────────────────────────────────────────────────────
+
+        // POST: api/orders/submit
+        [HttpPost("submit")]
+        public async Task<IActionResult> Submit(
+            [FromBody] SubmitOrderDto dto,
             CancellationToken cancellationToken)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            var result = await _orderService.CreateAsync(userId, cancellationToken);
+            var result = await _orderService.SubmitAsync(userId, dto, cancellationToken);
             return HandleResult(result);
         }
 
-        // PATCH: api/orders/{id}/discount/{discountPercentage}
-        [HttpPatch("{id}/discount/{discountPercentage}")]
-        public async Task<IActionResult> ApplyDiscount(
-            int id,
-            decimal discountPercentage,
-            CancellationToken cancellationToken)
-        {
-            var result = await _orderService.ApplyDiscountAsync(id, discountPercentage, cancellationToken);
-            return HandleResult(result);
-        }
-
-        // PATCH: api/orders/{id}/complete
-        [HttpPatch("{id}/complete")]
-        public async Task<IActionResult> Complete(
-            int id,
-            [FromBody] CompleteOrderDto dto,
-            CancellationToken cancellationToken)
-        {
-            var result = await _orderService.CompleteAsync(id, dto, cancellationToken);
-            return HandleResult(result);
-        }
-
-        // PATCH: api/orders/{id}/cancel
-        [HttpPatch("{id}/cancel")]
-        public async Task<IActionResult> Cancel(
-            int id,
-            CancellationToken cancellationToken)
-        {
-            var result = await _orderService.CancelAsync(id, cancellationToken);
-            return HandleResult(result);
-        }
+        // ─────────────────────────────────────────────────────────────
+        //  QUERIES
+        // ─────────────────────────────────────────────────────────────
 
         // GET: api/orders/{id}
         [HttpGet("{id}")]
@@ -75,13 +50,23 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
-        // GET: api/orders?status=Pending&sortBy=FinalTotal&sortDescending=true&page=1&pageSize=20
+        // GET: api/orders?status=Completed&sortBy=FinalTotal&page=1&pageSize=20
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] OrderFilter filter,
             CancellationToken cancellationToken)
         {
             var result = await _orderQueryService.GetAllAsync(filter, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // GET: api/orders/{orderId}/items
+        [HttpGet("{orderId}/items")]
+        public async Task<IActionResult> GetItemsByOrder(
+            int orderId,
+            CancellationToken cancellationToken)
+        {
+            var result = await _orderQueryService.GetItemsByOrderIdAsync(orderId, cancellationToken);
             return HandleResult(result);
         }
     }
