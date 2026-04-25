@@ -261,5 +261,22 @@ namespace Inventory.Application.Services
             _logger.LogInformation("Product deleted successfully with Id: {Id}", id);
             return Result.Success();
         }
+
+        public async Task<Result<IEnumerable<ProductLookupDto>>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Searching products with term: {SearchTerm}", searchTerm);
+
+            var products = await _productRepository.SearchAsync(searchTerm, cancellationToken);
+
+            var results = products.Select(p => new ProductLookupDto(
+                p.Id,
+                p.SKU,
+                p.Name,
+                p.SellingPrice,
+                p.StockQuantity
+            ));
+
+            return Result.Success(results);
+        }
     }
 }

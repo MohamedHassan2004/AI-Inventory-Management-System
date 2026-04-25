@@ -17,7 +17,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<StockBatch> StockBatches { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
-    public DbSet<StockConsumption> StockConsumptions { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

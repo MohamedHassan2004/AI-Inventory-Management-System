@@ -30,7 +30,7 @@ namespace Inventory.Domain.Entities
 
         private Order() { }
 
-        public Order(string cashierId)
+        private Order(string cashierId)
         {
             CashierId = cashierId ?? throw new ArgumentNullException(nameof(cashierId));
             OrderDate = DateTime.UtcNow;
@@ -38,72 +38,30 @@ namespace Inventory.Domain.Entities
             Type = OrderType.InStore;
         }
 
-        private void EnsureEditable()
+        public static Order Submit(
+            string cashierId,
+            IReadOnlyList<(Product product, decimal quantity)> items,
+            PaymentMethod paymentMethod,
+            OrderType orderType,
+            decimal discountPercentage)
         {
-            if (Status != OrderStatus.Pending)
-                throw new OrderNotEditableException(Status);
-        }
-
-        public void AddItem(Product product, decimal quantity)
-        {
-            EnsureEditable();
-
-            var existing = _items.FirstOrDefault(i => i.ProductId == product.Id);
-
-            if (existing != null)
-                existing.AddQuantity(quantity);
-            else
-                _items.Add(new OrderItem(product, quantity));
-
-            Recalculate();
-        }
-
-        public void RemoveItem(int itemId)
-        {
-            EnsureEditable();
-
-            var item = _items.FirstOrDefault(i => i.Id == itemId)
-                ?? throw new OrderItemNotFoundException(itemId);
-
-            item.Rollback();
-            _items.Remove(item);
-
-            Recalculate();
-        }
-
-        public void UpdateQuantity(int itemId, decimal quantity)
-        {
-            EnsureEditable();
-
-            var item = _items.FirstOrDefault(i => i.Id == itemId)
-                ?? throw new OrderItemNotFoundException(itemId);
-
-            item.UpdateQuantity(quantity);
-
-            Recalculate();
-        }
-
-        public void Complete(PaymentMethod method, OrderType type)
-        {
-            EnsureEditable();
-
-            if (!_items.Any())
+            if (items == null || !items.Any())
                 throw new EmptyOrderException();
 
-            PaymentMethod = method;
-            Type = type;
-            Status = OrderStatus.Completed;
-        }
+            var order = new Order(cashierId);
 
-        public void Cancel()
-        {
-            if (Status != OrderStatus.Pending)
-                throw new OrderNotEditableException(Status);
+            foreach (var (product, quantity) in items)
+            {
+                product.ReduceStock(quantity);
+                order._items.Add(new OrderItem(product, quantity));
+            }
 
-            foreach (var item in _items)
-                item.Rollback();
+            order.PaymentMethod = paymentMethod;
+            order.Type = orderType;
+            order.ApplyDiscount(discountPercentage);
+            order.Status = OrderStatus.Completed;
 
-            Status = OrderStatus.Cancelled;
+            return order;
         }
 
         public void ApplyDiscount(decimal percentage)

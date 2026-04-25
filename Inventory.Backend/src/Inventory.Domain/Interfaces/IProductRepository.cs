@@ -15,5 +15,11 @@ namespace Inventory.Domain.Interfaces
         Task<IEnumerable<Product>> GetWithBatchesListAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetAllWithBatchesAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetLowStockProductsAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Full-text search by product name (FREETEXT) or exact SKU match.
+        /// Requires a Full-Text Index on Products(Name, SKU).
+        /// </summary>
+        Task<IEnumerable<Product>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default);
     }
 }
