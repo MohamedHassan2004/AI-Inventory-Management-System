@@ -92,10 +92,11 @@ namespace Inventory.API
                     options.AddPolicy("Active", policy =>
                         policy.Requirements.Add(new StatusRequirement(AccountStatus.Active)));
 
-                    options.AddPolicy("PendingIdentityUploadOrActive", policy =>
+                    options.AddPolicy("UploadIdentity", policy =>
                         policy.Requirements.Add(new StatusRequirement(
                             AccountStatus.PendingIdentityUpload,
-                            AccountStatus.Active)));
+                            AccountStatus.Active,
+                            AccountStatus.Rejected)));
                 });
 
                 // Configure Request Localization
@@ -151,6 +152,8 @@ namespace Inventory.API
                 app.UseHttpsRedirection();
 
                 app.UseCors("AllowFrontend");
+
+                app.UseStaticFiles();
 
                 app.UseRateLimiter();
                 app.UseRateLimitHeaders();

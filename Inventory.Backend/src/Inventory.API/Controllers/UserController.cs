@@ -17,7 +17,7 @@ namespace Inventory.API.Controllers
             _userService = userService;
         }
 
-        [Authorize(Policy = "PendingIdentityUploadOrActive")]
+        [Authorize(Policy = "UploadIdentity")]
         [HttpPost("identity-image")]
         public async Task<IActionResult> UploadIdentityImage([FromForm] UploadIdentityImgDto uploadIdentity)
         {
