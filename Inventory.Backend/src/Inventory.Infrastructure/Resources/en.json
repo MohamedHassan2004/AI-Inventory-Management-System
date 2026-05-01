@@ -102,6 +102,10 @@
   "BatchNotFound": "Stock batch not found.",
 
   "OrderNotFound": "Order not found",
+  "PurchaseOrderNotFound": "Purchase order not found.",
+  "EmptyPurchaseOrder": "Cannot submit an empty purchase order.",
+  "SupplierNotFound": "Supplier not found.",
+  "ProductNotFound": "One or more products were not found.",
   "InvalidOrder": "The provided order data is invalid",
   "InvalidOrderItem": "Invalid order item",
   "InvalidDiscount": "Discount must be within the allowed range",
