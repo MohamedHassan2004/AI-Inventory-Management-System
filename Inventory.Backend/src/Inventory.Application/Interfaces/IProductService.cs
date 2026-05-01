@@ -17,9 +17,7 @@ namespace Inventory.Application.Interfaces
         Task<Result<ProductResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Full-text search by name (FREETEXT) or exact SKU — for the cashier product picker.
-        /// </summary>
+        
         Task<Result<IEnumerable<ProductLookupDto>>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default);
     }
 }

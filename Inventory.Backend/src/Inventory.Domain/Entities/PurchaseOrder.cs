@@ -37,19 +37,14 @@ namespace Inventory.Domain.Entities
         // Factory
         // ──────────────────────────────────────────
 
-        /// <summary>
-        /// Creates a new pending purchase order for the given supplier.
-        /// </summary>
+        
         public static PurchaseOrder Create(int supplierId) => new PurchaseOrder(supplierId);
 
         // ──────────────────────────────────────────
         // Mutators
         // ──────────────────────────────────────────
 
-        /// <summary>
-        /// Adds a single item to the purchase order and immediately updates stock via FEFO-aware batching.
-        /// Recalculates the running total after each item.
-        /// </summary>
+        
         public void AddItem(Product product, decimal quantity, decimal unitCost, DateTime expiryDate)
         {
             if (product is null) throw new ArgumentNullException(nameof(product));
@@ -63,9 +58,7 @@ namespace Inventory.Domain.Entities
             Recalculate();
         }
 
-        /// <summary>
-        /// Marks the order as Completed. Called once all items have been added.
-        /// </summary>
+        
         public void Complete()
         {
             if (!_items.Any())

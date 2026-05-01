@@ -13,7 +13,7 @@ namespace Inventory.Application.Interfaces
         Task<Result<CategoryResponseDto>> UpdateAsync(int id, UpdateCategoryDto dto, CancellationToken cancellationToken = default);
         Task<Result<CategoryResponseDto>> CreateAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default);
 
-        // ✅ Soft Delete
+        
         Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default);
     }
 }

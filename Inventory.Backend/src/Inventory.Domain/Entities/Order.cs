@@ -4,16 +4,7 @@ using Inventory.Domain.Exceptions;
 
 namespace Inventory.Domain.Entities
 {
-    /// <summary>
-    /// The Order aggregate root.
-    ///
-    /// Lifecycle:
-    ///   CreateDraft()  →  AddItem() / RemoveItem() (repeatable)  →  Confirm()
-    ///
-    /// Concurrency: RowVersion is a SQL ROWVERSION token. Any stale-write attempt
-    /// will cause EF Core to throw DbUpdateConcurrencyException, which callers must
-    /// catch and surface to the user as a 409 Conflict.
-    /// </summary>
+    
     public class Order
     {
         // ─── Constants ────────────────────────────────────────────────────────────
@@ -25,16 +16,10 @@ namespace Inventory.Domain.Entities
         public int Id { get; private set; }
         public DateTime OrderDate { get; private set; }
 
-        /// <summary>
-        /// Optimistic concurrency token. EF Core maps this to a SQL ROWVERSION
-        /// column that is auto-incremented by the DB on every UPDATE.
-        /// </summary>
+        
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
-        /// <summary>
-        /// Drafts expire after <see cref="DraftExpiryHours"/> hours.
-        /// Null for confirmed/cancelled orders.
-        /// </summary>
+        
         public DateTime? ExpiresAt { get; private set; }
 
         // ─── Ownership ────────────────────────────────────────────────────────────
@@ -73,10 +58,7 @@ namespace Inventory.Domain.Entities
         //  FACTORY — Draft Workflow
         // =========================================================================
 
-        /// <summary>
-        /// Creates a new empty Draft order. No items are added yet.
-        /// The order expires in <see cref="DraftExpiryHours"/> hours.
-        /// </summary>
+        
         public static Order CreateDraft(string cashierId, OrderType orderType)
         {
             if (string.IsNullOrWhiteSpace(cashierId))
@@ -96,11 +78,7 @@ namespace Inventory.Domain.Entities
         //  DRAFT MUTATIONS
         // =========================================================================
 
-        /// <summary>
-        /// Adds a product to the draft or updates its quantity if it already exists.
-        /// Price is snapshotted from Product.SellingPrice at this moment (backend SSOT).
-        /// No stock deduction occurs here — that is deferred to Confirm().
-        /// </summary>
+        
         public void AddItem(Product product, decimal quantity, decimal discountPercentage = 0)
         {
             EnsureIsDraft();
@@ -121,9 +99,7 @@ namespace Inventory.Domain.Entities
             ApplyDiscount(discountPercentage);
         }
 
-        /// <summary>
-        /// Removes a line item from the draft by product ID.
-        /// </summary>
+        
         public void RemoveItem(int productId)
         {
             EnsureIsDraft();
@@ -135,9 +111,7 @@ namespace Inventory.Domain.Entities
             Recalculate();
         }
 
-        /// <summary>
-        /// Updates the order-level discount and recalculates all totals.
-        /// </summary>
+        
         public void ApplyDiscount(decimal percentage)
         {
             if (percentage < 0 || percentage > MaxDiscountPercentage)
@@ -151,11 +125,7 @@ namespace Inventory.Domain.Entities
         //  CONFIRMATION
         // =========================================================================
 
-        /// <summary>
-        /// Transitions the Draft to Completed.
-        /// This is the ONLY point where stock is permanently deducted.
-        /// Must be called inside a database transaction.
-        /// </summary>
+        
         public void Confirm(PaymentMethod paymentMethod)
         {
             EnsureIsDraft();
@@ -175,9 +145,7 @@ namespace Inventory.Domain.Entities
             ExpiresAt = null; // no longer a draft
         }
 
-        /// <summary>
-        /// Cancels the draft. Idempotent if already cancelled.
-        /// </summary>
+        
         public void Cancel()
         {
             if (Status == OrderStatus.Cancelled) return;
@@ -193,10 +161,7 @@ namespace Inventory.Domain.Entities
         //  LEGACY — Single-Shot Submit (kept for backward compatibility)
         // =========================================================================
 
-        /// <summary>
-        /// Original "God Method" — creates and immediately completes an order in one shot.
-        /// Kept for backward compatibility with the old frontend submission workflow.
-        /// </summary>
+        
         public static Order Submit(
             string cashierId,
             IReadOnlyList<(Product product, decimal quantity)> items,

@@ -254,7 +254,7 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            // In future maybe soft delete, but using generic Delete for now as Product has no IsDeleted
+            
             _productRepository.Delete(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

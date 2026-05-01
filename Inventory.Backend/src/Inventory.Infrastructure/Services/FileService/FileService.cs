@@ -30,7 +30,7 @@ public class FileService : IFileService
     {
         try
         {
-            // Validate file size
+            
             var maxSizeInBytes = _options.MaxFileSizeInMB * 1024 * 1024;
             if (file.Length > maxSizeInBytes)
             {
@@ -40,7 +40,7 @@ public class FileService : IFileService
                     ErrorType.Validation));
             }
 
-            // Validate file extension
+            
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!_options.AllowedExtensions.Contains(extension))
             {
@@ -50,7 +50,7 @@ public class FileService : IFileService
                     ErrorType.Validation));
             }
 
-            // Validate MIME type
+            
             if (!_options.AllowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
             {
                 return Result.Failure<string>(new Error(
@@ -59,7 +59,7 @@ public class FileService : IFileService
                     ErrorType.Validation));
             }
 
-            // Sanitize and validate folder path to prevent path traversal
+            
             var sanitizedFolderPath = SanitizePath(folderPath);
             if (sanitizedFolderPath == null)
             {
@@ -69,15 +69,15 @@ public class FileService : IFileService
                     ErrorType.Validation));
             }
 
-            // Create upload directory
+            
             var uploadsFolder = Path.Combine(_env.WebRootPath, _options.UploadFolder, sanitizedFolderPath);
             Directory.CreateDirectory(uploadsFolder);
 
-            // Generate unique filename
+            
             var fileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
-            // Save file
+            
             await using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream);
@@ -85,7 +85,7 @@ public class FileService : IFileService
 
             _logger.LogInformation("File uploaded successfully: {Path}", filePath);
 
-            // Return relative path with forward slashes for web compatibility
+            
             var relativePath = Path.Combine(_options.UploadFolder, sanitizedFolderPath, fileName)
                 .Replace(Path.DirectorySeparatorChar, '/');
 
@@ -107,7 +107,7 @@ public class FileService : IFileService
 
         var fullPath = GetAbsolutePath(relativePath);
 
-        // Validate path is within allowed directory
+        
         var uploadsRoot = Path.Combine(_env.WebRootPath, _options.UploadFolder);
         if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
         {

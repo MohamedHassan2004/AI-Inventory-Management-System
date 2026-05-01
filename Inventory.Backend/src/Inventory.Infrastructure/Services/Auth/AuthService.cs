@@ -87,7 +87,7 @@ public class AuthService : IAuthService
         var accessToken = GenerateAccessToken(claims);
         var refreshTokenString = GenerateRefreshToken();
 
-        // Revoke any existing refresh tokens for this user
+        
         var existingTokens = await _context.RefreshTokens
             .Where(rt => rt.UserId == user.Id && !rt.IsRevoked)
             .ToListAsync();
@@ -97,7 +97,7 @@ public class AuthService : IAuthService
             existingToken.RevokeRefreshToken();
         }
 
-        // Save new refresh token to database
+        
         var newRefreshToken = new RefreshToken
         {
             Token = refreshTokenString,
@@ -226,7 +226,7 @@ public class AuthService : IAuthService
     {
         _logger.LogDebug("Token refresh requested using refresh token");
 
-        // Validate the provided refresh token against the database
+        
         var storedToken = await _context.RefreshTokens
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
@@ -256,15 +256,15 @@ public class AuthService : IAuthService
             return Result.Failure<TokenDto>(new Error("INVALID_REFRESH_TOKEN", _localizationService.GetMessage("RefreshTokenExpired"), ErrorType.Unauthorized));
         }
 
-        // Revoke the old refresh token
+        
         storedToken.RevokeRefreshToken();
 
-        // Generate new tokens
+        
         var claims = await GenerateUserClaimsAsync(user);
         var newAccessToken = GenerateAccessToken(claims);
         var newRefreshTokenString = GenerateRefreshToken();
 
-        // Save new refresh token to database
+        
         var newRefreshTokenEntity = new RefreshToken
         {
             Token = newRefreshTokenString,

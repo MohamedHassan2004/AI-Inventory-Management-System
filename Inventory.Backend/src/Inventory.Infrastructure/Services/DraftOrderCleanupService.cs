@@ -10,9 +10,9 @@ namespace Inventory.Infrastructure.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<DraftOrderCleanupService> _logger;
 
-        // Run every 1 hour
+        
         private static readonly TimeSpan Interval = TimeSpan.FromHours(1);
-        // Expire drafts older than 12 hours
+        
         private static readonly TimeSpan ExpirationThreshold = TimeSpan.FromHours(12);
 
         public DraftOrderCleanupService(IServiceProvider serviceProvider, ILogger<DraftOrderCleanupService> logger)

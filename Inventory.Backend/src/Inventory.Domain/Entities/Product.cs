@@ -94,18 +94,14 @@ namespace Inventory.Domain.Entities
         // Stock Management
         // ──────────────────────────────────────────
 
-        /// <summary>
-        /// Adds a new stock batch for this product (FEFO-aware).
-        /// </summary>
+        
         public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
             var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
             _batches.Add(batch);
         }
 
-        /// <summary>
-        /// Reduces stock using FEFO (First Expire First Out) strategy.
-        /// </summary>
+        
         public void ReduceStock(decimal quantityToReduce)
         {
             if (quantityToReduce <= 0)
