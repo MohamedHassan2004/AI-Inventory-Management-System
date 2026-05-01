@@ -76,6 +76,9 @@ namespace Inventory.Infrastructure.Queries
             OrderFilter filter,
             CancellationToken cancellationToken = default)
         {
+            filter.Page = Math.Max(1, filter.Page);
+            filter.PageSize = filter.PageSize <= 0 ? 20 : filter.PageSize;
+            
             var query = _context.Orders.AsNoTracking();
 
             // ── apply filters ──────────────────────────────────────

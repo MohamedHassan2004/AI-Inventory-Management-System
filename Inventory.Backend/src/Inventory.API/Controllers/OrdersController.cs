@@ -37,6 +37,68 @@ namespace Inventory.API.Controllers
         }
 
         // ─────────────────────────────────────────────────────────────
+        //  DRAFT WORKFLOW
+        // ─────────────────────────────────────────────────────────────
+
+        // POST: api/orders/draft
+        [HttpPost("draft")]
+        public async Task<IActionResult> CreateDraft(
+            [FromBody] CreateDraftOrderDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.CreateDraftAsync(userId, dto, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // POST: api/orders/{id}/items
+        [HttpPost("{id}/items")]
+        public async Task<IActionResult> AddItem(
+            int id,
+            [FromBody] AddOrderItemDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.AddItemAsync(userId, id, dto, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // DELETE: api/orders/{id}/items/{productId}
+        [HttpDelete("{id}/items/{productId}")]
+        public async Task<IActionResult> RemoveItem(
+            int id,
+            int productId,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.RemoveItemAsync(userId, id, productId, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // POST: api/orders/{id}/confirm
+        [HttpPost("{id}/confirm")]
+        public async Task<IActionResult> ConfirmOrder(
+            int id,
+            [FromBody] ConfirmOrderDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.ConfirmOrderAsync(userId, id, dto, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // DELETE: api/orders/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> CancelDraft(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.CancelDraftAsync(userId, id, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // ─────────────────────────────────────────────────────────────
         //  QUERIES
         // ─────────────────────────────────────────────────────────────
 

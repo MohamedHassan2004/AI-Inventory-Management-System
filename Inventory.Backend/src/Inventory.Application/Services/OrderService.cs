@@ -6,6 +6,8 @@ using Inventory.Domain.Shared;
 using Inventory.Domain.Exceptions;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Inventory.Domain.Enums;
 
 namespace Inventory.Application.Services
 {
@@ -38,7 +40,7 @@ namespace Inventory.Application.Services
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  SUBMIT — single-transaction order creation
+        //  SUBMIT — single-transaction order creation (LEGACY)
         // ─────────────────────────────────────────────────────────────
 
         public async Task<Result<OrderResponseDto>> SubmitAsync(
@@ -113,6 +115,160 @@ namespace Inventory.Application.Services
 
             var response = _mapper.Map<OrderResponseDto>(order);
             return Result.Success(response);
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        //  DRAFT WORKFLOW
+        // ─────────────────────────────────────────────────────────────
+
+        public async Task<Result<OrderResponseDto>> CreateDraftAsync(string cashierId, CreateDraftOrderDto dto, CancellationToken cancellationToken = default)
+        {
+            var order = Order.CreateDraft(cashierId, dto.OrderType);
+            
+            await _orderRepository.AddAsync(order, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var response = _mapper.Map<OrderResponseDto>(order);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<OrderResponseDto>> AddItemAsync(string cashierId, int orderId, AddOrderItemDto dto, CancellationToken cancellationToken = default)
+        {
+            var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
+            if (order == null || order.Status != OrderStatus.Draft)
+            {
+                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+            }
+
+            var product = await _productRepository.GetByIdAsync(dto.ProductId, cancellationToken);
+            if (product == null)
+            {
+                 return Result.Failure<OrderResponseDto>(new Error("PRODUCT_NOT_FOUND", "Product not found.", ErrorType.NotFound));
+            }
+
+            try
+            {
+                order.AddItem(product, dto.Quantity, dto.DiscountPercentage);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrency conflict while adding item to order {OrderId}", orderId);
+                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidDiscountException || ex is InvalidOperationException)
+            {
+                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+            }
+
+            var response = _mapper.Map<OrderResponseDto>(order);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<OrderResponseDto>> RemoveItemAsync(string cashierId, int orderId, int productId, CancellationToken cancellationToken = default)
+        {
+            var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
+            if (order == null || order.Status != OrderStatus.Draft)
+            {
+                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+            }
+
+            try
+            {
+                order.RemoveItem(productId);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrency conflict while removing item from order {OrderId}", orderId);
+                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (InvalidOperationException ex)
+            {
+                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+            }
+
+            var response = _mapper.Map<OrderResponseDto>(order);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<OrderResponseDto>> ConfirmOrderAsync(string cashierId, int orderId, ConfirmOrderDto dto, CancellationToken cancellationToken = default)
+        {
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
+                if (order == null || order.Status != OrderStatus.Draft)
+                {
+                    await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                    return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+                }
+
+                // Optimistic Concurrency check using RowVersion
+                if (!string.IsNullOrEmpty(dto.RowVersion))
+                {
+                    var clientRowVersion = Convert.FromBase64String(dto.RowVersion);
+                    if (!clientRowVersion.SequenceEqual(order.RowVersion))
+                    {
+                        await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                        return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                    }
+                }
+
+                order.Confirm(dto.PaymentMethod);
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+                var response = _mapper.Map<OrderResponseDto>(order);
+                return Result.Success(response);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                 _logger.LogWarning("Concurrency conflict while confirming order {OrderId}", orderId);
+                 return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (InsufficientStockException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                _logger.LogWarning(ex, "Insufficient stock while confirming order {OrderId}", orderId);
+                return Result.Failure<OrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
+            }
+            catch (EmptyOrderException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                _logger.LogWarning(ex, "Attempted to confirm empty order {OrderId}", orderId);
+                return Result.Failure<OrderResponseDto>(new Error("EMPTY_ORDER", "Order has no items.", ErrorType.Validation));
+            }
+            catch (Exception)
+            {
+                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                 throw;
+            }
+        }
+
+        public async Task<Result> CancelDraftAsync(string cashierId, int orderId, CancellationToken cancellationToken = default)
+        {
+            var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
+            if (order == null || order.Status != OrderStatus.Draft)
+            {
+                return Result.Failure(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+            }
+
+            try
+            {
+                order.Cancel();
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+             catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrency conflict while cancelling order {OrderId}", orderId);
+                return Result.Failure(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+
+            return Result.Success();
         }
     }
 }

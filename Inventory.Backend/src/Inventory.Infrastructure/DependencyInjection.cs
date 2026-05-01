@@ -92,6 +92,7 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
         services.AddScoped<IPurchaseOrderQueryService, PurchaseOrderQueryService>();
 
+        services.AddHostedService<DraftOrderCleanupService>();
 
         return services;
     }

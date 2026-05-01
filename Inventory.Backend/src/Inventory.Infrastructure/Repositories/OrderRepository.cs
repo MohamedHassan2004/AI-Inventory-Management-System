@@ -30,5 +30,19 @@ namespace Inventory.Infrastructure.Repositories
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }
+
+        public async Task<Order?> GetDraftByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Draft, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Where(o => o.Status == Domain.Enums.OrderStatus.Draft && o.ExpiresAt < olderThan)
+                .ToListAsync(cancellationToken);
+        }
     }
 }
