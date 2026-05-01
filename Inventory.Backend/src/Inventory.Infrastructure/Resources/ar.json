@@ -43,6 +43,10 @@
   "InvalidMimeType": "نوع MIME '{0}' غير مسموح به",
   "InvalidPath": "مسار الملف غير صالح",
   "PathCannotBeEmpty": "لا يمكن أن يكون المسار فارغاً",
+  "PurchaseOrderNotFound": "لم يتم العثور على طلب الشراء.",
+  "EmptyPurchaseOrder": "لا يمكن إرسال طلب شراء فارغ.",
+  "SupplierNotFound": "لم يتم العثور على المورد.",
+  "ProductNotFound": "لم يتم العثور على منتج واحد أو أكثر.",
   "InvalidFolderPath": "مسار المجلد المقدم غير صالح",
 
   "InternalServerError": "حدث خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى لاحقاً.",
