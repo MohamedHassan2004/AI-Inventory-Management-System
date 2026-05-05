@@ -10,10 +10,13 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(i => i.Id);
 
+            builder.Property(i => i.RowVersion).IsRowVersion();
+
             builder.Property(i => i.UnitPrice).IsRequired().HasPrecision(18, 2);
 
             builder.Ignore(i => i.TotalPrice);
             builder.Property(i => i.Quantity).IsRequired().HasPrecision(18, 2);
+            builder.Property(i => i.ReturnedQuantity).IsRequired().HasPrecision(18, 2).HasDefaultValue(0m);
 
             builder.HasOne(i => i.Product)
                 .WithMany()

@@ -114,5 +114,15 @@
   "OrderNotEditable": "Only pending orders can be modified",
   "CannotCancelOrder": "Cannot cancel this order in its current status",
   "InsufficientStock": "Not enough stock available for the requested quantity",
-  "OrderItemNotFound": "Order item not found"
+  "OrderItemNotFound": "Order item not found",
+  "InvalidOrderId": "Invalid order ID",
+  "EmptyReturnOrder": "Return order must contain at least one item",
+  "InvalidOrderItemId": "Invalid order item ID",
+  "QuantityMustBeGreaterThanZero": "Quantity must be greater than zero",
+  "ExpiryDateMustBeFuture": "Expiry date must be in the future",
+  "InvalidSupplierId": "Invalid supplier ID",
+  "InvalidUnitCost": "Unit cost must be greater than or equal to 0",
+  "ReturnQuantityExceeded": "Returned quantity exceeds allowed amount",
+  "DuplicateReturnItem": "Cannot add the same item twice to a return",
+  "ReturnOrderNotFound": "Return order not found"
 }

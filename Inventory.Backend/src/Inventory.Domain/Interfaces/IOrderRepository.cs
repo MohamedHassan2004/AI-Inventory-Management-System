@@ -6,5 +6,6 @@ namespace Inventory.Domain.Interfaces
     {
         Task<Order?> GetOrderWithItemsAsync(int id, CancellationToken cancellationToken = default);
         Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetOrderForReturnAsync(int id, IEnumerable<int> orderItemIds, CancellationToken cancellationToken = default);
     }
 }

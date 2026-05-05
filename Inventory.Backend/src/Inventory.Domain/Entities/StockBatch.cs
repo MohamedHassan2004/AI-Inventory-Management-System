@@ -15,6 +15,8 @@ namespace Inventory.Domain.Entities
         public int ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
 
+        public byte[] RowVersion { get; private set; } = null!;
+
         // Required by EF Core
         private StockBatch() { }
 

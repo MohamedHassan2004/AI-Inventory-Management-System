@@ -121,5 +121,15 @@
   "OrderNotEditable": "يمكن تعديل الطلبات قيد الانتظار فقط",
   "CannotCancelOrder": "لا يمكن إلغاء هذا الطلب في حالته الحالية",
   "InsufficientStock": "الكمية المطلوبة غير متوفرة في المخزون",
-  "OrderItemNotFound": "عنصر الطلب غير موجود"
+  "OrderItemNotFound": "عنصر الطلب غير موجود",
+  "InvalidOrderId": "معرّف الطلب غير صالح",
+  "EmptyReturnOrder": "يجب أن يحتوي طلب الإرجاع على عنصر واحد على الأقل",
+  "InvalidOrderItemId": "معرّف عنصر الطلب غير صالح",
+  "QuantityMustBeGreaterThanZero": "يجب أن تكون الكمية أكبر من صفر",
+  "ExpiryDateMustBeFuture": "يجب أن يكون تاريخ الانتهاء في المستقبل",
+  "InvalidSupplierId": "معرّف المورد غير صالح",
+  "InvalidUnitCost": "يجب أن تكون تكلفة الوحدة أكبر من أو تساوي صفر",
+  "ReturnQuantityExceeded": "الكمية المرتجعة تتجاوز الكمية المسموح بها",
+  "DuplicateReturnItem": "لا يمكن إضافة نفس العنصر مرتين لطلب الإرجاع",
+  "ReturnOrderNotFound": "طلب الإرجاع غير موجود"
 }
