@@ -78,6 +78,7 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.True(_user.IsDeleted);
             Assert.Equal(expectedDateTime, _user.DeletedAt);
+            Assert.Equal(AccountStatus.Deleted, _user.AccountStatus);
         }
 
         #endregion
@@ -88,6 +89,7 @@ namespace Inventory.Domain.Test.Entities.Users
         {
             // Arrange
             var deletionTime = new DateTime(2026, 1, 1, 10, 0, 0);
+            var previousStatus = _user.PreviousAccountStatus;
             _dateTimeProviderMock.Setup(x => x.UtcNow).Returns(deletionTime);
             _user.MarkAsDeleted(_dateTimeProviderMock.Object);
             // Act
@@ -95,6 +97,8 @@ namespace Inventory.Domain.Test.Entities.Users
             // Assert
             Assert.False(_user.IsDeleted);
             Assert.Null(_user.DeletedAt);
+            Assert.NotEqual(AccountStatus.Deleted, _user.AccountStatus);
+            Assert.Equal(previousStatus, _user.AccountStatus);
         }
 
         #endregion
@@ -148,7 +152,32 @@ namespace Inventory.Domain.Test.Entities.Users
             // Act
             _user.PasswordChanged();
             // Assert
+            Assert.NotEqual(AccountStatus.PendingChangePassword, _user.AccountStatus);
         }
+
+        [Fact]
+        public void PasswordChanged_WhenPendingChangePassword_ShouldSetPendingIdentityUpload()
+        {
+            // Arrange
+            var user = new ApplicationUser("user1", "Full Name", "user1@email.com", "0123");
+            // Act
+            user.PasswordChanged();
+            // Assert
+            Assert.Equal(AccountStatus.PendingIdentityUpload, user.AccountStatus);
+        }
+
+        [Fact]
+        public void PasswordChanged_WhenNotPendingChangePassword_ShouldNotChangeStatus()
+        {
+            // Arrange
+            var user = new ApplicationUser("user1", "Full Name", "user1@email.com", "0123");
+            user.ApproveAccount();
+            // Act
+            user.PasswordChanged();
+            // Assert
+            Assert.Equal(AccountStatus.Active, user.AccountStatus);
+        }
+
         #endregion
 
         #region SetIdentityImg
@@ -163,6 +192,17 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal(newUrl, _user.IdentityImgUrl);
         }
 
+        [Fact]
+        public void SetIdentityImgUrl_ShouldSetPendingAdminReviewStatus()
+        {
+            // Arrange
+            var user = new ApplicationUser("user1", "Full Name", "user1@email.com", "0123");
+            // Act
+            user.SetIdentityImgUrl("img.png");
+            // Assert
+            Assert.Equal(AccountStatus.PendingAdminReview, user.AccountStatus);
+        }
+
         #endregion
 
         #region Account Status Management
@@ -172,6 +212,7 @@ namespace Inventory.Domain.Test.Entities.Users
             // Act
             _user.ApproveAccount();
             // Assert
+            Assert.Equal(AccountStatus.Active, _user.AccountStatus);
         }
 
         [Fact]
@@ -187,6 +228,31 @@ namespace Inventory.Domain.Test.Entities.Users
             Assert.Equal(rejectionReason, _user.RejectionReason);
         }
 
+        [Fact]
+        public void ApproveAccount_ShouldSetAccountStatusToActive()
+        {
+            // Arrange
+            var user = new ApplicationUser("user1", "Full Name", "user1@email.com", "0123");
+            // Act
+            user.ApproveAccount();
+            // Assert
+            Assert.Equal(AccountStatus.Active, user.AccountStatus);
+        }
+
+        [Fact]
+        public void Restore_ShouldRestorePreviousAccountStatus()
+        {
+            // Arrange
+            var user = new ApplicationUser("user1", "Full Name", "user1@email.com", "0123");
+            user.ApproveAccount();
+            var mockTime = new Mock<IDateTimeProvider>();
+            mockTime.Setup(x => x.UtcNow).Returns(DateTime.UtcNow);
+            user.MarkAsDeleted(mockTime.Object);
+            // Act
+            user.Restore();
+            // Assert
+            Assert.Equal(AccountStatus.Active, user.AccountStatus);
+        }
         #endregion
 
     }

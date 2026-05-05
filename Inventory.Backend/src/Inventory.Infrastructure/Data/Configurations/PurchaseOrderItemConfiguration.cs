@@ -10,6 +10,8 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(i => i.Id);
 
+            builder.HasQueryFilter(i => !i.PurchaseOrder.Supplier.IsDeleted);
+
             builder.Property(i => i.Quantity).HasPrecision(18, 3);
             builder.Property(i => i.UnitCost).HasPrecision(18, 2);
 

@@ -10,6 +10,8 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(o => o.Id);
 
+            builder.HasQueryFilter(o => !o.Supplier.IsDeleted);
+
             builder.Property(o => o.Status)
                 .IsRequired()
                 .HasConversion<string>();

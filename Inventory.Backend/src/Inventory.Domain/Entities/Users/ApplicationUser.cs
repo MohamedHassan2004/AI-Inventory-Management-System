@@ -42,6 +42,10 @@ namespace Inventory.Domain.Entities.Users
 
         public void MarkAsDeleted(IDateTimeProvider timeProvider)
         {
+            if(IsDeleted)
+            {
+                throw new InvalidOperationException("User is already marked as deleted.");
+            }
             IsDeleted = true;
             DeletedAt = timeProvider.UtcNow;
             PreviousAccountStatus = AccountStatus;
