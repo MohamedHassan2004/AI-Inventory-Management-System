@@ -37,13 +37,12 @@ namespace Inventory.Domain.Entities
         }
 
         
-        internal void UpdateQuantity(decimal newQuantity, decimal currentUnitPrice)
+        internal void UpdateQuantity(decimal newQuantity)
         {
             if (newQuantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(newQuantity));
 
             Quantity = newQuantity;
-            UnitPrice = currentUnitPrice; // re-snapshot price in case it changed
         }
     }
 }

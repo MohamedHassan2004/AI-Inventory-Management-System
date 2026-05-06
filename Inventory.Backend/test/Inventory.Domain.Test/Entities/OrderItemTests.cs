@@ -20,10 +20,9 @@ namespace Inventory.Domain.Test.Entities
         {
             var product = new Product("SKU", "Name", 15m, 1);
             var item = new OrderItem(1, product, 2);
-            item.UpdateQuantity(5, 20);
+            item.UpdateQuantity(5);
 
             Assert.Equal(5, item.Quantity);
-            Assert.Equal(20, item.UnitPrice);
         }
 
         [Fact]
@@ -31,8 +30,8 @@ namespace Inventory.Domain.Test.Entities
         {
             var product = new Product("SKU", "Name", 10m, 1);
             var item = new OrderItem(1, product, 2);
-            Assert.Throws<System.ArgumentException>(() => item.UpdateQuantity(0, 10));
-            Assert.Throws<System.ArgumentException>(() => item.UpdateQuantity(-1, 10));
+            Assert.Throws<System.ArgumentException>(() => item.UpdateQuantity(0));
+            Assert.Throws<System.ArgumentException>(() => item.UpdateQuantity(-1));
         }
     }
 }

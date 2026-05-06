@@ -89,7 +89,7 @@ namespace Inventory.Domain.Entities
             var existing = _items.FirstOrDefault(i => i.ProductId == product.Id);
             if (existing is not null)
             {
-                existing.UpdateQuantity(quantity, product.SellingPrice);
+                existing.UpdateQuantity(quantity);
             }
             else
             {
