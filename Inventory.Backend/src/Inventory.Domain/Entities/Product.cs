@@ -100,6 +100,23 @@ namespace Inventory.Domain.Entities
             _batches.Add(batch);
         }
 
+        public void AddReturnedStock(DateTime expiryDate, decimal quantity)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            var target = _batches
+                .Where(b => !b.IsExpired)
+                .OrderBy(b => b.ExpireDate.Date == expiryDate.Date ? 0 : 1)
+                .ThenBy(b => b.RemainingQuantity)
+                .FirstOrDefault();
+
+            if (target == null)
+                throw new InvalidOperationException($"No active batch found for product '{Name}' to restore returned stock into.");
+
+            target.Restore(quantity);
+        }
+
         
         public void ReduceStock(decimal quantityToReduce)
         {
