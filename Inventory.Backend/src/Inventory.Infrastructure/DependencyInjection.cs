@@ -24,7 +24,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure DbContext
+        
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
@@ -41,11 +41,11 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-        // Configure JWT Settings
+        
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
 
-        // Configure JWT Authentication
+        
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,11 +73,11 @@ public static class DependencyInjection
         services.AddSingleton<ILocalizationService, LocalizationService>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
-        // Configure and register FileService
+        
         services.Configure<FileServiceOptions>(configuration.GetSection(FileServiceOptions.SectionName));
         services.AddScoped<IFileService, FileService>();
 
-        // Register repositories
+        
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRoleService, RoleService>();
@@ -91,7 +91,10 @@ public static class DependencyInjection
         services.AddScoped<IReturnOrderRepository, ReturnOrderRepository>();
         services.AddScoped<IOrderQueryService, OrderQueryService>();
         services.AddScoped<IReturnOrderQueryService, ReturnOrderQueryService>();
+        services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+        services.AddScoped<IPurchaseOrderQueryService, PurchaseOrderQueryService>();
 
+        services.AddHostedService<DraftOrderCleanupService>();
 
         return services;
     }

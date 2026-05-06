@@ -1,8 +1,6 @@
 namespace Inventory.Domain.Exceptions
 {
-    /// <summary>
-    /// Thrown when a product does not have sufficient stock to fulfil a requested quantity.
-    /// </summary>
+    
     public class InsufficientStockException : Exception
     {
         public string ProductName { get; }

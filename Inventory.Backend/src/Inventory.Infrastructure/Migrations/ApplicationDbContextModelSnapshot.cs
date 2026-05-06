@@ -66,6 +66,9 @@ namespace Inventory.Infrastructure.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("FinalTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -75,6 +78,12 @@ namespace Inventory.Infrastructure.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -107,7 +116,7 @@ namespace Inventory.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("OrderId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
@@ -173,7 +182,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.ReturnOrder", b =>
+            modelBuilder.Entity("Inventory.Domain.Entities.PurchaseOrder", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,33 +190,28 @@ namespace Inventory.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CashierId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("OriginalOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("ReturnDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("TotalRefundAmount")
+                    b.Property<decimal>("FinalTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CashierId");
+                    b.HasIndex("SupplierId");
 
-                    b.HasIndex("OriginalOrderId");
-
-                    b.ToTable("ReturnOrders");
+                    b.ToTable("PurchaseOrders");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.ReturnOrderItem", b =>
+            modelBuilder.Entity("Inventory.Domain.Entities.PurchaseOrderItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -215,35 +219,30 @@ namespace Inventory.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("NewExpiryDate")
+                    b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("OriginalOrderItemId")
-                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Quantity")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ReturnOrderId")
+                    b.Property<int>("PurchaseOrderId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("UnitPrice")
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<decimal>("UnitCost")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OriginalOrderItemId");
-
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ReturnOrderId");
+                    b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("ReturnOrderItems");
+                    b.ToTable("PurchaseOrderItems");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.StockBatch", b =>
@@ -418,6 +417,9 @@ namespace Inventory.Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int>("PreviousAccountStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(500)
@@ -633,7 +635,9 @@ namespace Inventory.Infrastructure.Migrations
                 {
                     b.HasOne("Inventory.Domain.Entities.Order", null)
                         .WithMany("Items")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Inventory.Domain.Entities.Product", "Product")
                         .WithMany()
@@ -654,47 +658,34 @@ namespace Inventory.Infrastructure.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.ReturnOrder", b =>
+            modelBuilder.Entity("Inventory.Domain.Entities.PurchaseOrder", b =>
                 {
-                    b.HasOne("Inventory.Domain.Entities.Users.ApplicationUser", "Cashier")
+                    b.HasOne("Inventory.Domain.Entities.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("CashierId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Inventory.Domain.Entities.Order", "OriginalOrder")
-                        .WithMany()
-                        .HasForeignKey("OriginalOrderId")
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Cashier");
-
-                    b.Navigation("OriginalOrder");
+                    b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.ReturnOrderItem", b =>
+            modelBuilder.Entity("Inventory.Domain.Entities.PurchaseOrderItem", b =>
                 {
-                    b.HasOne("Inventory.Domain.Entities.OrderItem", "OriginalOrderItem")
-                        .WithMany()
-                        .HasForeignKey("OriginalOrderItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Inventory.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Inventory.Domain.Entities.ReturnOrder", null)
+                    b.HasOne("Inventory.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany("Items")
-                        .HasForeignKey("ReturnOrderId")
+                        .HasForeignKey("PurchaseOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("OriginalOrderItem");
-
                     b.Navigation("Product");
+
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.StockBatch", b =>
@@ -801,7 +792,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.Navigation("Batches");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.ReturnOrder", b =>
+            modelBuilder.Entity("Inventory.Domain.Entities.PurchaseOrder", b =>
                 {
                     b.Navigation("Items");
                 });

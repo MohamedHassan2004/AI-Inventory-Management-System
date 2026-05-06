@@ -39,7 +39,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Creating category with name: {Name}", dto.Name);
 
-            // 1️⃣ Check duplicate name
+            
             if (await _categoryRepository.ExistsByNameAsync(dto.Name, null, cancellationToken))
             {
                 _logger.LogWarning("Duplicate category name detected: {Name}", dto.Name);
@@ -50,7 +50,7 @@ namespace Inventory.Application.Services
                     ErrorType.Conflict));
             }
 
-            // 2️⃣ Save image
+            
             var fileResult = await _fileService.SaveFileAsync(dto.Image, "categories");
 
             if (!fileResult.IsSuccess)
@@ -58,7 +58,7 @@ namespace Inventory.Application.Services
                 return Result.Failure<CategoryResponseDto>(fileResult.Error);
             }
 
-            // 3️⃣ Create entity
+            
             Category category;
 
             try
@@ -74,10 +74,10 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("InvalidCategoryData"),
                     ErrorType.Validation));
             }
-            // 4️⃣ Add
+            
             await _categoryRepository.AddAsync(category, cancellationToken);
 
-            // 5️⃣ Commit
+            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var response = _mapper.Map<CategoryResponseDto>(category);
@@ -88,7 +88,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Updating category with Id: {Id}", id);
 
-            // 1️⃣ نتأكد إنها موجودة
+            
             var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
@@ -111,7 +111,7 @@ namespace Inventory.Application.Services
                     ErrorType.Conflict));
             }
 
-            // 3️⃣ نعدل الاسم
+            
             try
             {
                 category.UpdateName(dto.Name);
@@ -127,13 +127,13 @@ namespace Inventory.Application.Services
                     _localizationService.GetMessage("InvalidCategoryData"),
                     ErrorType.Validation));
             }
-            // 4️⃣ نعمل Update
+            
             _categoryRepository.Update(category);
 
-            // 5️⃣ نحفظ
+            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 6️⃣ نرجع النتيجة
+            
             var response = _mapper.Map<CategoryResponseDto>(category);
 
             return Result.Success(response);
@@ -142,7 +142,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Updating image for category Id: {Id}", id);
 
-            // 1️⃣ التأكد من وجود الكاتيجوري
+            
             var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
@@ -155,7 +155,7 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            // 2️⃣ حفظ الصورة الجديدة
+            
             var fileResult = await _fileService.SaveFileAsync(dto.Image, "categories");
 
             if (!fileResult.IsSuccess)
@@ -167,7 +167,7 @@ namespace Inventory.Application.Services
 
             var oldImagePath = category.ImgUrl;
 
-            // 3️⃣ تحديث الكيان
+            
             try
             {
                 category.UpdateImage(fileResult.Value);
@@ -185,10 +185,10 @@ namespace Inventory.Application.Services
             }
             _categoryRepository.Update(category);
 
-            // 4️⃣ حفظ التغييرات
+            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 5️⃣ حذف الصورة القديمة (بعد نجاح الحفظ)
+            
             if (!string.IsNullOrWhiteSpace(oldImagePath))
             {
                 await _fileService.DeleteFileAsync(oldImagePath);
@@ -212,7 +212,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Soft deleting category with Id: {Id}", id);
 
-            // 1️⃣ Check existence
+            
             var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
 
             if (category is null)
@@ -225,15 +225,15 @@ namespace Inventory.Application.Services
                     ErrorType.NotFound));
             }
 
-            // 2️⃣ Soft Delete
+            
             category.Delete() ;
 
             _categoryRepository.Update(category);
 
-            // 3️⃣ Save changes
+            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 4️⃣ Delete image after success
+            
             if (!string.IsNullOrWhiteSpace(category.ImgUrl))
             {
                 await _fileService.DeleteFileAsync(category.ImgUrl);

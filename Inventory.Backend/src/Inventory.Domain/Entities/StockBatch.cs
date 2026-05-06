@@ -48,9 +48,7 @@ namespace Inventory.Domain.Entities
         // Domain Behaviour
         // ──────────────────────────────────────────
 
-        /// <summary>
-        /// Reduces the remaining quantity of this batch (used during stock consumption).
-        /// </summary>
+        
         public void Consume(decimal amount)
         {
             if (amount <= 0)
@@ -63,9 +61,7 @@ namespace Inventory.Domain.Entities
             RemainingQuantity -= amount;
         }
 
-        /// <summary>
-        /// Restores quantity back to this batch (used during order cancellation or item removal).
-        /// </summary>
+        
         public void Restore(decimal amount)
         {
             if (amount <= 0)

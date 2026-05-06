@@ -17,6 +17,7 @@ namespace Inventory.Domain.Entities.Users
         public bool IsDeleted { get; private set; } = false;
         public DateTime? DeletedAt { get; private set; } = null;
         public AccountStatus AccountStatus { get; private set; } = AccountStatus.PendingChangePassword;
+        public AccountStatus PreviousAccountStatus { get; private set; } = AccountStatus.PendingChangePassword;
         public string? RejectionReason { get; private set; } = null;
 
         public ApplicationUser() { }
@@ -41,15 +42,20 @@ namespace Inventory.Domain.Entities.Users
 
         public void MarkAsDeleted(IDateTimeProvider timeProvider)
         {
+            if(IsDeleted)
+            {
+                throw new InvalidOperationException("User is already marked as deleted.");
+            }
             IsDeleted = true;
             DeletedAt = timeProvider.UtcNow;
+            PreviousAccountStatus = AccountStatus;
             AccountStatus = AccountStatus.Deleted;
         }
         public void Restore()
         {
             IsDeleted = false;
             DeletedAt = null;
-            AccountStatus = AccountStatus.Active;
+            AccountStatus = PreviousAccountStatus;
         }
         public void UpdateLastLogin(IDateTimeProvider timeProvider)
         {

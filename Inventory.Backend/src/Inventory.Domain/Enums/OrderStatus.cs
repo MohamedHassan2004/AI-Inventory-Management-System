@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Inventory.Domain.Enums
 {
     public enum OrderStatus
     {
+        
+        Draft,
+
+        
         Pending,
+
+        
         Completed,
+
+        
         Cancelled
     }
 }

@@ -2,28 +2,36 @@ using Inventory.Domain.Exceptions;
 
 namespace Inventory.Domain.Entities
 {
+    
     public class OrderItem
     {
         public int Id { get; private set; }
 
+        public int OrderId { get; private set; }
+
         public int ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
 
+        
         public decimal UnitPrice { get; private set; }
 
         public decimal Quantity { get; private set; }
         public decimal ReturnedQuantity { get; private set; }
         public decimal TotalPrice => Quantity * UnitPrice;
 
+        // Required by EF Core
         private OrderItem() { }
 
-        public OrderItem(Product product, decimal quantity)
+        
+        internal OrderItem(int orderId, Product product, decimal quantity)
         {
-            Product = product ?? throw new ArgumentNullException(nameof(product));
+            if (product is null) throw new ArgumentNullException(nameof(product));
+            if (quantity <= 0) throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            OrderId = orderId;
+            Product = product;
             ProductId = product.Id;
             UnitPrice = product.SellingPrice;
-            if (product.StockQuantity < quantity)
-                throw new InsufficientStockException(product.Name, quantity, product.StockQuantity);
             Quantity = quantity;
         }
 
@@ -36,6 +44,14 @@ namespace Inventory.Domain.Entities
                 throw new ReturnQuantityExceededException(Id, quantity, Quantity - ReturnedQuantity);
 
             ReturnedQuantity += quantity;
+        }
+        
+        internal void UpdateQuantity(decimal newQuantity)
+        {
+            if (newQuantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.", nameof(newQuantity));
+
+            Quantity = newQuantity;
         }
     }
 }

@@ -34,6 +34,12 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .HasForeignKey(o => o.CashierId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(o => o.RowVersion)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+
+            builder.Property(o => o.ExpiresAt);
         }
     }
 }
