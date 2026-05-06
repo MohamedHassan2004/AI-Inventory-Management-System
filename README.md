@@ -197,6 +197,14 @@ Base route: `api/<controller>`
 | GET | `/api/orders` | List orders (status, sorting, paging) |
 | GET | `/api/orders/{orderId}/items` | Get order items |
 
+### Return Orders *(Cashier / Admin)*
+
+| Method | Route | Description |
+|---|---|---|
+| POST | `/api/return-orders` | Create a return order |
+| GET | `/api/return-orders/{id}` | Get return order by ID |
+| GET | `/api/return-orders` | List return orders (filter + paging) |
+
 ### Categories
 
 | Method | Route | Description |
@@ -251,6 +259,7 @@ Base route: `api/<controller>`
 - **Role- and policy-based authorization** — Admin, InventoryStaff, Cashier, and Active account policies.
 - **Full inventory lifecycle** — products, stock batches with FEFO consumption, and purchase orders.
 - **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support.
+- **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
 - **Soft-delete** for Suppliers and Categories with restore capability.
 - **File upload** support for category images and user identity images.
 - **Serilog** structured logging and SQL Server health checks.
@@ -264,6 +273,8 @@ Base route: `api/<controller>`
 |---|---|
 | `Product` | Has many `StockBatch`; optional `CategoryId` |
 | `StockBatch` | Belongs to `Product` and `Supplier`; tracks `OriginalQuantity` / `RemainingQuantity` |
+| `ReturnOrder` | Belongs to `Order`; includes `TotalRefundAmount`, `CashierId`, and `ReturnDate` |
+| `ReturnOrderItem` | Belongs to `ReturnOrder` and `OrderItem`; captures refunded quantity and new expiry date |
 | `Supplier` | Has many `SupplierNotes`; soft-deleted via `IsDeleted` query filter |
 | `Order` | Has many `OrderItem`; tracks draft/confirm flow, financials, and `CashierId` |
 | `PurchaseOrder` | Has many `PurchaseOrderItem`; on submit, items create stock batches and status → Completed |

@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IStockBatchService, StockBatchService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+        services.AddScoped<IReturnOrderService, ReturnOrderService>();
 
 
         return services;

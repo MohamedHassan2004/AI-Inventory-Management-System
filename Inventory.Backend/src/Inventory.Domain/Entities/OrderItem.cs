@@ -16,8 +16,7 @@ namespace Inventory.Domain.Entities
         public decimal UnitPrice { get; private set; }
 
         public decimal Quantity { get; private set; }
-
-        
+        public decimal ReturnedQuantity { get; private set; }
         public decimal TotalPrice => Quantity * UnitPrice;
 
         // Required by EF Core
@@ -36,13 +35,23 @@ namespace Inventory.Domain.Entities
             Quantity = quantity;
         }
 
-        
         internal void UpdateQuantity(decimal newQuantity)
         {
             if (newQuantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(newQuantity));
 
             Quantity = newQuantity;
+        }
+
+        public void AddReturnedQuantity(decimal quantity)
+        {
+            if (quantity <= 0)
+                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            if (ReturnedQuantity + quantity > Quantity)
+                throw new ReturnQuantityExceededException(Id, quantity, Quantity - ReturnedQuantity);
+
+            ReturnedQuantity += quantity;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Inventory.Infrastructure.Data.Configurations
 
             builder.Ignore(i => i.TotalPrice);
             builder.Property(i => i.Quantity).IsRequired().HasPrecision(18, 2);
+            builder.Property(i => i.ReturnedQuantity).IsRequired().HasPrecision(18, 2).HasDefaultValue(0m);
 
             builder.HasOne(i => i.Product)
                 .WithMany()

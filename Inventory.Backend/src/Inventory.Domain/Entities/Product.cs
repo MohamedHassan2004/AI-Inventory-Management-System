@@ -94,8 +94,7 @@ namespace Inventory.Domain.Entities
         // Stock Management
         // ──────────────────────────────────────────
 
-        
-        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddStock(int? supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
             var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
             _batches.Add(batch);
