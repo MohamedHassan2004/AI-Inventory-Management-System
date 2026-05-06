@@ -6,6 +6,6 @@ namespace Inventory.Application.DTOs.ReturnOrder
     {
         public int OriginalOrderItemId { get; set; }
         public decimal Quantity { get; set; }
-        public DateTime? NewExpiryDate { get; set; }
+        public DateTime NewExpiryDate { get; set; }
     }
 }

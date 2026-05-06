@@ -52,16 +52,8 @@ namespace Inventory.Domain.Entities
 
             foreach (var (product, quantity) in items)
             {
-                var consumedBatches = product.ReduceStock(quantity);
-                var orderItem = new OrderItem(product, quantity);
-                
-                foreach (var consumed in consumedBatches)
-                {
-                    orderItem.AddStockConsumption(new StockConsumption(product.Id, consumed.StockBatchId, consumed.Quantity));
-                }
-
-                orderItem.ValidateConsumptions();
-                order._items.Add(orderItem);
+                product.ReduceStock(quantity);
+                order._items.Add(new OrderItem(product, quantity));
             }
 
             order.PaymentMethod = paymentMethod;

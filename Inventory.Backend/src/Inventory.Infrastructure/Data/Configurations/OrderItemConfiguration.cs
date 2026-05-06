@@ -10,8 +10,6 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(i => i.Id);
 
-            builder.Property(i => i.RowVersion).IsRowVersion();
-
             builder.Property(i => i.UnitPrice).IsRequired().HasPrecision(18, 2);
 
             builder.Ignore(i => i.TotalPrice);

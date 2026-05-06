@@ -97,17 +97,16 @@ namespace Inventory.Domain.Entities
         /// <summary>
         /// Adds a new stock batch for this product (FEFO-aware).
         /// </summary>
-        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddStock(int? supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
             var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
             _batches.Add(batch);
         }
 
         /// <summary>
-        /// Reduces stock using FIFO (First In First Out) strategy based on PurchaseDate.
+        /// Reduces stock using FEFO (First Expire First Out) strategy.
         /// </summary>
-        /// <returns>A list of consumed batch information for traceability.</returns>
-        public IReadOnlyList<ConsumedBatch> ReduceStock(decimal quantityToReduce)
+        public void ReduceStock(decimal quantityToReduce)
         {
             if (quantityToReduce <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantityToReduce));
@@ -115,12 +114,9 @@ namespace Inventory.Domain.Entities
             if (quantityToReduce > StockQuantity)
                 throw new InsufficientStockException(Name, quantityToReduce, StockQuantity);
 
-            var consumptions = new List<ConsumedBatch>();
-
             var availableBatches = _batches
                 .Where(b => b.HasStock && !b.IsExpired)
-                .OrderBy(b => b.PurchaseDate)
-                .ThenBy(b => b.Id);
+                .OrderBy(b => b.ExpireDate);
 
             foreach (var batch in availableBatches)
             {
@@ -129,16 +125,12 @@ namespace Inventory.Domain.Entities
                 var taken = Math.Min(batch.RemainingQuantity, quantityToReduce);
 
                 batch.Consume(taken);
-                consumptions.Add(new ConsumedBatch(batch.Id, taken));
-                
                 quantityToReduce -= taken;
             }
 
-            // Fallback: if expired batches needed to fulfill (shouldn't happen in healthy stock)
+            // Fallback: if expired batches needed to fulfil (shouldn't happen in healthy stock)
             if (quantityToReduce > 0)
                 throw new InsufficientStockException(Name, quantityToReduce, 0);
-
-            return consumptions.AsReadOnly();
         }
     }
 }

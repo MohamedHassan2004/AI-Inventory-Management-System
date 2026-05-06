@@ -25,22 +25,6 @@ namespace Inventory.Infrastructure.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Items)
-                    .ThenInclude(i => i.StockConsumptions)
-                        .ThenInclude(sc => sc.StockBatch)
-                .Include(o => o.Items)
-                    .ThenInclude(i => i.Product)
-                        .ThenInclude(p => p.Batches)
-                .AsSplitQuery()
-                .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
-        }
-
-        public async Task<Order?> GetOrderForReturnAsync(int id, IEnumerable<int> orderItemIds, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .Include(o => o.Items.Where(i => orderItemIds.Contains(i.Id)))
-                    .ThenInclude(i => i.StockConsumptions)
-                        .ThenInclude(sc => sc.StockBatch)
-                .Include(o => o.Items.Where(i => orderItemIds.Contains(i.Id)))
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.Batches)
                 .AsSplitQuery()

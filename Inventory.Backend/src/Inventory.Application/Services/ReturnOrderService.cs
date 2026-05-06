@@ -50,9 +50,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Creating return order for original order {OrderId}", dto.OriginalOrderId);
 
-            var itemIds = dto.Items.Select(i => i.OriginalOrderItemId).Distinct().ToList();
-            var originalOrder = await _orderRepository.GetOrderForReturnAsync(dto.OriginalOrderId, itemIds, cancellationToken);
-            
+            var originalOrder = await _orderRepository.GetFullOrderAsync(dto.OriginalOrderId, cancellationToken);
             if (originalOrder == null)
             {
                 return Result.Failure<ReturnOrderResponseDto>(new Error(
@@ -77,40 +75,18 @@ namespace Inventory.Application.Services
                             ErrorType.NotFound));
                     }
 
-                    // ─────────────────────────────────────────────────────────────
-                    // TRACEABILITY: Find original batches and costs via Domain Logic
-                    // ─────────────────────────────────────────────────────────────
-                    var stockToRestore = originalItem.Return(itemDto.Quantity);
+                    returnOrder.AddItem(originalItem, itemDto.Quantity, itemDto.NewExpiryDate);
 
-                    // If user didn't provide a new expiry, use the earliest (Min) original expiry of the returned batches as a label
-                    var returnItemExpiry = itemDto.NewExpiryDate ?? stockToRestore.Min(x => x.OriginalExpiryDate);
-                    returnOrder.AddItem(originalItem, itemDto.Quantity, returnItemExpiry);
+                    var lastBatch = originalItem.Product.Batches
+                        .OrderByDescending(b => b.PurchaseDate)
+                        .ThenByDescending(b => b.Id)
+                        .FirstOrDefault();
 
-                    // Group returned quantities by Supplier, Cost, and Expiry to minimize batch creation
-                    // Key: (SupplierId, UnitCost, ExpiryDate)
-                    var batchMerger = new Dictionary<(int SupplierId, decimal UnitCost, DateTime ExpiryDate), decimal>();
+                    decimal unitCost = lastBatch?.UnitCost ?? 0;
 
-                    foreach (var info in stockToRestore)
-                    {
-                        var resolvedExpiry = itemDto.NewExpiryDate ?? info.OriginalExpiryDate;
-                        var roundedCost = Math.Round(info.UnitCost, 4);
-                        var key = (info.SupplierId, roundedCost, resolvedExpiry);
-                        
-                        if (batchMerger.ContainsKey(key))
-                            batchMerger[key] += info.Quantity;
-                        else
-                            batchMerger[key] = info.Quantity;
-                    }
-
-                    // Perform merged batch additions
-                    foreach (var kvp in batchMerger)
-                    {
-                        originalItem.Product.AddStock(
-                            kvp.Key.SupplierId, 
-                            kvp.Key.ExpiryDate, 
-                            kvp.Key.UnitCost, 
-                            kvp.Value);
-                    }
+                    // Delegate the creation of the StockBatch to the Product aggregate root
+                    // Product and Batches are already loaded via GetFullOrderAsync
+                    originalItem.Product.AddStock(null, itemDto.NewExpiryDate, unitCost, itemDto.Quantity);
                 }
 
                 returnOrder.Complete();

@@ -27,8 +27,7 @@ namespace Inventory.Application.Validation.ReturnOrder
                     .GreaterThan(0).WithMessage(localizationService.GetMessage("QuantityMustBeGreaterThanZero"));
 
                 items.RuleFor(i => i.NewExpiryDate)
-                    .Must(date => !date.HasValue || date.Value > DateTime.UtcNow)
-                    .WithMessage(localizationService.GetMessage("ExpiryDateMustBeFuture"));
+                    .Must(date => date > DateTime.UtcNow).WithMessage(localizationService.GetMessage("ExpiryDateMustBeFuture"));
             });
         }
     }

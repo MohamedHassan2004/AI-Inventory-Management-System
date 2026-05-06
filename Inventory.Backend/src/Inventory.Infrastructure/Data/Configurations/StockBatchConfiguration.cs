@@ -15,8 +15,6 @@ namespace Inventory.Infrastructure.Data.Configurations
         {
             builder.HasKey(sb => sb.Id);
 
-            builder.Property(sb => sb.RowVersion).IsRowVersion();
-
             builder.Property(sb => sb.UnitCost)
                 .HasColumnType("decimal(18,2)");
 

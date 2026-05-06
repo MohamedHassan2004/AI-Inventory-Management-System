@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inventory.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260505170324_AddOptimisticConcurrency")]
-    partial class AddOptimisticConcurrency
+    [Migration("20260506114037_MakeSupplierIdNullable")]
+    partial class MakeSupplierIdNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,12 +125,6 @@ namespace Inventory.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasDefaultValue(0m);
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
@@ -278,13 +272,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.Property<decimal>("RemainingQuantity")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("SupplierId")
+                    b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitCost")
@@ -297,45 +285,6 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("SupplierId");
 
                     b.ToTable("StockBatches");
-                });
-
-            modelBuilder.Entity("Inventory.Domain.Entities.StockConsumption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OrderItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ReturnedQuantity")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("StockBatchId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderItemId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("StockBatchId");
-
-                    b.ToTable("StockConsumptions");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.Supplier", b =>
@@ -769,33 +718,6 @@ namespace Inventory.Infrastructure.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Inventory.Domain.Entities.StockConsumption", b =>
-                {
-                    b.HasOne("Inventory.Domain.Entities.OrderItem", "OrderItem")
-                        .WithMany("StockConsumptions")
-                        .HasForeignKey("OrderItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Inventory.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Inventory.Domain.Entities.StockBatch", "StockBatch")
-                        .WithMany()
-                        .HasForeignKey("StockBatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("OrderItem");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("StockBatch");
-                });
-
             modelBuilder.Entity("Inventory.Domain.Entities.SupplierNotes", b =>
                 {
                     b.HasOne("Inventory.Domain.Entities.Supplier", "Supplier")
@@ -875,11 +797,6 @@ namespace Inventory.Infrastructure.Migrations
             modelBuilder.Entity("Inventory.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Inventory.Domain.Entities.OrderItem", b =>
-                {
-                    b.Navigation("StockConsumptions");
                 });
 
             modelBuilder.Entity("Inventory.Domain.Entities.Product", b =>
