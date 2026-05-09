@@ -76,12 +76,9 @@ namespace Inventory.Application.Services
                     }
 
                     returnOrder.AddItem(originalItem, itemDto.Quantity, itemDto.NewExpiryDate);
-
-                    // Restore stock into the original batch — preserves the correct SupplierId and UnitCost
-                    originalItem.Product.AddReturnedStock(itemDto.NewExpiryDate, itemDto.Quantity);
                 }
 
-                returnOrder.Complete();
+                returnOrder.Process();
             }
             catch (InvalidOperationException ex)
             {

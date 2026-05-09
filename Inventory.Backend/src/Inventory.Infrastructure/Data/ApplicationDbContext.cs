@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
     public DbSet<ReturnOrder> ReturnOrders { get; set; }
     public DbSet<ReturnOrderItem> ReturnOrderItems { get; set; }
+    public DbSet<OrderItemBatchAllocation> OrderItemBatchAllocations { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

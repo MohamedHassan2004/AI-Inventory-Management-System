@@ -94,31 +94,33 @@ namespace Inventory.Domain.Entities
         // Stock Management
         // ──────────────────────────────────────────
 
-        public void AddStock(int? supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
             var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
             _batches.Add(batch);
         }
 
-        public void AddReturnedStock(DateTime expiryDate, decimal quantity)
+        public void AddReturnedStock(int originalBatchId, int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
         {
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 
-            var target = _batches
-                .Where(b => !b.IsExpired)
-                .OrderBy(b => b.ExpireDate.Date == expiryDate.Date ? 0 : 1)
-                .ThenBy(b => b.RemainingQuantity)
-                .FirstOrDefault();
+            var target = _batches.FirstOrDefault(b => 
+                b.Id == originalBatchId &&
+                b.RemainingQuantity + quantity <= b.OriginalQuantity);
 
-            if (target == null)
-                throw new InvalidOperationException($"No active batch found for product '{Name}' to restore returned stock into.");
-
-            target.Restore(quantity);
+            if (target != null)
+            {
+                target.Restore(quantity);
+            }
+            else
+            {
+                AddStock(supplierId, expiryDate, unitCost, quantity);
+            }
         }
 
         
-        public void ReduceStock(decimal quantityToReduce)
+        public List<(StockBatch batch, decimal taken)> ReduceStock(decimal quantityToReduce)
         {
             if (quantityToReduce <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantityToReduce));
@@ -130,6 +132,8 @@ namespace Inventory.Domain.Entities
                 .Where(b => b.HasStock && !b.IsExpired)
                 .OrderBy(b => b.ExpireDate);
 
+            var allocations = new List<(StockBatch batch, decimal taken)>();
+
             foreach (var batch in availableBatches)
             {
                 if (quantityToReduce <= 0) break;
@@ -137,12 +141,15 @@ namespace Inventory.Domain.Entities
                 var taken = Math.Min(batch.RemainingQuantity, quantityToReduce);
 
                 batch.Consume(taken);
+                allocations.Add((batch, taken));
                 quantityToReduce -= taken;
             }
 
             // Fallback: if expired batches needed to fulfil (shouldn't happen in healthy stock)
             if (quantityToReduce > 0)
                 throw new InsufficientStockException(Name, quantityToReduce, 0);
+                
+            return allocations;
         }
     }
 }

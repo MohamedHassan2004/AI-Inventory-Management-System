@@ -20,6 +20,9 @@ namespace Inventory.Domain.Entities
         public Order Order { get; private set; } = null!;
         public decimal TotalPrice => Quantity * UnitPrice;
 
+        private readonly List<OrderItemBatchAllocation> _allocations = new();
+        public IReadOnlyCollection<OrderItemBatchAllocation> Allocations => _allocations.AsReadOnly();
+
         // Required by EF Core
         private OrderItem() { }
 
@@ -44,7 +47,15 @@ namespace Inventory.Domain.Entities
             Quantity = newQuantity;
         }
 
-        public void AddReturnedQuantity(decimal quantity)
+        internal void SetAllocations(List<(StockBatch batch, decimal taken)> allocations)
+        {
+            foreach (var a in allocations)
+            {
+                _allocations.Add(new OrderItemBatchAllocation(a.batch.Id, a.taken));
+            }
+        }
+
+        public IEnumerable<(StockBatch batch, decimal returned)> AddReturnedQuantity(decimal quantity)
         {
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
@@ -53,6 +64,22 @@ namespace Inventory.Domain.Entities
                 throw new ReturnQuantityExceededException(Id, quantity, Quantity - ReturnedQuantity);
 
             ReturnedQuantity += quantity;
+
+            var result = new List<(StockBatch batch, decimal returned)>();
+            var remaining = quantity;
+
+            foreach (var alloc in _allocations.Where(a => a.RemainingToReturn > 0))
+            {
+                if (remaining <= 0) break;
+                
+                var toReturn = Math.Min(alloc.RemainingToReturn, remaining);
+                alloc.AddReturn(toReturn);
+                result.Add((alloc.StockBatch, toReturn));
+                
+                remaining -= toReturn;
+            }
+
+            return result;
         }
     }
 }
