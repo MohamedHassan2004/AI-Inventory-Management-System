@@ -88,4 +88,72 @@ public class PurchasesReportService : IPurchasesReportService
             .Take(top)
             .ToList();
     }
+    public async Task<IEnumerable<SupplierPerformanceDto>> GetSupplierPerformanceAsync(
+    DateTime startDate,
+    DateTime endDate,
+    CancellationToken cancellationToken)
+    {
+        var purchaseOrders = await _dbContext.PurchaseOrders
+            .AsNoTracking()
+            .Include(po => po.Supplier)
+            .Include(po => po.Items)
+            .Where(po =>
+                po.OrderDate >= startDate &&
+                po.OrderDate <= endDate)
+            .ToListAsync(cancellationToken);
+
+        var returnItems = await _dbContext.ReturnOrderItems
+            .AsNoTracking()
+            .Include(ri => ri.OriginalOrderItem)
+                .ThenInclude(oi => oi.Allocations)
+                    .ThenInclude(a => a.StockBatch)
+            .ToListAsync(cancellationToken);
+
+        return purchaseOrders
+            .GroupBy(po => new
+            {
+                po.SupplierId,
+                po.Supplier.Name
+            })
+            .Select(g =>
+            {
+                var supplierId = g.Key.SupplierId;
+
+                var totalProductsSupplied = g
+                    .SelectMany(x => x.Items)
+                    .Sum(i => i.Quantity);
+
+                var returnedQuantity = returnItems
+                    .SelectMany(ri =>
+                        ri.OriginalOrderItem.Allocations
+                            .Where(a =>
+                                a.StockBatch.SupplierId == supplierId)
+                            .Select(a => a.ReturnedQuantity))
+                    .Sum();
+
+                return new SupplierPerformanceDto
+                {
+                    SupplierId = supplierId,
+
+                    SupplierName = g.Key.Name,
+
+                    TotalPurchaseOrders = g.Count(),
+
+                    TotalSpent = g.Sum(x => x.FinalTotal),
+
+                    TotalProductsSupplied = totalProductsSupplied,
+
+                    ReturnedQuantity = returnedQuantity,
+
+                    ReturnRate =
+                        totalProductsSupplied == 0
+                            ? 0
+                            : Math.Round(
+                                (returnedQuantity / totalProductsSupplied) * 100m,
+                                2)
+                };
+            })
+            .OrderByDescending(x => x.TotalSpent)
+            .ToList();
+    }
 }

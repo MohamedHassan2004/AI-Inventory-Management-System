@@ -41,5 +41,6 @@ namespace Inventory.Infrastructure.Repositories
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
+
     }
 }

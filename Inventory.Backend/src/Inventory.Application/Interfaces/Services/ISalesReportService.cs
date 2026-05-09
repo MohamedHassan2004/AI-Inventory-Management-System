@@ -22,4 +22,8 @@ public interface ISalesReportService
     DateTime startDate,
     DateTime endDate,
     CancellationToken cancellationToken);
+    Task<IEnumerable<ProfitMarginDto>> GetProfitMarginsAsync(
+    DateTime startDate,
+    DateTime endDate,
+    CancellationToken cancellationToken);
 }

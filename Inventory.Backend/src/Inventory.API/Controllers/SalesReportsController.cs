@@ -56,4 +56,18 @@ public class SalesReportsController : ControllerBase
 
         return Ok(result);
     }
+    [HttpGet("profit-margin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProfitMargins(
+    [FromQuery] DateTime startDate,
+    [FromQuery] DateTime endDate,
+    CancellationToken cancellationToken)
+    {
+        var result = await _salesReportService.GetProfitMarginsAsync(
+            startDate,
+            endDate,
+            cancellationToken);
+
+        return Ok(result);
+    }
 }

@@ -21,12 +21,19 @@ namespace Inventory.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }
 
-        public async Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Order?> GetFullOrderAsync(
+            int id,
+            CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Product)
                         .ThenInclude(p => p.Batches)
+
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }

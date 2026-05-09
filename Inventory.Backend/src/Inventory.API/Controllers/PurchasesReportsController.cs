@@ -45,4 +45,18 @@ public class PurchasesReportsController : ControllerBase
 
         return Ok(result);
     }
+    [HttpGet("supplier-performance")]
+[ProducesResponseType(StatusCodes.Status200OK)]
+public async Task<IActionResult> GetSupplierPerformance(
+    [FromQuery] DateTime startDate,
+    [FromQuery] DateTime endDate,
+    CancellationToken cancellationToken)
+{
+    var result = await _reportService.GetSupplierPerformanceAsync(
+        startDate,
+        endDate,
+        cancellationToken);
+
+    return Ok(result);
+}
 }   

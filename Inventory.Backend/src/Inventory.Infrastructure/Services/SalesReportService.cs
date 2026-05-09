@@ -112,5 +112,59 @@ public class SalesReportService : ISalesReportService
             PeakHours = peakHours
         };
     }
+    public async Task<IEnumerable<ProfitMarginDto>> GetProfitMarginsAsync(
+    DateTime startDate,
+    DateTime endDate,
+    CancellationToken cancellationToken)
+    {
+        var orderItems = await _dbContext.OrderItems
+            .AsNoTracking()
+            .Include(oi => oi.Product)
+            .Include(oi => oi.Allocations)
+                .ThenInclude(a => a.StockBatch)
+            .Include(oi => oi.Order)
+            .Where(oi =>
+                oi.Order.Status == OrderStatus.Completed &&
+                oi.Order.OrderDate >= startDate &&
+                oi.Order.OrderDate <= endDate)
+            .ToListAsync(cancellationToken);
+
+        return orderItems
+            .GroupBy(oi => new
+            {
+                oi.ProductId,
+                oi.Product.Name
+            })
+            .Select(g =>
+            {
+                var revenue = g.Sum(x => x.TotalPrice);
+
+                var cost = g.Sum(x =>
+                    x.Allocations.Sum(a =>
+                        a.QuantityTaken * a.StockBatch.UnitCost));
+
+                var profit = revenue - cost;
+
+                return new ProfitMarginDto
+                {
+                    ProductId = g.Key.ProductId,
+
+                    ProductName = g.Key.Name,
+
+                    Revenue = revenue,
+
+                    Cost = cost,
+
+                    Profit = profit,
+
+                    ProfitMarginPercentage =
+                        revenue == 0
+                            ? 0
+                            : Math.Round((profit / revenue) * 100m, 2)
+                };
+            })
+            .OrderByDescending(x => x.Profit)
+            .ToList();
+    }
 
 }

@@ -16,4 +16,8 @@ public interface IPurchasesReportService
     DateTime endDate,
     int top,
     CancellationToken cancellationToken);
+    Task<IEnumerable<SupplierPerformanceDto>> GetSupplierPerformanceAsync(
+    DateTime startDate,
+    DateTime endDate,
+    CancellationToken cancellationToken);
 }
