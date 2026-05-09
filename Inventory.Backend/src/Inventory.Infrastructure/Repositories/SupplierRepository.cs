@@ -25,5 +25,10 @@ namespace Inventory.Infrastructure.Repositories
                 .Include(s => s.SupplierNotes)
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
+
+        public async Task<bool> HasRelatedStockBatchesAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.StockBatches.AnyAsync(sb => sb.SupplierId == id, cancellationToken);
+        }
     }
 }
