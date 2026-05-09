@@ -17,6 +17,7 @@ namespace Inventory.Domain.Entities
 
         public decimal Quantity { get; private set; }
         public decimal ReturnedQuantity { get; private set; }
+        public Order Order { get; private set; } = null!;
         public decimal TotalPrice => Quantity * UnitPrice;
 
         // Required by EF Core

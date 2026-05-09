@@ -1,5 +1,6 @@
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
+using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
 using Inventory.Infrastructure.Data;
@@ -93,6 +94,12 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
         services.AddScoped<IPurchaseOrderQueryService, PurchaseOrderQueryService>();
         services.AddScoped<IReturnOrderQueryService, ReturnOrderQueryService>();
+        services.AddScoped<ISalesReportService, SalesReportService>();
+        services.AddScoped<IInventoryReportService, InventoryReportService>();
+        services.AddScoped<IReturnsReportService, ReturnsReportService>();
+        services.AddScoped<IPurchasesReportService, PurchasesReportService>();
+        services.AddScoped<IUsersReportService, UsersReportService>();
+        services.AddScoped<IDashboardService, DashboardService>();
 
         services.AddHostedService<DraftOrderCleanupService>();
 
