@@ -151,6 +151,14 @@ namespace Inventory.Application.Services
             return Result.Success(response);
         }
 
+        public async Task<Result<IEnumerable<StockBatchResponseDto>>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching StockBatches for Supplier Id: {SupplierId}", supplierId);
+            var batches = await _stockBatchRepository.GetBySupplierIdAsync(supplierId, cancellationToken);
+            var response = _mapper.Map<IEnumerable<StockBatchResponseDto>>(batches);
+            return Result.Success(response);
+        }
+
         public async Task<Result<IEnumerable<StockBatchResponseDto>>> GetExpiringBatchesAsync(int daysUntilExpiry, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Fetching StockBatches expiring within {Days} days", daysUntilExpiry);

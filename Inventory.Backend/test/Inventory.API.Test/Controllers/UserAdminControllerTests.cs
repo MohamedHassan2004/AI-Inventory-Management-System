@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs;
 using Inventory.Application.Interfaces;
@@ -48,7 +48,7 @@ public class UserAdminControllerTests
     }
 
     [Fact]
-    public async Task GetAllAccounts_Should_Return_Ok_When_Accounts_Exist()
+    public async Task GetAllAccounts_AccountsExist_ReturnsOk()
     {
         // Arrange
         var accounts = new List<AccountDto>
@@ -75,7 +75,7 @@ public class UserAdminControllerTests
     }
 
     [Fact]
-    public async Task DeleteUser_Should_Return_NoContent_When_Delete_Succeeds()
+    public async Task DeleteUser_DeleteSucceeds_ReturnsNoContent()
     {
         // Arrange
         _userAdminServiceMock
@@ -92,7 +92,7 @@ public class UserAdminControllerTests
     }
 
     [Fact]
-    public async Task ApproveAccount_Should_Return_NoContent_When_Approve_Succeeds()
+    public async Task ApproveAccount_ApproveSucceeds_ReturnsNoContent()
     {
         // Arrange
         _userAdminServiceMock
@@ -109,7 +109,7 @@ public class UserAdminControllerTests
     }
 
     [Fact]
-    public async Task RejectAccount_Should_Return_NoContent_When_Reject_Succeeds()
+    public async Task RejectAccount_RejectSucceeds_ReturnsNoContent()
     {
         // Arrange
         _userAdminServiceMock

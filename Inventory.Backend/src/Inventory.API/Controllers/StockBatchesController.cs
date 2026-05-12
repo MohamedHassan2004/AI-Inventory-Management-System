@@ -37,6 +37,13 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
+        [HttpGet("supplier/{supplierId}")]
+        public async Task<IActionResult> GetBySupplierId(int supplierId)
+        {
+            var result = await _stockBatchService.GetBySupplierIdAsync(supplierId);
+            return HandleResult(result);
+        }
+
         [HttpGet("expiring/{days}")]
         public async Task<IActionResult> GetExpiringBatches(int days)
         {

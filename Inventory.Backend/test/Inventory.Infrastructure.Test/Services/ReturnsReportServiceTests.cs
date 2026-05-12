@@ -1,24 +1,41 @@
+using FluentAssertions;
+using Inventory.Application.DTOs.Reports.Returns;
+using Inventory.Domain.Entities;
+using Inventory.Infrastructure.Data;
 using Inventory.Infrastructure.Services;
-using Inventory.Infrastructure.Test.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace Inventory.Infrastructure.Test.Services;
+namespace Inventory.Infrastructure.Tests.Services;
 
 public class ReturnsReportServiceTests
 {
+    private static ApplicationDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        return new ApplicationDbContext(options);
+    }
+
+
     [Fact]
-    public async Task GetReturnsSummaryAsync_WithEmptyDb_ShouldReturnZeroes()
+    public async Task GetTopReturnedProductsAsync_WithNoReturns_ShouldReturnEmpty()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        using var dbContext = CreateDbContext();
+
         var service = new ReturnsReportService(dbContext);
 
         // Act
-        var result = await service.GetReturnsSummaryAsync(DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), CancellationToken.None);
+        var result = await service.GetTopReturnedProductsAsync(
+            DateTime.UtcNow.AddDays(-30),
+            DateTime.UtcNow,
+            10,
+            CancellationToken.None);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(0, result.TotalReturns);
-        Assert.Equal(0, result.TotalRefundAmount);
+        result.Should().BeEmpty();
     }
 }

@@ -19,7 +19,7 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.Property(o => o.FinalTotal).HasPrecision(18, 2);
 
             builder.HasOne(o => o.Supplier)
-                .WithMany()
+                .WithMany(s => s.PurchaseOrders)
                 .HasForeignKey(o => o.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
 

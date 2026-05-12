@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Inventory.Application.DTOs.Reports.Dashboard;
@@ -45,14 +45,14 @@ public class DashboardService : IDashboardService
 
         var returnOrders = await returnsQuery.ToListAsync(cancellationToken);
 
-        var poQuery = _dbContext.PurchaseOrders
+        var pendingOrdersQuery = _dbContext.Orders
             .AsNoTracking()
-            .Where(po => po.Status == PurchaseOrderStatus.Pending);
+            .Where(o => o.Status == OrderStatus.Pending);
             
-        if (startDate.HasValue) poQuery = poQuery.Where(po => po.OrderDate >= startDate.Value);
-        if (endDate.HasValue) poQuery = poQuery.Where(po => po.OrderDate <= endDate.Value);
+        if (startDate.HasValue) pendingOrdersQuery = pendingOrdersQuery.Where(o => o.OrderDate >= startDate.Value);
+        if (endDate.HasValue) pendingOrdersQuery = pendingOrdersQuery.Where(o => o.OrderDate <= endDate.Value);
 
-        var pendingPurchaseOrders = await poQuery.CountAsync(cancellationToken);
+        var totalPendingOrders = await pendingOrdersQuery.CountAsync(cancellationToken);
 
         var activeUsers = await _dbContext.Users
             .AsNoTracking()
@@ -89,7 +89,7 @@ public class DashboardService : IDashboardService
             TotalRefundAmount = returnOrders.Sum(r =>
                 r.TotalRefundAmount),
 
-            PendingPurchaseOrders = pendingPurchaseOrders,
+            TotalPendingOrders = totalPendingOrders,
 
             ActiveUsers = activeUsers
         };

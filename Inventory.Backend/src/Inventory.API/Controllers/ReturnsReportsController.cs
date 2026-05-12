@@ -15,20 +15,6 @@ public class ReturnsReportsController : ControllerBase
         _reportService = reportService;
     }
 
-    [HttpGet("summary")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSummary(
-        [FromQuery] DateTime startDate,
-        [FromQuery] DateTime endDate,
-        CancellationToken cancellationToken)
-    {
-        var result = await _reportService.GetReturnsSummaryAsync(
-            startDate,
-            endDate,
-            cancellationToken);
-
-        return Ok(result);
-    }
     [HttpGet("top-products")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTopReturnedProducts(

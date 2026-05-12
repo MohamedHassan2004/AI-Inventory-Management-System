@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Application.Interfaces;
@@ -51,7 +51,7 @@ public class PurchaseOrdersControllerTests
     }
 
     [Fact]
-    public async Task Submit_Should_Return_Ok_When_Purchase_Order_Is_Submitted()
+    public async Task Submit_PurchaseOrderIsSubmitted_ReturnsOk()
     {
         // Arrange
         var dto = new SubmitPurchaseOrderDto
@@ -85,7 +85,7 @@ public class PurchaseOrdersControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_Ok_When_Purchase_Order_Exists()
+    public async Task GetById_PurchaseOrderExists_ReturnsOk()
     {
         // Arrange
         var response = new PurchaseOrderResponseDto
@@ -113,7 +113,7 @@ public class PurchaseOrdersControllerTests
     }
 
     [Fact]
-    public async Task GetAll_Should_Return_Ok_When_Purchase_Orders_Exist()
+    public async Task GetAll_PurchaseOrdersExist_ReturnsOk()
     {
         // Arrange
         var orders = new List<PurchaseOrderResponseDto>
@@ -150,7 +150,7 @@ public class PurchaseOrdersControllerTests
     }
 
     [Fact]
-    public async Task GetItemsByPurchaseOrder_Should_Return_Ok_When_Items_Exist()
+    public async Task GetItemsByPurchaseOrder_ItemsExist_ReturnsOk()
     {
         // Arrange
         var items = new List<PurchaseOrderItemResponseDto>

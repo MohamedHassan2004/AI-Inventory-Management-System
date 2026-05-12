@@ -5,7 +5,7 @@ using Inventory.Application.DTOs.Auth;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
 using Inventory.Domain.Shared;
-using Inventory.Infrastructure.Settings;
+using Inventory.Infrastructure.Data.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,7 +74,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Login_Should_Return_Ok_When_Login_Succeeds()
+    public async Task Login_LoginSucceeds_ReturnsOk()
     {
         // Arrange
         var dto = new LoginDto
@@ -102,7 +102,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Login_Should_Return_Unauthorized_When_Credentials_Are_Invalid()
+    public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
         // Arrange
         var dto = new LoginDto { UserName = "invalid", Password = "wrong" };
@@ -127,7 +127,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Logout_Should_Return_Ok_When_Logout_Succeeds()
+    public async Task Logout_LogoutSucceeds_ReturnsOk()
     {
         // Arrange
         _localizationMock
@@ -148,7 +148,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task RefreshToken_Should_Return_Unauthorized_When_Cookie_Is_Missing()
+    public async Task RefreshToken_CookieMissing_ReturnsUnauthorized()
     {
         // Arrange
         _localizationMock
@@ -165,7 +165,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task ChangePassword_Should_Return_NoContent_When_Change_Succeeds()
+    public async Task ChangePassword_ChangeSucceeds_ReturnsNoContent()
     {
         // Arrange
         var dto = new ChangePasswordDto
@@ -191,7 +191,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task ChangePassword_Should_Return_BadRequest_When_Validation_Fails()
+    public async Task ChangePassword_ValidationFails_ReturnsBadRequest()
     {
         // Arrange
         var dto = new ChangePasswordDto { NewPassword = "123" };

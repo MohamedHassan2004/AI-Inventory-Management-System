@@ -1,6 +1,11 @@
+using Inventory.Domain.Entities;
+using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Test.Helpers;
 using Xunit;
+using System.Threading;
+using System;
+using System.Threading.Tasks;
 
 namespace Inventory.Infrastructure.Test.Services;
 
@@ -10,7 +15,7 @@ public class DashboardServiceTests
     public async Task GetSummaryAsync_WithEmptyDb_ShouldReturnZeroes()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        await using var dbContext = DbContextFactory.Create();
         var service = new DashboardService(dbContext);
 
         // Act
@@ -20,5 +25,6 @@ public class DashboardServiceTests
         Assert.NotNull(result);
         Assert.Equal(0, result.TotalProducts);
         Assert.Equal(0, result.LowStockProducts);
+        Assert.Equal(0, result.TotalPendingOrders);
     }
 }

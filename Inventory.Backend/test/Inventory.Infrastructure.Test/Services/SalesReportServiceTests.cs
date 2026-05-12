@@ -10,7 +10,7 @@ public class SalesReportServiceTests
     public async Task GetSalesSummaryAsync_WithEmptyDb_ShouldReturnZeroes()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        await using var dbContext = DbContextFactory.Create();
         var service = new SalesReportService(dbContext);
 
         // Act

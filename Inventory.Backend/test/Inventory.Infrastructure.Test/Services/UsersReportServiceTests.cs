@@ -10,7 +10,7 @@ public class UsersReportServiceTests
     public async Task GetCashierSalesAsync_WithEmptyDb_ShouldReturnEmpty()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        await using var dbContext = DbContextFactory.Create();
         var service = new UsersReportService(dbContext);
 
         // Act
@@ -25,7 +25,7 @@ public class UsersReportServiceTests
     public async Task GetUserStatusBreakdownAsync_WithEmptyDb_ShouldReturnEmpty()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        await using var dbContext = DbContextFactory.Create();
         var service = new UsersReportService(dbContext);
 
         // Act

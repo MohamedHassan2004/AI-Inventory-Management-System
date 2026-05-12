@@ -63,7 +63,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Submit_Should_Return_Ok_When_Order_Is_Submitted()
+    public async Task Submit_OrderIsSubmitted_ReturnsOk()
     {
         // Arrange
         var dto = new SubmitOrderDto
@@ -101,7 +101,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task CreateDraft_Should_Return_Ok_When_Draft_Is_Created()
+    public async Task CreateDraft_DraftIsCreated_ReturnsOk()
     {
         // Arrange
         var dto = new CreateDraftOrderDto
@@ -135,7 +135,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_Ok_When_Order_Exists()
+    public async Task GetById_OrderExists_ReturnsOk()
     {
         // Arrange
         var response = new OrderResponseDto
@@ -163,7 +163,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_NotFound_When_Order_Does_Not_Exist()
+    public async Task GetById_OrderDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var error = new Error("Order.NotFound", "Order not found", ErrorType.NotFound);
@@ -190,7 +190,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task Submit_Should_Return_BadRequest_When_Validation_Fails()
+    public async Task Submit_ValidationFails_ReturnsBadRequest()
     {
         // Arrange
         var dto = new SubmitOrderDto();
@@ -220,7 +220,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task CancelDraft_Should_Return_NoContent_When_Cancel_Succeeds()
+    public async Task CancelDraft_CancelSucceeds_ReturnsNoContent()
     {
         // Arrange
         _orderServiceMock
@@ -242,7 +242,7 @@ public class OrdersControllerTests
     }
 
     [Fact]
-    public async Task CancelDraft_Should_Return_NotFound_When_Order_Does_Not_Exist()
+    public async Task CancelDraft_OrderDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         _localizationMock

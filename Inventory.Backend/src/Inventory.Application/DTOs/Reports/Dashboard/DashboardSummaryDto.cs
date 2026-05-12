@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -24,7 +24,7 @@ public class DashboardSummaryDto
 
     public decimal TotalRefundAmount { get; set; }
 
-    public int PendingPurchaseOrders { get; set; }
+    public int TotalPendingOrders { get; set; }
 
     public int ActiveUsers { get; set; }
 }

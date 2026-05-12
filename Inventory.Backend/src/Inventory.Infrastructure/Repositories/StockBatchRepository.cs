@@ -45,6 +45,15 @@ namespace Inventory.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<StockBatch>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken = default)
+        {
+            return await _context.StockBatches
+                .Include(sb => sb.Supplier)
+                .Include(sb => sb.Product)
+                .Where(sb => sb.SupplierId == supplierId)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<StockBatch>> GetExpiringBatchesAsync(DateTime thresholdDate, CancellationToken cancellationToken = default)
         {
             return await _context.StockBatches

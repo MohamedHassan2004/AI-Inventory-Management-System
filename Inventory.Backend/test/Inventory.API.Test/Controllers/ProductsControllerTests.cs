@@ -45,7 +45,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task GetAll_Should_Return_Ok_When_Products_Exist()
+    public async Task GetAll_ProductsExist_ReturnsOk()
     {
         // Arrange
         var products = new List<ProductResponseDto>
@@ -77,7 +77,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_Ok_When_Product_Exists()
+    public async Task GetById_ProductExists_ReturnsOk()
     {
         // Arrange
         var product = new ProductResponseDto(
@@ -108,7 +108,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_NotFound_When_Product_Does_Not_Exist()
+    public async Task GetById_ProductDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var error = new Error("Product.NotFound", "Product not found", ErrorType.NotFound);
@@ -135,7 +135,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Create_Should_Return_BadRequest_When_Validation_Fails()
+    public async Task Create_ValidationFails_ReturnsBadRequest()
     {
         // Arrange
         var dto = new CreateProductDto("P-001", "", 1000, 10, null);
@@ -164,7 +164,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Delete_Should_Return_NoContent_When_Delete_Succeeds()
+    public async Task Delete_DeleteSucceeds_ReturnsNoContent()
     {
         // Arrange
         _productServiceMock
@@ -185,7 +185,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Search_Should_Return_BadRequest_When_Query_Is_Empty()
+    public async Task Search_QueryIsEmpty_ReturnsBadRequest()
     {
         // Arrange
         var controller = CreateController();
@@ -200,7 +200,7 @@ public class ProductsControllerTests
     }
 
     [Fact]
-    public async Task Search_Should_Return_Ok_When_Query_Is_Valid()
+    public async Task Search_QueryIsValid_ReturnsOk()
     {
         // Arrange
         var products = new List<ProductLookupDto>

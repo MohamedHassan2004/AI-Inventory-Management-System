@@ -1,10 +1,16 @@
-namespace Inventory.Application.DTOs.Reports.Purchases;
+namespace Inventory.Application.DTOs.Supplier;
 
-public class SupplierPurchasesReportItemDto
+public class SupplierReportItemDto
 {
     public int SupplierId { get; set; }
 
     public string SupplierName { get; set; } = string.Empty;
+
+    public string ContactInfo { get; set; } = string.Empty;
+
+    public string PhoneNumber { get; set; } = string.Empty;
+
+    public string Address { get; set; } = string.Empty;
 
     public decimal TotalSpent { get; set; }
 

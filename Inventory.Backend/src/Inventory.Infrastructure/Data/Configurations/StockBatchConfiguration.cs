@@ -30,7 +30,7 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(sb => sb.Supplier)
-                .WithMany()
+                .WithMany(s => s.StockBatches)
                 .HasForeignKey(sb => sb.SupplierId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.StockBatch;
 using Inventory.Application.Interfaces;
@@ -46,7 +46,7 @@ public class StockBatchesControllerTests
     }
 
     [Fact]
-    public async Task GetAll_Should_Return_Ok_When_Batches_Exist()
+    public async Task GetAll_BatchesExist_ReturnsOk()
     {
         // Arrange
         var batches = new List<StockBatchResponseDto>
@@ -78,7 +78,7 @@ public class StockBatchesControllerTests
     }
 
     [Fact]
-    public async Task GetById_Should_Return_Ok_When_Batch_Exists()
+    public async Task GetById_BatchExists_ReturnsOk()
     {
         // Arrange
         var batch = new StockBatchResponseDto(
@@ -107,7 +107,7 @@ public class StockBatchesControllerTests
     }
 
     [Fact]
-    public async Task Create_Should_Return_Ok_When_Batch_Is_Created()
+    public async Task Create_BatchIsCreated_ReturnsOk()
     {
         // Arrange
         var dto = new CreateStockBatchDto(
@@ -143,7 +143,7 @@ public class StockBatchesControllerTests
     }
 
     [Fact]
-    public async Task Delete_Should_Return_NoContent_When_Delete_Succeeds()
+    public async Task Delete_DeleteSucceeds_ReturnsNoContent()
     {
         // Arrange
         _stockBatchServiceMock
@@ -162,7 +162,7 @@ public class StockBatchesControllerTests
     }
 
     [Fact]
-    public async Task GetExpiringBatches_Should_Return_Ok_When_Batches_Exist()
+    public async Task GetExpiringBatches_BatchesExist_ReturnsOk()
     {
         // Arrange
         var batches = new List<StockBatchResponseDto>
@@ -189,6 +189,50 @@ public class StockBatchesControllerTests
 
         // Act
         var result = await controller.GetExpiringBatches(7);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public async Task GetByProductId_BatchesExist_ReturnsOk()
+    {
+        // Arrange
+        var batches = new List<StockBatchResponseDto>
+        {
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1)
+        };
+
+        _stockBatchServiceMock
+            .Setup(x => x.GetByProductIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IEnumerable<StockBatchResponseDto>>(batches));
+
+        var controller = CreateController();
+
+        // Act
+        var result = await controller.GetByProductId(1);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public async Task GetBySupplierId_BatchesExist_ReturnsOk()
+    {
+        // Arrange
+        var batches = new List<StockBatchResponseDto>
+        {
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1)
+        };
+
+        _stockBatchServiceMock
+            .Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IEnumerable<StockBatchResponseDto>>(batches));
+
+        var controller = CreateController();
+
+        // Act
+        var result = await controller.GetBySupplierId(1);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

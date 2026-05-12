@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
@@ -46,7 +46,7 @@ public class RoleControllerTests
     }
 
     [Fact]
-    public async Task GetUserRoles_Should_Return_Ok_When_Roles_Exist()
+    public async Task GetUserRoles_RolesExist_ReturnsOk()
     {
         // Arrange
         var roles = new List<string>
@@ -73,7 +73,7 @@ public class RoleControllerTests
     }
 
     [Fact]
-    public async Task AddUserRole_Should_Return_NoContent_When_Add_Succeeds()
+    public async Task AddUserRole_AddSucceeds_ReturnsNoContent()
     {
         // Arrange
         _roleServiceMock
@@ -94,7 +94,7 @@ public class RoleControllerTests
     }
 
     [Fact]
-    public async Task RemoveUserRole_Should_Return_NoContent_When_Remove_Succeeds()
+    public async Task RemoveUserRole_RemoveSucceeds_ReturnsNoContent()
     {
         // Arrange
         _roleServiceMock

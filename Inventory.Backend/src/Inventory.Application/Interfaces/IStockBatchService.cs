@@ -13,6 +13,7 @@ namespace Inventory.Application.Interfaces
         Task<Result<IEnumerable<StockBatchResponseDto>>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<Result<StockBatchResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Result<IEnumerable<StockBatchResponseDto>>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<Result<IEnumerable<StockBatchResponseDto>>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken = default);
         Task<Result<IEnumerable<StockBatchResponseDto>>> GetExpiringBatchesAsync(int daysUntilExpiry, CancellationToken cancellationToken = default);
         Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default);
     }

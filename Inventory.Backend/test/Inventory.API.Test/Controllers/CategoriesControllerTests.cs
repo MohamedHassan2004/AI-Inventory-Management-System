@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Category;
 using Inventory.Application.Interfaces;
@@ -47,7 +47,7 @@ public class CategoriesControllerTests
     }
 
     [Fact]
-    public async Task GetAll_Should_Return_Ok_When_Categories_Exist()
+    public async Task GetAll_CategoriesExist_ReturnsOk()
     {
         // Arrange
         var categories = new List<CategoryResponseDto>
@@ -78,7 +78,7 @@ public class CategoriesControllerTests
     }
 
     [Fact]
-    public async Task Create_Should_Return_Ok_When_Category_Is_Created()
+    public async Task Create_CategoryCreated_ReturnsOk()
     {
         // Arrange
         var dto = new CreateCategoryDto
@@ -111,7 +111,7 @@ public class CategoriesControllerTests
     }
 
     [Fact]
-    public async Task Delete_Should_Return_NoContent_When_Delete_Succeeds()
+    public async Task Delete_DeleteSucceeds_ReturnsNoContent()
     {
         // Arrange
         _categoryServiceMock
@@ -132,7 +132,7 @@ public class CategoriesControllerTests
     }
 
     [Fact]
-    public async Task Delete_Should_Return_NotFound_When_Category_Does_Not_Exist()
+    public async Task Delete_CategoryDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         _localizationMock

@@ -15,6 +15,8 @@ namespace Inventory.Domain.Entities
         public int ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
 
+        public ICollection<OrderItemBatchAllocation> Allocations { get; private set; } = new List<OrderItemBatchAllocation>();
+
         // Required by EF Core
         private StockBatch() { }
 

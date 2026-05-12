@@ -18,33 +18,6 @@ public class ReturnsReportService : IReturnsReportService
         _dbContext = dbContext;
     }
 
-
-    public async Task<ReturnsSummaryDto> GetReturnsSummaryAsync(
-        DateTime startDate,
-        DateTime endDate,
-        CancellationToken cancellationToken)
-    {
-        var returnOrders = await _dbContext.ReturnOrders
-            .AsNoTracking()
-            .Include(r => r.Items)
-            .Where(r =>
-                r.ReturnDate >= startDate &&
-                r.ReturnDate <= endDate)
-            .ToListAsync(cancellationToken);
-
-        var returnItems = returnOrders
-            .SelectMany(r => r.Items)
-            .ToList();
-
-        return new ReturnsSummaryDto
-        {
-            TotalReturns = returnOrders.Count,
-
-            TotalReturnedQuantity = returnItems.Sum(x => x.Quantity),
-
-            TotalRefundAmount = returnOrders.Sum(x => x.TotalRefundAmount)
-        };
-    }
     public async Task<IEnumerable<TopReturnedProductDto>> GetTopReturnedProductsAsync(
         DateTime startDate,
         DateTime endDate,

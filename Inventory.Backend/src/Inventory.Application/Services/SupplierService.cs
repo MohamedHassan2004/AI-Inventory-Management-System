@@ -53,10 +53,8 @@ namespace Inventory.Application.Services
             if (supplier == null)
                 return Result.Failure<SupplierDto>(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
 
-            supplier.Name = dto.Name;
-            supplier.PhoneNumber = dto.PhoneNumber;
-            supplier.ContactInfo = dto.ContactInfo;
-            supplier.Address = dto.Address;
+            supplier.Rename(dto.Name);
+            supplier.UpdateContactInfo(dto.PhoneNumber, dto.ContactInfo, dto.Address);
 
             _supplierRepository.Update(supplier);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

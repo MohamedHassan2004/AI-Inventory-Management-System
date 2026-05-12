@@ -10,7 +10,7 @@ public class InventoryReportServiceTests
     public async Task GetLowStockProductsAsync_WithEmptyDb_ShouldReturnEmpty()
     {
         // Arrange
-        var dbContext = DbContextFactory.Create();
+        await using var dbContext = DbContextFactory.Create();
         var service = new InventoryReportService(dbContext);
 
         // Act

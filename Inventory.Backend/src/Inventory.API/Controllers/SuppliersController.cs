@@ -1,5 +1,6 @@
 using Inventory.Application.DTOs.Supplier;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventory.API.Controllers
@@ -8,17 +9,31 @@ namespace Inventory.API.Controllers
     public class SuppliersController : ActiveApiBaseController
     {
         private readonly ISupplierService _supplierService;
+        private readonly ISupplierReportService _supplierReportService;
 
-        public SuppliersController(ISupplierService supplierService)
+        public SuppliersController(ISupplierService supplierService, ISupplierReportService supplierReportService)
         {
             _supplierService = supplierService;
+            _supplierReportService = supplierReportService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSuppliers(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            CancellationToken cancellationToken = default)
         {
-            var result = await _supplierService.GetAllSuppliersAsync(cancellationToken);
-            return HandleResult(result);
+            var result = await _supplierReportService.GetSuppliersReportAsync(
+                startDate,
+                endDate,
+                page,
+                pageSize,
+                cancellationToken);
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

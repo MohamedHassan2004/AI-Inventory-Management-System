@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.Domain.Entities;
 using Inventory.Infrastructure.Repositories;
 using Inventory.Infrastructure.Test.Helpers;
@@ -217,5 +217,34 @@ public class StockBatchRepositoryTests
 
         result.First().ExpireDate.Should().BeOnOrBefore(
             DateTime.UtcNow.AddDays(10));
+    }
+
+    [Fact]
+    public async Task GetBySupplierIdAsync_Should_Return_Supplier_Batches_Only()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var supplier1 = new Supplier("Supplier 1", "01000000000");
+        var supplier2 = new Supplier("Supplier 2", "02000000000");
+        context.Suppliers.AddRange(supplier1, supplier2);
+        await context.SaveChangesAsync();
+
+        var product = new Product("P-001", "Laptop", 1000, 5);
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+
+        product.AddStock(supplier1.Id, DateTime.UtcNow.AddDays(30), 500, 10);
+        product.AddStock(supplier2.Id, DateTime.UtcNow.AddDays(30), 500, 20);
+        await context.SaveChangesAsync();
+
+        var repository = new StockBatchRepository(context);
+
+        // Act
+        var result = await repository.GetBySupplierIdAsync(supplier1.Id);
+
+        // Assert
+        result.Should().ContainSingle();
+        result.First().SupplierId.Should().Be(supplier1.Id);
     }
 }

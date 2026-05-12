@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Auth;
 using Inventory.Application.Interfaces;
@@ -58,7 +58,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetUserStatus_Should_Return_Ok_When_Status_Exists()
+    public async Task GetUserStatus_StatusExists_ReturnsOk()
     {
         // Arrange
         _userServiceMock
@@ -79,7 +79,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetRejectionReason_Should_Return_Ok_When_Reason_Exists()
+    public async Task GetRejectionReason_ReasonExists_ReturnsOk()
     {
         // Arrange
         _userServiceMock
@@ -96,7 +96,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task UploadIdentityImage_Should_Return_NoContent_When_Upload_Succeeds()
+    public async Task UploadIdentityImage_UploadSucceeds_ReturnsNoContent()
     {
         // Arrange
         var dto = new UploadIdentityImgDto
