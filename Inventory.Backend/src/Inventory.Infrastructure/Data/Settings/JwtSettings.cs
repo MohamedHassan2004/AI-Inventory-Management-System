@@ -1,4 +1,4 @@
-namespace Inventory.Infrastructure.Settings
+namespace Inventory.Infrastructure.Data.Settings
 {
     public class JwtSettings
     {

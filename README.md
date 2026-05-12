@@ -205,6 +205,27 @@ Base route: `api/<controller>`
 | GET | `/api/return-orders/{id}` | Get return order by ID |
 | GET | `/api/return-orders` | List return orders (filter + paging) |
 
+### Dashboard & Reports
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/dashboard/summary` | Dashboard summary metrics |
+| GET | `/api/reports/inventory/expiring-batches` | Batches expiring soon |
+| GET | `/api/reports/inventory/dead-stock` | Dead stock analysis |
+| GET | `/api/reports/inventory/low-stock` | Low stock products |
+| GET | `/api/reports/inventory/out-of-stock` | Out of stock products |
+| GET | `/api/reports/inventory/turnover` | Inventory turnover rate |
+| GET | `/api/reports/purchases/summary` | Purchases summary |
+| GET | `/api/reports/purchases/suppliers` | Supplier performance report |
+| GET | `/api/reports/returns/summary` | Returns summary |
+| GET | `/api/reports/returns/top-products` | Top returned products |
+| GET | `/api/reports/sales/summary` | Sales summary |
+| GET | `/api/reports/sales/top-products` | Top selling products |
+| GET | `/api/reports/sales/analytics` | Sales analytics data |
+| GET | `/api/reports/sales/profit-margin` | Profit margin analysis |
+| GET | `/api/reports/users/cashier-sales` | Cashier sales performance |
+| GET | `/api/reports/users/status-breakdown` | User status breakdown |
+
 ### Categories
 
 | Method | Route | Description |
@@ -260,6 +281,7 @@ Base route: `api/<controller>`
 - **Full inventory lifecycle** — products, stock batches with FEFO consumption, and purchase orders.
 - **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support.
 - **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
+- **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance.
 - **Soft-delete** for Suppliers and Categories with restore capability.
 - **File upload** support for category images and user identity images.
 - **Serilog** structured logging and SQL Server health checks.

@@ -5,7 +5,7 @@ using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
 using Inventory.Domain.Shared;
 using Inventory.Infrastructure.Data;
-using Inventory.Infrastructure.Settings;
+using Inventory.Infrastructure.Data.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

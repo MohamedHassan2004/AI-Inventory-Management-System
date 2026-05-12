@@ -15,4 +15,13 @@ public class DeadStockDto
     public DateTime? LastSoldDate { get; set; }
 
     public int? DaysSinceLastSale { get; set; }
+    
+    public IEnumerable<DeadStockBatchDto> Batches { get; set; } = Enumerable.Empty<DeadStockBatchDto>();
+}
+
+public class DeadStockBatchDto
+{
+    public int BatchId { get; set; }
+    public decimal RemainingQuantity { get; set; }
+    public DateTime ExpireDate { get; set; }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Inventory.Application.DTOs.Dashboard;
+namespace Inventory.Application.DTOs.Reports.Dashboard;
 
 public class DashboardSummaryDto
 {
@@ -12,7 +12,13 @@ public class DashboardSummaryDto
 
     public int LowStockProducts { get; set; }
 
+    public int OutOfStockProducts { get; set; }
+
     public decimal TotalStockValue { get; set; }
+
+    public int TotalProducts { get; set; }
+
+    public decimal TotalStockQuantity { get; set; }
 
     public int TotalReturns { get; set; }
 

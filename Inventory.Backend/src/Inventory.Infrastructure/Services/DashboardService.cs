@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Inventory.Application.DTOs.Dashboard;
+using Inventory.Application.DTOs.Reports.Dashboard;
 using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Data;
@@ -19,27 +19,40 @@ public class DashboardService : IDashboardService
     }
 
     public async Task<DashboardSummaryDto> GetSummaryAsync(
+        DateTime? startDate,
+        DateTime? endDate,
         CancellationToken cancellationToken)
     {
-        var completedOrders = await _dbContext.Orders
+        var ordersQuery = _dbContext.Orders
             .AsNoTracking()
-            .Where(o => o.Status == OrderStatus.Completed)
-            .ToListAsync(cancellationToken);
+            .Where(o => o.Status == OrderStatus.Completed);
+            
+        if (startDate.HasValue) ordersQuery = ordersQuery.Where(o => o.OrderDate >= startDate.Value);
+        if (endDate.HasValue) ordersQuery = ordersQuery.Where(o => o.OrderDate <= endDate.Value);
+
+        var completedOrders = await ordersQuery.ToListAsync(cancellationToken);
 
         var products = await _dbContext.Products
             .AsNoTracking()
             .Include(p => p.Batches)
             .ToListAsync(cancellationToken);
 
-        var returnOrders = await _dbContext.ReturnOrders
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var returnsQuery = _dbContext.ReturnOrders
+            .AsNoTracking().AsQueryable();
+            
+        if (startDate.HasValue) returnsQuery = returnsQuery.Where(r => r.ReturnDate >= startDate.Value);
+        if (endDate.HasValue) returnsQuery = returnsQuery.Where(r => r.ReturnDate <= endDate.Value);
 
-        var pendingPurchaseOrders = await _dbContext.PurchaseOrders
+        var returnOrders = await returnsQuery.ToListAsync(cancellationToken);
+
+        var poQuery = _dbContext.PurchaseOrders
             .AsNoTracking()
-            .CountAsync(po =>
-                po.Status == PurchaseOrderStatus.Pending,
-                cancellationToken);
+            .Where(po => po.Status == PurchaseOrderStatus.Pending);
+            
+        if (startDate.HasValue) poQuery = poQuery.Where(po => po.OrderDate >= startDate.Value);
+        if (endDate.HasValue) poQuery = poQuery.Where(po => po.OrderDate <= endDate.Value);
+
+        var pendingPurchaseOrders = await poQuery.CountAsync(cancellationToken);
 
         var activeUsers = await _dbContext.Users
             .AsNoTracking()
@@ -58,10 +71,16 @@ public class DashboardService : IDashboardService
             TotalRevenue = completedOrders.Sum(o => o.FinalTotal),
 
             TotalOrders = completedOrders.Count,
+            
+            TotalProducts = products.Count,
+            
+            TotalStockQuantity = products.Sum(p => p.StockQuantity),
 
             LowStockProducts = products.Count(p =>
                 p.StockQuantity > 0 &&
                 p.StockQuantity <= p.ReorderPoint),
+                
+            OutOfStockProducts = products.Count(p => p.StockQuantity <= 0),
 
             TotalStockValue = totalStockValue,
 

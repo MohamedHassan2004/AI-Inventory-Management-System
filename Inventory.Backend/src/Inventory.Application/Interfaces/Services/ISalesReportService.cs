@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs.Reports.Sales;
+using Inventory.Domain.Shared;
 
 namespace Inventory.Application.Interfaces.Services;
 
@@ -22,8 +23,10 @@ public interface ISalesReportService
     DateTime startDate,
     DateTime endDate,
     CancellationToken cancellationToken);
-    Task<IEnumerable<ProfitMarginDto>> GetProfitMarginsAsync(
+    Task<PagedResult<ProfitMarginDto>> GetProfitMarginsAsync(
     DateTime startDate,
     DateTime endDate,
+    int page,
+    int pageSize,
     CancellationToken cancellationToken);
 }

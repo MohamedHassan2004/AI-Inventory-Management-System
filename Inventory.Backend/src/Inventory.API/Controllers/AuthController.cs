@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Inventory.Infrastructure.Data.Settings;
 
 namespace Inventory.API.Controllers
 {
@@ -22,7 +23,7 @@ namespace Inventory.API.Controllers
             IAuthService authService,
             ILocalizationService localizationService,
             IOptions<RefreshTokenCookieSettings> refreshTokenCookieOptions,
-            IOptions<Inventory.Infrastructure.Settings.JwtSettings> jwtOptions)
+            IOptions<JwtSettings> jwtOptions)
         {
             _authService = authService;
             _localizationService = localizationService;

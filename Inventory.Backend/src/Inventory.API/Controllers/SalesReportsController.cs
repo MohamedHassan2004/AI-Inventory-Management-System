@@ -61,11 +61,15 @@ public class SalesReportsController : ControllerBase
     public async Task<IActionResult> GetProfitMargins(
     [FromQuery] DateTime startDate,
     [FromQuery] DateTime endDate,
-    CancellationToken cancellationToken)
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20,
+    CancellationToken cancellationToken = default)
     {
         var result = await _salesReportService.GetProfitMarginsAsync(
             startDate,
             endDate,
+            page,
+            pageSize,
             cancellationToken);
 
         return Ok(result);

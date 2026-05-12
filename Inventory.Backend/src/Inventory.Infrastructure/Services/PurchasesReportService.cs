@@ -6,6 +6,8 @@ using Inventory.Application.Interfaces.Services;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
+using Inventory.Domain.Shared;
+
 namespace Inventory.Infrastructure.Services;
 
 public class PurchasesReportService : IPurchasesReportService
@@ -47,51 +49,14 @@ public class PurchasesReportService : IPurchasesReportService
             StatusBreakdown = statusBreakdown
         };
     }
-    public async Task<IEnumerable<TopSupplierDto>> GetTopSuppliersAsync(
-    DateTime startDate,
-    DateTime endDate,
-    int top,
-    CancellationToken cancellationToken)
-    {
-        var purchaseOrders = await _dbContext.PurchaseOrders
-            .AsNoTracking()
-            .Include(po => po.Supplier)
-            .Include(po => po.Items)
-            .Where(po =>
-                po.OrderDate >= startDate &&
-                po.OrderDate <= endDate)
-            .ToListAsync(cancellationToken);
 
-        return purchaseOrders
-            .GroupBy(po => new
-            {
-                po.SupplierId,
-                po.Supplier.Name
-            })
-            .Select(g => new TopSupplierDto
-            {
-                SupplierId = g.Key.SupplierId,
 
-                SupplierName = g.Key.Name,
-
-                TotalOrders = g.Count(),
-
-                TotalSpent = g.Sum(x => x.FinalTotal),
-
-                TotalProductsSupplied = g
-                    .SelectMany(x => x.Items)
-                    .Select(i => i.ProductId)
-                    .Distinct()
-                    .Count()
-            })
-            .OrderByDescending(x => x.TotalSpent)
-            .Take(top)
-            .ToList();
-    }
-    public async Task<IEnumerable<SupplierPerformanceDto>> GetSupplierPerformanceAsync(
-    DateTime startDate,
-    DateTime endDate,
-    CancellationToken cancellationToken)
+    public async Task<PagedResult<SupplierPurchasesReportItemDto>> GetSuppliersReportAsync(
+        DateTime startDate,
+        DateTime endDate,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
     {
         var purchaseOrders = await _dbContext.PurchaseOrders
             .AsNoTracking()
@@ -109,51 +74,46 @@ public class PurchasesReportService : IPurchasesReportService
                     .ThenInclude(a => a.StockBatch)
             .ToListAsync(cancellationToken);
 
-        return purchaseOrders
+        var query = purchaseOrders
             .GroupBy(po => new
             {
                 po.SupplierId,
-                po.Supplier.Name
+                Name = po.Supplier.Name,
+                AvgRating = po.Supplier.AvgRating
             })
             .Select(g =>
             {
                 var supplierId = g.Key.SupplierId;
-
-                var totalProductsSupplied = g
-                    .SelectMany(x => x.Items)
-                    .Sum(i => i.Quantity);
-
+                var totalProductsSupplied = g.SelectMany(x => x.Items).Sum(i => i.Quantity);
                 var returnedQuantity = returnItems
                     .SelectMany(ri =>
                         ri.OriginalOrderItem.Allocations
-                            .Where(a =>
-                                a.StockBatch.SupplierId == supplierId)
+                            .Where(a => a.StockBatch.SupplierId == supplierId)
                             .Select(a => a.ReturnedQuantity))
                     .Sum();
 
-                return new SupplierPerformanceDto
+                var returnRate = totalProductsSupplied == 0
+                    ? 0
+                    : Math.Round((returnedQuantity / totalProductsSupplied) * 100m, 2);
+
+                return new SupplierPurchasesReportItemDto
                 {
                     SupplierId = supplierId,
-
                     SupplierName = g.Key.Name,
-
-                    TotalPurchaseOrders = g.Count(),
-
                     TotalSpent = g.Sum(x => x.FinalTotal),
-
-                    TotalProductsSupplied = totalProductsSupplied,
-
+                    TotalProductsSupplied = (int)totalProductsSupplied,
+                    AvgRating = g.Key.AvgRating,
+                    TotalPurchaseOrders = g.Count(),
                     ReturnedQuantity = returnedQuantity,
-
-                    ReturnRate =
-                        totalProductsSupplied == 0
-                            ? 0
-                            : Math.Round(
-                                (returnedQuantity / totalProductsSupplied) * 100m,
-                                2)
+                    ReturnRate = returnRate
                 };
             })
             .OrderByDescending(x => x.TotalSpent)
             .ToList();
+
+        var totalCount = query.Count;
+        var pagedItems = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        return new PagedResult<SupplierPurchasesReportItemDto>(pagedItems, page, pageSize, totalCount);
     }
 }

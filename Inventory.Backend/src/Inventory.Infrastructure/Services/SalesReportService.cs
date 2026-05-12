@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using Inventory.Domain.Shared;
+
 namespace Inventory.Infrastructure.Services;
 
 public class SalesReportService : ISalesReportService
@@ -90,7 +92,7 @@ public class SalesReportService : ISalesReportService
             .GroupBy(o => o.PaymentMethod)
             .Select(g => new SalesByPaymentMethodDto
             {
-                PaymentMethod = g.Key.ToString(),
+                PaymentMethod = g.Key != null ? g.Key.ToString() : "Unknown",
                 TotalOrders = g.Count(),
                 TotalRevenue = g.Sum(x => x.FinalTotal)
             })
@@ -106,15 +108,28 @@ public class SalesReportService : ISalesReportService
             .OrderByDescending(x => x.TotalOrders)
             .ToListAsync(cancellationToken);
 
+        var salesByOrderType = await ordersQuery
+            .GroupBy(o => o.Type)
+            .Select(g => new SalesByOrderTypeDto
+            {
+                OrderType = g.Key.ToString(),
+                TotalOrders = g.Count(),
+                TotalRevenue = g.Sum(x => x.FinalTotal)
+            })
+            .ToListAsync(cancellationToken);
+
         return new SalesAnalyticsDto
         {
             SalesByPaymentMethod = salesByPaymentMethod,
-            PeakHours = peakHours
+            PeakHours = peakHours,
+            SalesByOrderType = salesByOrderType
         };
     }
-    public async Task<IEnumerable<ProfitMarginDto>> GetProfitMarginsAsync(
+    public async Task<PagedResult<ProfitMarginDto>> GetProfitMarginsAsync(
     DateTime startDate,
     DateTime endDate,
+    int page,
+    int pageSize,
     CancellationToken cancellationToken)
     {
         var orderItems = await _dbContext.OrderItems
@@ -129,7 +144,7 @@ public class SalesReportService : ISalesReportService
                 oi.Order.OrderDate <= endDate)
             .ToListAsync(cancellationToken);
 
-        return orderItems
+        var allItems = orderItems
             .GroupBy(oi => new
             {
                 oi.ProductId,
@@ -165,6 +180,12 @@ public class SalesReportService : ISalesReportService
             })
             .OrderByDescending(x => x.Profit)
             .ToList();
+
+        var totalCount = allItems.Count;
+        var skip = (page - 1) * pageSize;
+        var pagedItems = allItems.Skip(skip).Take(pageSize).ToList();
+
+        return new PagedResult<ProfitMarginDto>(pagedItems, page, pageSize, totalCount);
     }
 
 }

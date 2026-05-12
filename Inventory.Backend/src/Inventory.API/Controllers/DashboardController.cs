@@ -18,9 +18,13 @@ public class DashboardController : ControllerBase
     [HttpGet("summary")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSummary(
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
         CancellationToken cancellationToken)
     {
         var result = await _dashboardService.GetSummaryAsync(
+            startDate,
+            endDate,
             cancellationToken);
 
         return Ok(result);
