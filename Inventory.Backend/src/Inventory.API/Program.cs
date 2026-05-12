@@ -143,6 +143,10 @@ namespace Inventory.API
 
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                     await ApplicationDbContextSeed.SeedAdminUserAsync(userManager);
+
+                    // Seed domain entities securely using the orchestrated seeder
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    await Inventory.Infrastructure.Data.Seeders.DatabaseSeeder.SeedAllAsync(context, userManager);
                 }
 
                 app.UseRequestLocalization();
