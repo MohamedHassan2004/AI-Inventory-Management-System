@@ -137,7 +137,8 @@ namespace Inventory.Domain.Entities
             // Each Product must have been loaded with its Batches collection.
             foreach (var item in _items)
             {
-                item.Product.ReduceStock(item.Quantity);
+                var allocations = item.Product.ReduceStock(item.Quantity);
+                item.SetAllocations(allocations);
             }
 
             PaymentMethod = paymentMethod;
@@ -176,8 +177,10 @@ namespace Inventory.Domain.Entities
 
             foreach (var (product, quantity) in items)
             {
-                product.ReduceStock(quantity);
-                order._items.Add(new OrderItem(0, product, quantity));
+                var allocations = product.ReduceStock(quantity);
+                var orderItem = new OrderItem(0, product, quantity);
+                orderItem.SetAllocations(allocations);
+                order._items.Add(orderItem);
             }
 
             order.PaymentMethod = paymentMethod;

@@ -58,10 +58,25 @@ namespace Inventory.Domain.Entities
         // ──────────────────────────────────────────
         // Finalize return
         // ──────────────────────────────────────────
-        public void Complete()
+        public void Process()
         {
             if (!_items.Any())
                 throw new EmptyReturnOrderException();
+
+            foreach (var item in _items)
+            {
+                var allocations = item.OriginalOrderItem.AddReturnedQuantity(item.Quantity);
+                
+                foreach (var alloc in allocations)
+                {
+                    item.Product.AddReturnedStock(
+                        alloc.batch.Id,
+                        alloc.batch.SupplierId, 
+                        item.NewExpiryDate, 
+                        alloc.batch.UnitCost, 
+                        alloc.returned);
+                }
+            }
 
             TotalRefundAmount = _items.Sum(i => i.RefundAmount);
         }

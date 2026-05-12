@@ -71,6 +71,9 @@ namespace Inventory.Application.Services
             if (supplier == null)
                 return Result.Failure(new Error("Supplier.NotFound", $"Supplier with ID {id} not found", ErrorType.NotFound));
 
+            if (await _supplierRepository.HasRelatedStockBatchesAsync(id, cancellationToken))
+                return Result.Failure(new Error("Supplier.HasStockBatches", "Cannot delete supplier because it is associated with existing stock batches.", ErrorType.Conflict));
+
             supplier.MarkAsDeleted();
             _supplierRepository.Update(supplier);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

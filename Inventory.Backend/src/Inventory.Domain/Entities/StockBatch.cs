@@ -9,8 +9,8 @@ namespace Inventory.Domain.Entities
         public decimal OriginalQuantity { get; private set; }
         public decimal RemainingQuantity { get; private set; }
 
-        public int? SupplierId { get; private set; }
-        public Supplier? Supplier { get; private set; }
+        public int SupplierId { get; private set; }
+        public Supplier Supplier { get; private set; }
 
         public int ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
@@ -18,12 +18,12 @@ namespace Inventory.Domain.Entities
         // Required by EF Core
         private StockBatch() { }
 
-        public StockBatch(int productId, int? supplierId, DateTime expireDate, decimal unitCost, decimal quantity)
+        public StockBatch(int productId, int supplierId, DateTime expireDate, decimal unitCost, decimal quantity)
         {
             if (productId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(productId), "Product ID must be greater than zero.");
 
-            if (supplierId.HasValue && supplierId.Value <= 0)
+            if (supplierId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(supplierId), "Supplier ID must be greater than zero.");
 
             if (expireDate <= DateTime.UtcNow)

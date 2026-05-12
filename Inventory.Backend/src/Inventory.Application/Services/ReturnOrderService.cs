@@ -76,20 +76,9 @@ namespace Inventory.Application.Services
                     }
 
                     returnOrder.AddItem(originalItem, itemDto.Quantity, itemDto.NewExpiryDate);
-
-                    var lastBatch = originalItem.Product.Batches
-                        .OrderByDescending(b => b.PurchaseDate)
-                        .ThenByDescending(b => b.Id)
-                        .FirstOrDefault();
-
-                    decimal unitCost = lastBatch?.UnitCost ?? 0;
-
-                    // Delegate the creation of the StockBatch to the Product aggregate root
-                    // Product and Batches are already loaded via GetFullOrderAsync
-                    originalItem.Product.AddStock(null, itemDto.NewExpiryDate, unitCost, itemDto.Quantity);
                 }
 
-                returnOrder.Complete();
+                returnOrder.Process();
             }
             catch (InvalidOperationException ex)
             {
@@ -125,6 +114,7 @@ namespace Inventory.Application.Services
             }
 
             await _returnOrderRepository.AddAsync(returnOrder, cancellationToken);
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Return order {ReturnOrderId} created successfully", returnOrder.Id);

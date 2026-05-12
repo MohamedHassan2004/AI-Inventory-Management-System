@@ -20,6 +20,14 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey(i => i.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(i => i.Allocations)
+                .WithOne(a => a.OrderItem)
+                .HasForeignKey(a => a.OrderItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Metadata.FindNavigation(nameof(OrderItem.Allocations))!
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

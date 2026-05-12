@@ -44,8 +44,8 @@ namespace Inventory.Domain.Entities
             if (newExpiryDate <= DateTime.UtcNow)
                 throw new ArgumentException("Expiry date must be in the future.", nameof(newExpiryDate));
 
-            // Validate against remaining returnable quantity and update original item state
-            originalItem.AddReturnedQuantity(quantity);
+            // Validation of remaining returnable quantity should happen during Process
+
 
             // ── assignments ─────────────────────────────
 

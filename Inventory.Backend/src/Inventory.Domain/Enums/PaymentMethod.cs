@@ -9,5 +9,5 @@ namespace Inventory.Domain.Enums
         Cash,
         Visa,
         BankTransfer
-    }
+    } 
 }

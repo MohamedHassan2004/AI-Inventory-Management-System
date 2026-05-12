@@ -1,0 +1,41 @@
+using System;
+
+namespace Inventory.Domain.Entities
+{
+    public class OrderItemBatchAllocation
+    {
+        public int Id { get; private set; }
+
+        public int OrderItemId { get; private set; }
+        public OrderItem OrderItem { get; private set; } = null!;
+
+        public int StockBatchId { get; private set; }
+        public StockBatch StockBatch { get; private set; } = null!;
+
+        public decimal QuantityTaken { get; private set; }
+        public decimal ReturnedQuantity { get; private set; }
+
+        public decimal RemainingToReturn => QuantityTaken - ReturnedQuantity;
+
+        private OrderItemBatchAllocation() { }
+
+        internal OrderItemBatchAllocation(int stockBatchId, decimal quantityTaken)
+        {
+            if (stockBatchId <= 0) throw new ArgumentOutOfRangeException(nameof(stockBatchId));
+            if (quantityTaken <= 0) throw new ArgumentOutOfRangeException(nameof(quantityTaken));
+
+            StockBatchId = stockBatchId;
+            QuantityTaken = quantityTaken;
+            ReturnedQuantity = 0;
+        }
+
+        internal void AddReturn(decimal quantity)
+        {
+            if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
+            if (ReturnedQuantity + quantity > QuantityTaken)
+                throw new InvalidOperationException($"Cannot return {quantity}. Only {RemainingToReturn} left to return for this allocation.");
+
+            ReturnedQuantity += quantity;
+        }
+    }
+}

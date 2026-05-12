@@ -6,5 +6,6 @@ namespace Inventory.Domain.Interfaces
     {
         Task<bool> ExistsAsync(string name, CancellationToken cancellationToken = default);
         Task<Supplier?> GetSupplierWithNotesAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> HasRelatedStockBatchesAsync(int id, CancellationToken cancellationToken = default);
     }
 }
