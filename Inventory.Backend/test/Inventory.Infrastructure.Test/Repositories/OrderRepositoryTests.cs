@@ -40,21 +40,39 @@ public class OrderRepositoryTests
         // Arrange
         await using var context = DbContextFactory.Create();
 
-        var product = new Product(
-        "SKU-1",
-        "Laptop",
-        1000,
-        10);
+        var supplier = new Supplier(
+            "Main Supplier",
+            "01000000000");
 
-        var order = Order.Submit(
+        context.Suppliers.Add(supplier);
+
+        await context.SaveChangesAsync();
+
+        var product = new Product(
+            "P-001",
+            "Laptop",
+            1000,
+            5);
+
+        context.Products.Add(product);
+
+        await context.SaveChangesAsync();
+
+        product.AddStock(
+            supplier.Id,
+            DateTime.UtcNow.AddDays(30),
+            500,
+            10);
+
+        await context.SaveChangesAsync();
+
+        var order = Order.CreateDraft(
             "cashier-1",
-            new List<(Product product, decimal quantity)>
-            {
-                (product, 1)
-            },
-            PaymentMethod.Cash,
-            OrderType.InStore,
-            0);
+            OrderType.InStore);
+
+        order.AddItem(product, 1);
+
+        order.Confirm(PaymentMethod.Cash);
 
         context.Orders.Add(order);
 
@@ -75,15 +93,25 @@ public class OrderRepositoryTests
         // Arrange
         await using var context = DbContextFactory.Create();
 
-        var expiredDraft = Order.CreateDraft(
+        var expiredOrder = Order.CreateDraft(
             "cashier-1",
             OrderType.InStore);
 
-        var validDraft = Order.CreateDraft(
+        var validOrder = Order.CreateDraft(
             "cashier-2",
             OrderType.InStore);
 
-        context.Orders.AddRange(expiredDraft, validDraft);
+        typeof(Order)
+            .GetProperty(nameof(Order.ExpiresAt))!
+            .SetValue(expiredOrder, DateTime.UtcNow.AddHours(-1));
+
+        typeof(Order)
+            .GetProperty(nameof(Order.ExpiresAt))!
+            .SetValue(validOrder, DateTime.UtcNow.AddDays(2));
+
+        context.Orders.AddRange(
+            expiredOrder,
+            validOrder);
 
         await context.SaveChangesAsync();
 
@@ -91,9 +119,11 @@ public class OrderRepositoryTests
 
         // Act
         var result = await repository.GetExpiredDraftsAsync(
-            DateTime.UtcNow.AddHours(13));
+            DateTime.UtcNow);
 
         // Assert
         result.Should().ContainSingle();
+
+        result.First().CashierId.Should().Be("cashier-1");
     }
 }
