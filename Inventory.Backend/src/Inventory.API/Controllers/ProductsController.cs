@@ -82,10 +82,7 @@ namespace Inventory.API.Controllers
         }
 
         // GET: api/products/search?q=pepsi
-        // Searches by product name (Full-Text Search) or exact SKU match.
-        // Intended for the cashier product-picker; returns lightweight lookup results.
         [HttpGet("search")]
-        [Authorize(Roles = "Cashier,Admin")]
         public async Task<IActionResult> Search(
             [FromQuery] string q,
             CancellationToken cancellationToken)
