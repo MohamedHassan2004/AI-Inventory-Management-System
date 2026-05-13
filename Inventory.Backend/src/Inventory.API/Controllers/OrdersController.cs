@@ -1,5 +1,6 @@
 using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,13 +13,16 @@ namespace Inventory.API.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IOrderQueryService _orderQueryService;
+        private readonly IReceiptService _receiptService;
 
         public OrdersController(
             IOrderService orderService,
-            IOrderQueryService orderQueryService)
+            IOrderQueryService orderQueryService,
+            IReceiptService receiptService)
         {
             _orderService = orderService;
             _orderQueryService = orderQueryService;
+            _receiptService = receiptService;
         }
 
         // ─────────────────────────────────────────────────────────────
@@ -130,6 +134,16 @@ namespace Inventory.API.Controllers
         {
             var result = await _orderQueryService.GetItemsByOrderIdAsync(orderId, cancellationToken);
             return HandleResult(result);
+        }
+
+        // GET: api/orders/{id}/receipt
+        [HttpGet("{id}/receipt")]
+        public async Task<IActionResult> GetReceipt(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _receiptService.GenerateReceiptAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"receipt-{id}.pdf");
         }
     }
 }

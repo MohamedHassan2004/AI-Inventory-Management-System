@@ -46,6 +46,8 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
 
+        services.Configure<SystemSettings>(configuration.GetSection(SystemSettings.SectionName));
+
         
         services.AddAuthentication(options =>
         {
@@ -100,6 +102,8 @@ public static class DependencyInjection
         services.AddScoped<ISupplierReportService, SupplierReportService>();
         services.AddScoped<IUsersReportService, UsersReportService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IReceiptService, ReceiptService>();
+        services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
 
         services.AddHostedService<DraftOrderCleanupService>();
 

@@ -168,6 +168,7 @@ Base route: `api/<controller>`
 |---|---|---|
 | POST | `/api/purchaseorders/submit` | Submit a purchase order with items |
 | GET | `/api/purchaseorders/{id}` | Get purchase order by ID |
+| GET | `/api/purchase-orders/{id}/invoice` | Generate PDF invoice for purchase order |
 | GET | `/api/purchaseorders` | List all purchase orders (with filtering) |
 | GET | `/api/purchaseorders/{id}/items` | Get items for a purchase order |
 
@@ -194,6 +195,7 @@ Base route: `api/<controller>`
 | POST | `/api/orders/{id}/confirm` | Confirm draft (consumes stock FEFO) |
 | DELETE | `/api/orders/{id}` | Cancel a draft order |
 | GET | `/api/orders/{id}` | Get order by ID |
+| GET | `/api/orders/{id}/receipt` | Generate PDF receipt for order |
 | GET | `/api/orders` | List orders (status, sorting, paging) |
 | GET | `/api/orders/{orderId}/items` | Get order items |
 
@@ -215,11 +217,7 @@ Base route: `api/<controller>`
 | GET | `/api/reports/inventory/low-stock` | Low stock products |
 | GET | `/api/reports/inventory/out-of-stock` | Out of stock products |
 | GET | `/api/reports/inventory/turnover` | Inventory turnover rate |
-| GET | `/api/reports/purchases/summary` | Purchases summary |
-| GET | `/api/reports/purchases/suppliers` | Supplier performance report |
-| GET | `/api/reports/returns/summary` | Returns summary |
 | GET | `/api/reports/returns/top-products` | Top returned products |
-| GET | `/api/reports/sales/summary` | Sales summary |
 | GET | `/api/reports/sales/top-products` | Top selling products |
 | GET | `/api/reports/sales/analytics` | Sales analytics data |
 | GET | `/api/reports/sales/profit-margin` | Profit margin analysis |

@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +14,16 @@ namespace Inventory.API.Controllers
     {
         private readonly IPurchaseOrderService _purchaseOrderService;
         private readonly IPurchaseOrderQueryService _purchaseOrderQueryService;
+        private readonly IPurchaseInvoiceService _purchaseInvoiceService;
 
         public PurchaseOrdersController(
             IPurchaseOrderService purchaseOrderService,
-            IPurchaseOrderQueryService purchaseOrderQueryService)
+            IPurchaseOrderQueryService purchaseOrderQueryService,
+            IPurchaseInvoiceService purchaseInvoiceService)
         {
             _purchaseOrderService = purchaseOrderService;
             _purchaseOrderQueryService = purchaseOrderQueryService;
+            _purchaseInvoiceService = purchaseInvoiceService;
         }
 
         [HttpPost("submit")]
@@ -56,6 +60,15 @@ namespace Inventory.API.Controllers
         {
             var result = await _purchaseOrderQueryService.GetItemsByPurchaseOrderIdAsync(id, cancellationToken);
             return HandleResult(result);
+        }
+
+        [HttpGet("{id}/invoice")]
+        public async Task<IActionResult> GetInvoice(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _purchaseInvoiceService.GenerateInvoiceAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"purchase-invoice-{id}.pdf");
         }
     }
 }

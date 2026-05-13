@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi;
+using QuestPDF.Infrastructure;
 
 
 namespace Inventory.API
@@ -31,6 +32,8 @@ namespace Inventory.API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            QuestPDF.Settings.License = LicenseType.Community;
 
             // Create Serilog Logger
             Log.Logger = new LoggerConfiguration()
