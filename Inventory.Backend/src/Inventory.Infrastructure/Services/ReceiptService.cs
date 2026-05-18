@@ -7,21 +7,25 @@ using Inventory.Infrastructure.Data.Settings;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Inventory.Domain.Shared;
+using Microsoft.Extensions.Logging;
 
 namespace Inventory.Infrastructure.Services;
 
 public class ReceiptService : IReceiptService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<ReceiptService> _logger;
     private readonly string _systemName;
 
-    public ReceiptService(ApplicationDbContext context, IOptions<SystemSettings> systemSettings)
+    public ReceiptService(ApplicationDbContext context, IOptions<SystemSettings> systemSettings, ILogger<ReceiptService> logger)
     {
         _context = context;
+        _logger = logger;
         _systemName = systemSettings.Value.SystemName;
     }
 
-    public async Task<byte[]> GenerateReceiptAsync(int orderId, CancellationToken cancellationToken = default)
+    public async Task<Result<byte[]>> GenerateReceiptAsync(int orderId, CancellationToken cancellationToken = default)
     {
         var order = await _context.Orders
             .AsNoTracking()
@@ -31,7 +35,10 @@ public class ReceiptService : IReceiptService
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
         if (order == null)
-            throw new OrderNotFoundException(orderId);
+        {
+            _logger.LogWarning("Order with ID {OrderId} not found.", orderId);
+            return Result.Failure<byte[]>(new Error("ORDER_NOT_FOUND",$"Order with ID {orderId} not found.",ErrorType.NotFound));
+        }
 
         var document = Document.Create(container =>
         {
@@ -48,7 +55,7 @@ public class ReceiptService : IReceiptService
             });
         });
 
-        return document.GeneratePdf();
+        return Result.Success(document.GeneratePdf());
     }
 
     private void ComposeHeader(IContainer container)

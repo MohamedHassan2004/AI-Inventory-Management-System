@@ -2,6 +2,7 @@ using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Enums;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Http;
@@ -17,12 +18,15 @@ public class PurchaseOrdersControllerTests
     private readonly Mock<IPurchaseOrderService> _purchaseOrderServiceMock;
     private readonly Mock<IPurchaseOrderQueryService> _purchaseOrderQueryServiceMock;
     private readonly Mock<ILocalizationService> _localizationMock;
+    private readonly Mock<IPurchaseInvoiceService> _purchaseInvoiceServiceMock;
 
     public PurchaseOrdersControllerTests()
     {
         _purchaseOrderServiceMock = new Mock<IPurchaseOrderService>();
 
         _purchaseOrderQueryServiceMock = new Mock<IPurchaseOrderQueryService>();
+
+        _purchaseInvoiceServiceMock = new Mock<IPurchaseInvoiceService>();
 
         _localizationMock = new Mock<ILocalizationService>();
     }
@@ -37,7 +41,8 @@ public class PurchaseOrdersControllerTests
 
         var controller = new PurchaseOrdersController(
             _purchaseOrderServiceMock.Object,
-            _purchaseOrderQueryServiceMock.Object);
+            _purchaseOrderQueryServiceMock.Object,
+            _purchaseInvoiceServiceMock.Object);
 
         controller.ControllerContext = new ControllerContext
         {

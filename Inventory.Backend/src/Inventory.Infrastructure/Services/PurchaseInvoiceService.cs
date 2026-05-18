@@ -7,21 +7,25 @@ using Inventory.Infrastructure.Data.Settings;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Inventory.Domain.Shared;
+using Microsoft.Extensions.Logging;
 
 namespace Inventory.Infrastructure.Services;
 
 public class PurchaseInvoiceService : IPurchaseInvoiceService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<PurchaseInvoiceService> _logger;
     private readonly string _systemName;
 
-    public PurchaseInvoiceService(ApplicationDbContext context, IOptions<SystemSettings> systemSettings)
+    public PurchaseInvoiceService(ApplicationDbContext context, IOptions<SystemSettings> systemSettings, ILogger<PurchaseInvoiceService> logger)
     {
         _context = context;
+        _logger = logger;
         _systemName = systemSettings.Value.SystemName;
     }
 
-    public async Task<byte[]> GenerateInvoiceAsync(int purchaseOrderId, CancellationToken cancellationToken = default)
+    public async Task<Result<byte[]>> GenerateInvoiceAsync(int purchaseOrderId, CancellationToken cancellationToken = default)
     {
         var purchaseOrder = await _context.PurchaseOrders
             .AsNoTracking()
@@ -31,7 +35,10 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
             .FirstOrDefaultAsync(po => po.Id == purchaseOrderId, cancellationToken);
 
         if (purchaseOrder == null)
-            throw new PurchaseOrderNotFoundException(purchaseOrderId);
+        {
+            _logger.LogWarning("Purchase order with ID {PurchaseOrderId} not found for invoice generation.", purchaseOrderId);
+            return Result.Failure<byte[]>(new Error("NOT_FOUND", $"purchase order with ID {purchaseOrderId} not found", ErrorType.NotFound));
+        }
 
         var document = Document.Create(container =>
         {
@@ -48,7 +55,7 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
             });
         });
 
-        return document.GeneratePdf();
+        return Result.Success(document.GeneratePdf());
     }
 
     private void ComposeHeader(IContainer container)

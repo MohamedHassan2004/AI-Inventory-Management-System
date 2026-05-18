@@ -67,8 +67,12 @@ namespace Inventory.API.Controllers
             int id,
             CancellationToken cancellationToken)
         {
-            var pdfBytes = await _purchaseInvoiceService.GenerateInvoiceAsync(id, cancellationToken);
-            return File(pdfBytes, "application/pdf", $"purchase-invoice-{id}.pdf");
+            var result = await _purchaseInvoiceService.GenerateInvoiceAsync(id, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return HandleResult(result);
+            }
+            return File(result.Value , "application/pdf", $"purchase-invoice-{id}.pdf");
         }
     }
 }

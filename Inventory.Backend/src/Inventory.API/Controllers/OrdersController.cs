@@ -142,8 +142,12 @@ namespace Inventory.API.Controllers
             int id,
             CancellationToken cancellationToken)
         {
-            var pdfBytes = await _receiptService.GenerateReceiptAsync(id, cancellationToken);
-            return File(pdfBytes, "application/pdf", $"receipt-{id}.pdf");
+            var result = await _receiptService.GenerateReceiptAsync(id, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return HandleResult(result);
+            }
+            return File(result.Value, "application/pdf", $"receipt-{id}.pdf");
         }
     }
 }

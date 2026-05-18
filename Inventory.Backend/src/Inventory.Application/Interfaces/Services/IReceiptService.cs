@@ -1,3 +1,4 @@
+using Inventory.Domain.Shared;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -5,5 +6,5 @@ namespace Inventory.Application.Interfaces.Services;
 
 public interface IReceiptService
 {
-    Task<byte[]> GenerateReceiptAsync(int orderId, CancellationToken cancellationToken = default);
+    Task<Result<byte[]>> GenerateReceiptAsync(int orderId, CancellationToken cancellationToken = default);
 }

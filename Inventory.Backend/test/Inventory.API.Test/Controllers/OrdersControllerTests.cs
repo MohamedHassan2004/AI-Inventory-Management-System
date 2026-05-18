@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Security.Claims;
+using Inventory.Application.Interfaces.Services;
 using Xunit;
 
 namespace Inventory.API.Test.Controllers;
@@ -18,12 +19,15 @@ public class OrdersControllerTests
     private readonly Mock<IOrderService> _orderServiceMock;
     private readonly Mock<IOrderQueryService> _orderQueryServiceMock;
     private readonly Mock<ILocalizationService> _localizationMock;
+    private readonly Mock<IReceiptService> _receiptServiceMock;
 
     public OrdersControllerTests()
     {
         _orderServiceMock = new Mock<IOrderService>();
 
         _orderQueryServiceMock = new Mock<IOrderQueryService>();
+
+        _receiptServiceMock = new Mock<IReceiptService>();
 
         _localizationMock = new Mock<ILocalizationService>();
     }
@@ -38,7 +42,8 @@ public class OrdersControllerTests
 
         var controller = new OrdersController(
             _orderServiceMock.Object,
-            _orderQueryServiceMock.Object);
+            _orderQueryServiceMock.Object,
+            _receiptServiceMock.Object);
 
         var user = new ClaimsPrincipal(
             new ClaimsIdentity(

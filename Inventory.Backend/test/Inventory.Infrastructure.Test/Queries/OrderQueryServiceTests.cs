@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
 using Inventory.Domain.Entities;
@@ -126,6 +126,8 @@ public class OrderQueryServiceTests
             DateTime.UtcNow.AddDays(30),
             500,
             20);
+
+        await context.SaveChangesAsync();
 
         var draftOrder = Order.CreateDraft(
             "cashier-1",
