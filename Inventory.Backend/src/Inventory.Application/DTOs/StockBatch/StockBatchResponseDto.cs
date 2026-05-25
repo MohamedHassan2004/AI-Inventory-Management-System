@@ -10,6 +10,7 @@ namespace Inventory.Application.DTOs.StockBatch
         decimal UnitCost,
         decimal OriginalQuantity,
         decimal RemainingQuantity,
-        int? SupplierId
+        int? SupplierId,
+        string? SupplierName
     );
 }

@@ -59,7 +59,8 @@ public class StockBatchesControllerTests
                 100,
                 50,
                 50,
-                1)
+                1,
+                "Mohamed")
         };
 
         _stockBatchServiceMock
@@ -89,7 +90,8 @@ public class StockBatchesControllerTests
             100,
             50,
             50,
-            1);
+            1,
+            "Mohamed");
 
         _stockBatchServiceMock
             .Setup(x => x.GetByIdAsync(
@@ -125,7 +127,8 @@ public class StockBatchesControllerTests
             100,
             50,
             50,
-            1);
+            1,
+            "Mohamed");
 
         _stockBatchServiceMock
             .Setup(x => x.CreateAsync(
@@ -175,7 +178,8 @@ public class StockBatchesControllerTests
                 100,
                 50,
                 50,
-                1)
+                1,
+                "Mohamed")
         };
 
         _stockBatchServiceMock
@@ -200,7 +204,7 @@ public class StockBatchesControllerTests
         // Arrange
         var batches = new List<StockBatchResponseDto>
         {
-            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1)
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1, "Mohamed")
         };
 
         _stockBatchServiceMock
@@ -222,7 +226,7 @@ public class StockBatchesControllerTests
         // Arrange
         var batches = new List<StockBatchResponseDto>
         {
-            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1)
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1, "Mohamed")
         };
 
         _stockBatchServiceMock

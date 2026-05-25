@@ -8,6 +8,7 @@ namespace Inventory.Application.DTOs.ReturnOrder
         public int Id { get; set; }
         public int OriginalOrderId { get; set; }
         public string CashierId { get; set; } = string.Empty;
+        public string CashierName {  get; set; } = string.Empty;
         public DateTime ReturnDate { get; set; }
         public string? Reason { get; set; }
         public decimal TotalRefundAmount { get; set; }

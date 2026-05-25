@@ -29,6 +29,7 @@ namespace Inventory.Infrastructure.Queries
                 Id = r.Id,
                 OriginalOrderId = r.OriginalOrderId,
                 CashierId = r.CashierId,
+                CashierName = r.Cashier != null ? r.Cashier.FullName: string.Empty,
                 ReturnDate = r.ReturnDate,
                 Reason = r.Reason,
                 TotalRefundAmount = r.TotalRefundAmount,

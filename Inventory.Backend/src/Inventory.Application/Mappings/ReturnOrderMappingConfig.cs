@@ -12,6 +12,9 @@ namespace Inventory.Application.Mappings
                 .Map(dest => dest.Items, src => src.Items);
 
             config.NewConfig<ReturnOrderItem, ReturnOrderItemResponseDto>();
+
+            config.NewConfig<ReturnOrder, ReturnOrderResponseDto>()
+                .Map(dest => dest.CashierName, src => src.Cashier != null ? src.Cashier.FullName : string.Empty);
         }
     }
 }
