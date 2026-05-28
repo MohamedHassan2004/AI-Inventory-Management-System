@@ -18,6 +18,7 @@ namespace Inventory.Domain.Entities
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
         public DateTime? ExpiresAt { get; private set; }
+        public DateTime? AllocationExpiresAt { get; private set; }
 
         // ─── Ownership ────────────────────────────────────────────────────────────
         public string CashierId { get; private set; } = string.Empty;
@@ -65,7 +66,8 @@ namespace Inventory.Domain.Entities
                 CashierId = cashierId,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Draft,
-                ExpiresAt = DateTime.UtcNow.AddHours(DraftExpiryHours)
+                ExpiresAt = DateTime.UtcNow.AddHours(DraftExpiryHours),
+                AllocationExpiresAt = DateTime.UtcNow.AddMinutes(30)
             };
         }
 
@@ -84,20 +86,19 @@ namespace Inventory.Domain.Entities
             if (existing is not null)
             {
                 var newQuantity = existing.Quantity + quantity;
-                if (product.StockQuantity >= newQuantity)
-                {
-                    existing.UpdateQuantity(existing.Quantity + quantity);
-                }
-                else
-                {
-                    throw new InsufficientStockException(product.Name, newQuantity, product.StockQuantity);
-                }
+                var extraAllocations = product.ReduceStock(quantity);
+                existing.UpdateQuantity(newQuantity);
+                existing.SetAllocations(extraAllocations);
             }
             else
             {
-                _items.Add(new OrderItem(Id, product, quantity));
+                var orderItem = new OrderItem(Id, product, quantity);
+                var allocations = product.ReduceStock(quantity);
+                orderItem.SetAllocations(allocations);
+                _items.Add(orderItem);
             }
 
+            AllocationExpiresAt = DateTime.UtcNow.AddMinutes(30);
             Recalculate();
         }
 
@@ -110,7 +111,21 @@ namespace Inventory.Domain.Entities
             var existing = _items.FirstOrDefault(i => i.ProductId == productId)
                            ?? throw new InvalidOperationException($"Product {productId} is not in this order.");
 
-            existing.UpdateQuantity(quantity);
+            if (quantity > existing.Quantity)
+            {
+                var extraAllocations = existing.Product.ReduceStock(quantity - existing.Quantity);
+                existing.UpdateQuantity(quantity);
+                existing.SetAllocations(extraAllocations);
+            }
+            else if (quantity < existing.Quantity)
+            {
+                existing.ClearAllocations();
+                var newAllocations = existing.Product.ReduceStock(quantity);
+                existing.UpdateQuantity(quantity);
+                existing.SetAllocations(newAllocations);
+            }
+
+            AllocationExpiresAt = DateTime.UtcNow.AddMinutes(30);
             Recalculate();
         }
 
@@ -121,7 +136,10 @@ namespace Inventory.Domain.Entities
             var item = _items.FirstOrDefault(i => i.ProductId == productId)
                        ?? throw new InvalidOperationException($"Product {productId} is not in this order.");
 
+            item.ClearAllocations();
             _items.Remove(item);
+            
+            AllocationExpiresAt = DateTime.UtcNow.AddMinutes(30);
             Recalculate();
         }
 
@@ -148,16 +166,19 @@ namespace Inventory.Domain.Entities
             if (!_items.Any())
                 throw new EmptyOrderException();
 
-            // Each Product must be loaded with its Batches collection.
             foreach (var item in _items)
             {
-                var allocations = item.Product.ReduceStock(item.Quantity);
-                item.SetAllocations(allocations);
+                if (!item.Allocations.Any())
+                {
+                    var allocations = item.Product.ReduceStock(item.Quantity);
+                    item.SetAllocations(allocations);
+                }
             }
 
             PaymentMethod = paymentMethod;
             Type = orderType;
             ExpiresAt = null;
+            AllocationExpiresAt = null;
 
             Status = orderType == OrderType.Delivery
                 ? OrderStatus.OutForDelivery
@@ -214,8 +235,22 @@ namespace Inventory.Domain.Entities
                 throw new InvalidOperationException(
                     $"Cancel is only valid on Draft orders. Use FailDelivery() for OutForDelivery orders. Current status: {Status}.");
 
+            ReleaseAllocations();
+
             Status = OrderStatus.Cancelled;
             ExpiresAt = null;
+        }
+
+        public void ReleaseAllocations()
+        {
+            if (Status != OrderStatus.Draft) return;
+
+            foreach (var item in _items)
+            {
+                item.ClearAllocations();
+            }
+
+            AllocationExpiresAt = null;
         }
 
         // =========================================================================

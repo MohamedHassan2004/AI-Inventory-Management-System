@@ -10,23 +10,23 @@ namespace Inventory.Application.Interfaces
             SubmitOrderDto dto,
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> CreateDraftAsync(
+        Task<Result<DetailedOrderResponseDto>> CreateDraftAsync(
             string cashierId, 
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> AddItemAsync(
+        Task<Result<DetailedOrderResponseDto>> AddItemAsync(
             string cashierId, 
             int orderId, 
             AddOrderItemDto dto, 
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> RemoveItemAsync(
+        Task<Result<DetailedOrderResponseDto>> RemoveItemAsync(
             string cashierId, 
             int orderId, 
             int productId, 
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> UpdateItemQuantityAsync(
+        Task<Result<DetailedOrderResponseDto>> UpdateItemQuantityAsync(
             string cashierId, 
             int orderId, 
             int productId, 

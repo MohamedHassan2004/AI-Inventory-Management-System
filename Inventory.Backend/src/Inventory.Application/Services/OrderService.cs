@@ -121,29 +121,29 @@ namespace Inventory.Application.Services
         //  DRAFT WORKFLOW
         // ─────────────────────────────────────────────────────────────
 
-        public async Task<Result<OrderResponseDto>> CreateDraftAsync(string cashierId, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> CreateDraftAsync(string cashierId, CancellationToken cancellationToken = default)
         {
             var order = Order.CreateDraft(cashierId);
             
             await _orderRepository.AddAsync(order, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = _mapper.Map<OrderResponseDto>(order);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
             return Result.Success(response);
         }
 
-        public async Task<Result<OrderResponseDto>> AddItemAsync(string cashierId, int orderId, AddOrderItemDto dto, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> AddItemAsync(string cashierId, int orderId, AddOrderItemDto dto, CancellationToken cancellationToken = default)
         {
             var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
             if (order == null || order.Status != OrderStatus.Draft)
             {
-                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
             }
 
             var product = await _productRepository.GetBySkuWithBatchesAsync(dto.SKU, cancellationToken);
             if (product == null)
             {
-                 return Result.Failure<OrderResponseDto>(new Error("PRODUCT_NOT_FOUND", "Product not found.", ErrorType.NotFound));
+                 return Result.Failure<DetailedOrderResponseDto>(new Error("PRODUCT_NOT_FOUND", "Product not found.", ErrorType.NotFound));
             }
 
             try
@@ -154,28 +154,28 @@ namespace Inventory.Application.Services
             catch(InsufficientStockException ex)
             {
                 _logger.LogWarning(ex, "Insufficient stock while adding product {ProductId} to order {OrderId}", product.Id, orderId);
-                return Result.Failure<OrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
             }
             catch (DbUpdateConcurrencyException)
             {
                 _logger.LogWarning("Concurrency conflict while adding item to order {OrderId}", orderId);
-                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidDiscountException || ex is InvalidOperationException)
             {
-                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+                 return Result.Failure<DetailedOrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
             }
 
-            var response = _mapper.Map<OrderResponseDto>(order);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
             return Result.Success(response);
         }
 
-        public async Task<Result<OrderResponseDto>> RemoveItemAsync(string cashierId, int orderId, int productId, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> RemoveItemAsync(string cashierId, int orderId, int productId, CancellationToken cancellationToken = default)
         {
             var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
             if (order == null || order.Status != OrderStatus.Draft)
             {
-                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
             }
 
             try
@@ -186,23 +186,23 @@ namespace Inventory.Application.Services
             catch (DbUpdateConcurrencyException)
             {
                 _logger.LogWarning("Concurrency conflict while removing item from order {OrderId}", orderId);
-                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
             }
             catch (InvalidOperationException ex)
             {
-                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+                 return Result.Failure<DetailedOrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
             }
 
-            var response = _mapper.Map<OrderResponseDto>(order);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
             return Result.Success(response);
         }
 
-        public async Task<Result<OrderResponseDto>> UpdateItemQuantityAsync(string cashierId, int orderId, int productId, decimal quantity, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> UpdateItemQuantityAsync(string cashierId, int orderId, int productId, decimal quantity, CancellationToken cancellationToken = default)
         {
             var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
             if (order == null || order.Status != OrderStatus.Draft)
             {
-                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
             }
 
             try
@@ -213,14 +213,14 @@ namespace Inventory.Application.Services
             catch (DbUpdateConcurrencyException)
             {
                 _logger.LogWarning("Concurrency conflict while updating item quantity in order {OrderId}", orderId);
-                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
             {
-                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+                 return Result.Failure<DetailedOrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
             }
 
-            var response = _mapper.Map<OrderResponseDto>(order);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
             return Result.Success(response);
         }
 

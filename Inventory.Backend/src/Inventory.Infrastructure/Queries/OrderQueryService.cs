@@ -56,7 +56,8 @@ namespace Inventory.Infrastructure.Queries
                     UnitPrice = a.UnitPrice,
                     DiscountPercentage = a.DiscountPercentage
                 }).ToList()
-            }).ToList()
+            }).ToList(),
+            RowVersion = Convert.ToBase64String(o.RowVersion)
         };
 
         private static readonly Expression<Func<Order, OrderResponseDto>> ToOrderResponseDto = o => new OrderResponseDto
@@ -78,6 +79,7 @@ namespace Inventory.Infrastructure.Queries
         {
             var order = await _context.Orders
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(o => o.Id == id)
                 .Select(ToDetailedOrderResponseDto)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -162,6 +164,7 @@ namespace Inventory.Infrastructure.Queries
         {
             var order = await _context.Orders
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(o => o.Id == orderId)
                 .Select(o => new
                 {

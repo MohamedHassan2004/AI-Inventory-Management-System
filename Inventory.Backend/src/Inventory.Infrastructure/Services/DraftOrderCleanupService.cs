@@ -56,6 +56,11 @@ namespace Inventory.Infrastructure.Services
                 {
                     _logger.LogInformation("Found {Count} expired draft orders to clean up.", expiredDrafts.Count);
                     
+                    foreach (var order in expiredDrafts)
+                    {
+                        order.ReleaseAllocations();
+                    }
+
                     orderRepository.DeleteRange(expiredDrafts);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
                     

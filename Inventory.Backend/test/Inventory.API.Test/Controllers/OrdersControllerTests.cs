@@ -109,7 +109,7 @@ public class OrdersControllerTests
     public async Task CreateDraft_DraftIsCreated_ReturnsOk()
     {
         // Arrange
-        var response = new OrderResponseDto
+        var response = new DetailedOrderResponseDto
         {
             Id = 1,
             CashierId = "user-123",

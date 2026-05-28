@@ -42,6 +42,12 @@ namespace Inventory.Infrastructure.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                        .ThenInclude(p => p.Batches)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Draft, cancellationToken);
         }
 
@@ -59,6 +65,10 @@ namespace Inventory.Infrastructure.Repositories
         public async Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+                .AsSplitQuery()
                 .Where(o => o.Status == Domain.Enums.OrderStatus.Draft && o.ExpiresAt < olderThan)
                 .ToListAsync(cancellationToken);
         }

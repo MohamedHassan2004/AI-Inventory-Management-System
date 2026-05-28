@@ -63,6 +63,18 @@ namespace Inventory.Domain.Entities
             }
         }
 
+        internal void ClearAllocations()
+        {
+            foreach (var alloc in _allocations)
+            {
+                if (alloc.StockBatch != null)
+                {
+                    alloc.StockBatch.Restore(alloc.QuantityTaken);
+                }
+            }
+            _allocations.Clear();
+        }
+
         private decimal CalculateEstimatedPrice()
         {
             if (Product == null || Product.Batches == null || !Product.Batches.Any())

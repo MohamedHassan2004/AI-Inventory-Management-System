@@ -106,6 +106,7 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
 
         services.AddHostedService<DraftOrderCleanupService>();
+        services.AddHostedService<ExpiredAllocationCleanupBackgroundService>();
 
         return services;
     }
