@@ -4,7 +4,6 @@ using Inventory.Domain.Exceptions;
 
 namespace Inventory.Domain.Entities
 {
-    
     public class Order
     {
         // ─── Constants ────────────────────────────────────────────────────────────
@@ -16,10 +15,8 @@ namespace Inventory.Domain.Entities
         public int Id { get; private set; }
         public DateTime OrderDate { get; private set; }
 
-        
         public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
-        
         public DateTime? ExpiresAt { get; private set; }
 
         // ─── Ownership ────────────────────────────────────────────────────────────
@@ -50,7 +47,7 @@ namespace Inventory.Domain.Entities
         {
             CashierId = cashierId ?? throw new ArgumentNullException(nameof(cashierId));
             OrderDate = DateTime.UtcNow;
-            Status = OrderStatus.Pending;
+            Status = OrderStatus.Completed;
             Type = OrderType.InStore;
         }
 
@@ -58,7 +55,6 @@ namespace Inventory.Domain.Entities
         //  FACTORY — Draft Workflow
         // =========================================================================
 
-        
         public static Order CreateDraft(string cashierId)
         {
             if (string.IsNullOrWhiteSpace(cashierId))
@@ -77,7 +73,6 @@ namespace Inventory.Domain.Entities
         //  DRAFT MUTATIONS
         // =========================================================================
 
-        
         public void AddItem(Product product, decimal quantity)
         {
             EnsureIsDraft();
@@ -102,6 +97,8 @@ namespace Inventory.Domain.Entities
             {
                 _items.Add(new OrderItem(Id, product, quantity));
             }
+
+            Recalculate();
         }
 
         public void UpdateItemQuantity(int productId, decimal quantity)
@@ -117,7 +114,6 @@ namespace Inventory.Domain.Entities
             Recalculate();
         }
 
-        
         public void RemoveItem(int productId)
         {
             EnsureIsDraft();
@@ -129,7 +125,6 @@ namespace Inventory.Domain.Entities
             Recalculate();
         }
 
-        
         public void ApplyDiscount(decimal percentage)
         {
             if (percentage < 0 || percentage > MaxDiscountPercentage)
@@ -143,7 +138,9 @@ namespace Inventory.Domain.Entities
         //  CONFIRMATION
         // =========================================================================
 
-        
+        // Deducts stock via FEFO and creates allocations.
+        // Pickup orders → Completed immediately.
+        // Delivery orders → OutForDelivery (finalize with MarkAsDelivered or FailDelivery).
         public void Confirm(PaymentMethod paymentMethod, OrderType orderType)
         {
             EnsureIsDraft();
@@ -151,8 +148,7 @@ namespace Inventory.Domain.Entities
             if (!_items.Any())
                 throw new EmptyOrderException();
 
-            // Permanently deduct stock via FEFO on each product.
-            // Each Product must have been loaded with its Batches collection.
+            // Each Product must be loaded with its Batches collection.
             foreach (var item in _items)
             {
                 var allocations = item.Product.ReduceStock(item.Quantity);
@@ -161,17 +157,62 @@ namespace Inventory.Domain.Entities
 
             PaymentMethod = paymentMethod;
             Type = orderType;
+            ExpiresAt = null;
+
+            Status = orderType == OrderType.Delivery
+                ? OrderStatus.OutForDelivery
+                : OrderStatus.Completed;
+
+            Recalculate();
+        }
+
+        // =========================================================================
+        //  DELIVERY WORKFLOW
+        // =========================================================================
+
+        // Marks a dispatched delivery as successfully received. Draft → OutForDelivery → Completed.
+        public void MarkAsDelivered()
+        {
+            if (Status != OrderStatus.OutForDelivery)
+                throw new InvalidOperationException(
+                    $"MarkAsDelivered is only valid on OutForDelivery orders. Current status: {Status}.");
+
             Status = OrderStatus.Completed;
+        }
+
+        // Cancels a failed delivery and restores stock.
+        // Only restores the remaining unreturned quantity per allocation (RemainingToReturn),
+        // so partial returns already processed are never double-counted.
+        public void FailDelivery()
+        {
+            if (Status != OrderStatus.OutForDelivery)
+                throw new InvalidOperationException(
+                    $"FailDelivery is only valid on OutForDelivery orders. Current status: {Status}.");
+
+            foreach (var item in _items)
+            {
+                foreach (var allocation in item.Allocations)
+                {
+                    // RemainingToReturn = QuantityTaken - ReturnedQuantity
+                    var toRestore = allocation.RemainingToReturn;
+                    if (toRestore > 0)
+                        allocation.StockBatch.Restore(toRestore);
+                }
+            }
+
+            Status = OrderStatus.Cancelled;
             ExpiresAt = null;
         }
 
-        
+        // Cancels a Draft order (no stock was ever deducted).
+        // Use FailDelivery() instead for OutForDelivery orders.
         public void Cancel()
         {
             if (Status == OrderStatus.Cancelled) return;
 
-            if (Status == OrderStatus.Completed)
-                throw new InvalidOperationException("A completed order cannot be cancelled through this workflow.");
+            if (Status != OrderStatus.Draft)
+                throw new InvalidOperationException(
+                    $"Cancel is only valid on Draft orders. Use FailDelivery() for OutForDelivery orders. Current status: {Status}.");
 
             Status = OrderStatus.Cancelled;
             ExpiresAt = null;
@@ -181,7 +222,6 @@ namespace Inventory.Domain.Entities
         //  LEGACY — Single-Shot Submit (kept for backward compatibility)
         // =========================================================================
 
-        
         public static Order Submit(
             string cashierId,
             IReadOnlyList<(Product product, decimal quantity)> items,

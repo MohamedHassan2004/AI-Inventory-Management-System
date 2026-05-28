@@ -47,7 +47,7 @@ public class DashboardService : IDashboardService
 
         var pendingOrdersQuery = _dbContext.Orders
             .AsNoTracking()
-            .Where(o => o.Status == OrderStatus.Pending);
+            .Where(o => o.Status == OrderStatus.OutForDelivery);
             
         if (startDate.HasValue) pendingOrdersQuery = pendingOrdersQuery.Where(o => o.OrderDate >= startDate.Value);
         if (endDate.HasValue) pendingOrdersQuery = pendingOrdersQuery.Where(o => o.OrderDate <= endDate.Value);

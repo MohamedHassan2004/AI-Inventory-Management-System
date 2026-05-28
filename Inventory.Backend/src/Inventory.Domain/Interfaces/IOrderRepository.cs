@@ -13,6 +13,9 @@ namespace Inventory.Domain.Interfaces
         
         Task<Order?> GetDraftByIdAsync(int id, CancellationToken cancellationToken = default);
 
+        // Loads order with Items → Allocations → StockBatch — needed for FailDelivery stock restoration
+        Task<Order?> GetOutForDeliveryByIdAsync(int id, CancellationToken cancellationToken = default);
+
         
         Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default);
     }

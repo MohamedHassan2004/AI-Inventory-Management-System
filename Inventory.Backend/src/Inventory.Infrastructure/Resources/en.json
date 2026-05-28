@@ -128,5 +128,7 @@
   "InvalidUnitCost": "Unit cost must be greater than or equal to 0",
   "ReturnQuantityExceeded": "Returned quantity exceeds allowed amount",
   "DuplicateReturnItem": "Cannot add the same item twice to a return",
-  "ReturnOrderNotFound": "Return order not found"
+  "ReturnOrderNotFound": "Return order not found",
+  "OrderNotOutForDelivery": "Order is not currently out for delivery",
+  "OrderDeliveryFailed": "Delivery failed — stock has been restored"
 }

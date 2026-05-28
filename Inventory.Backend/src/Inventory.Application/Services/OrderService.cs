@@ -302,5 +302,86 @@ namespace Inventory.Application.Services
 
             return Result.Success();
         }
+
+        // ─────────────────────────────────────────────────────────────
+        //  DELIVERY WORKFLOW
+        // ─────────────────────────────────────────────────────────────
+
+        public async Task<Result<DetailedOrderResponseDto>> MarkAsDeliveredAsync(string cashierId, int orderId, CancellationToken cancellationToken = default)
+        {
+            var order = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
+            if (order == null || order.Status != OrderStatus.OutForDelivery)
+            {
+                return Result.Failure<DetailedOrderResponseDto>(new Error(
+                    "ORDER_NOT_OUT_FOR_DELIVERY",
+                    _localizationService.GetMessage("OrderNotOutForDelivery"),
+                    ErrorType.NotFound));
+            }
+
+            try
+            {
+                order.MarkAsDelivered();
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrency conflict while marking order {OrderId} as delivered", orderId);
+                return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Result.Failure<DetailedOrderResponseDto>(new Error("INVALID_ORDER_OPERATION", ex.Message, ErrorType.Validation));
+            }
+
+            _logger.LogInformation("Order {OrderId} marked as delivered by cashier {CashierId}", orderId, cashierId);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<DetailedOrderResponseDto>> FailDeliveryAsync(string cashierId, int orderId, CancellationToken cancellationToken = default)
+        {
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Must load Items → Allocations → StockBatch so FailDelivery() can call Restore() in-memory
+                var order = await _orderRepository.GetOutForDeliveryByIdAsync(orderId, cancellationToken);
+                if (order == null)
+                {
+                    await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                    return Result.Failure<DetailedOrderResponseDto>(new Error(
+                        "ORDER_NOT_OUT_FOR_DELIVERY",
+                        _localizationService.GetMessage("OrderNotOutForDelivery"),
+                        ErrorType.NotFound));
+                }
+
+                order.FailDelivery();
+
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                _logger.LogWarning("Concurrency conflict while failing delivery for order {OrderId}", orderId);
+                return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (InvalidOperationException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                return Result.Failure<DetailedOrderResponseDto>(new Error("INVALID_ORDER_OPERATION", ex.Message, ErrorType.Validation));
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw;
+            }
+
+            _logger.LogInformation("Delivery failed for order {OrderId} — stock restored. Cashier: {CashierId}", orderId, cashierId);
+
+            var updated = await _orderRepository.GetFullOrderAsync(orderId, cancellationToken);
+            var response = _mapper.Map<DetailedOrderResponseDto>(updated!);
+            return Result.Success(response);
+        }
     }
 }

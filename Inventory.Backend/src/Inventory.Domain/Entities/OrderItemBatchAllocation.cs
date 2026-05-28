@@ -44,5 +44,9 @@ namespace Inventory.Domain.Entities
 
             ReturnedQuantity += quantity;
         }
+
+        // Sets the StockBatch navigation reference — used by SetAllocations so FailDelivery
+        // can call batch.Restore() in-memory without relying on EF Core lazy-loading.
+        internal void SetStockBatch(StockBatch batch) => StockBatch = batch;
     }
 }

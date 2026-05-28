@@ -43,5 +43,15 @@ namespace Inventory.Application.Interfaces
             string cashierId, 
             int orderId, 
             CancellationToken cancellationToken = default);
+
+        Task<Result<DetailedOrderResponseDto>> MarkAsDeliveredAsync(
+            string cashierId,
+            int orderId,
+            CancellationToken cancellationToken = default);
+
+        Task<Result<DetailedOrderResponseDto>> FailDeliveryAsync(
+            string cashierId,
+            int orderId,
+            CancellationToken cancellationToken = default);
     }
 }

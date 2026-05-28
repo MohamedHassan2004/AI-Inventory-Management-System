@@ -57,7 +57,9 @@ namespace Inventory.Domain.Entities
         {
             foreach (var a in allocations)
             {
-                _allocations.Add(new OrderItemBatchAllocation(a.batch.Id, a.taken, a.batch.Product.SellingPrice, a.batch.DiscountPercentage));
+                var alloc = new OrderItemBatchAllocation(a.batch.Id, a.taken, a.batch.Product.SellingPrice, a.batch.DiscountPercentage);
+                alloc.SetStockBatch(a.batch);
+                _allocations.Add(alloc);
             }
         }
 
@@ -83,7 +85,7 @@ namespace Inventory.Domain.Entities
                 if (remaining <= 0) break;
 
                 var taken = Math.Min(batch.RemainingQuantity, remaining);
-                var price = batch.Product.SellingPrice;
+                var price = batch.Product?.SellingPrice ?? Product.SellingPrice;
                 var discount = batch.DiscountPercentage;
                 total += taken * price * (1 - discount / 100m);
                 remaining -= taken;

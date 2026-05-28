@@ -45,6 +45,17 @@ namespace Inventory.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Draft, cancellationToken);
         }
 
+        // Loads Items → Allocations → StockBatch for FailDelivery to restore exact batch quantities
+        public async Task<Order?> GetOutForDeliveryByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.OutForDelivery, cancellationToken);
+        }
+
         public async Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
@@ -52,4 +63,4 @@ namespace Inventory.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
     }
-}
+}

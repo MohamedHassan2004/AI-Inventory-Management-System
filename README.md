@@ -188,17 +188,35 @@ Base route: `api/<controller>`
 
 | Method | Route | Description |
 |---|---|---|
-| POST | `/api/orders/submit` | Submit an order (single-shot) |
+| POST | `/api/orders/submit` | Submit an order (single-shot, legacy) |
 | POST | `/api/orders/draft` | Create a draft order |
 | POST | `/api/orders/{id}/items` | Add item to draft order |
 | PUT | `/api/orders/{id}/items/{productId}` | Update item quantity in draft order |
 | DELETE | `/api/orders/{id}/items/{productId}` | Remove item from draft order |
-| POST | `/api/orders/{id}/confirm` | Confirm draft (consumes stock FEFO) |
+| POST | `/api/orders/{id}/confirm` | Confirm draft — deducts stock via FEFO; pickup → `Completed`, delivery → `OutForDelivery` |
+| POST | `/api/orders/{id}/deliver` | Mark an `OutForDelivery` order as successfully delivered → `Completed` |
+| POST | `/api/orders/{id}/fail-delivery` | Fail a delivery — restores stock to exact batches → `Cancelled` |
+| GET | `/api/orders/out-for-delivery` | List all orders currently out for delivery (paginated + sortable) |
 | DELETE | `/api/orders/{id}` | Cancel a draft order |
 | GET | `/api/orders/{id}` | Get order by ID |
 | GET | `/api/orders/{id}/receipt` | Generate PDF receipt for order |
 | GET | `/api/orders` | List orders (status, sorting, paging) |
 | GET | `/api/orders/{orderId}/items` | Get order items |
+
+#### Order Status Lifecycle
+
+```
+Pickup:   Draft ──[confirm]──► Completed
+Delivery: Draft ──[confirm]──► OutForDelivery ──[deliver]──────► Completed
+                                               └──[fail-delivery]──► Cancelled
+```
+
+- `Draft` — being built by cashier, no stock deducted yet.
+- `OutForDelivery` — delivery order dispatched, stock already deducted, awaiting delivery confirmation.
+- `Completed` — order fulfilled (pickup done or delivery confirmed).
+- `Cancelled` — draft discarded or delivery failed (stock fully restored per allocation).
+
+> **Partial returns + FailDelivery:** If items were partially returned before `fail-delivery` is called, only the remaining unreturned quantity per allocation is restored — never the full originally allocated amount.
 
 ### Return Orders *(Cashier / Admin)*
 
@@ -280,6 +298,7 @@ Base route: `api/<controller>`
 - **Full inventory lifecycle** — products, stock batches with FEFO consumption, and purchase orders.
 - **Full inventory lifecycle** — products, stock batches with FEFO/FIFO consumption, and purchase orders. Supports batch-level selling prices and discount percentages, allowing different batches of the same product to be sold at custom clearance/promotional prices.
 - **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support. Eagerly simulates FEFO/FIFO prices and batch-level discounts for draft items, finalizing and snapshotting prices permanently at confirmation.
+- **Delivery order workflow** — `confirm` with `orderType: Delivery` moves the order to `OutForDelivery`. A subsequent `POST /deliver` marks it `Completed`; `POST /fail-delivery` cancels the order and restores each stock batch using exact allocation-level quantities (partial returns already processed are respected).
 - **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
 - **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance.
 - **Soft-delete** for Suppliers and Categories with restore capability.

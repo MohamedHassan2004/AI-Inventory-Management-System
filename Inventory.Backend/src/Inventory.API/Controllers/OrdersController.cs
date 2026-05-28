@@ -1,6 +1,7 @@
 using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Services;
+using Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -114,6 +115,28 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
+        // POST: api/orders/{id}/deliver
+        [HttpPost("{id}/deliver")]
+        public async Task<IActionResult> MarkAsDelivered(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.MarkAsDeliveredAsync(userId, id, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // POST: api/orders/{id}/fail-delivery
+        [HttpPost("{id}/fail-delivery")]
+        public async Task<IActionResult> FailDelivery(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.FailDeliveryAsync(userId, id, cancellationToken);
+            return HandleResult(result);
+        }
+
         // ─────────────────────────────────────────────────────────────
         //  QUERIES
         // ─────────────────────────────────────────────────────────────
@@ -125,6 +148,27 @@ namespace Inventory.API.Controllers
             CancellationToken cancellationToken)
         {
             var result = await _orderQueryService.GetByIdAsync(id, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // GET: api/orders/out-for-delivery?sortBy=OrderDate&page=1&pageSize=20
+        [HttpGet("out-for-delivery")]
+        public async Task<IActionResult> GetOutForDelivery(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] OrderSortBy sortBy = OrderSortBy.OrderDate,
+            [FromQuery] bool sortDescending = true,
+            CancellationToken cancellationToken = default)
+        {
+            var filter = new OrderFilter
+            {
+                Status = OrderStatus.OutForDelivery,
+                Page = page,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDescending = sortDescending
+            };
+            var result = await _orderQueryService.GetAllAsync(filter, cancellationToken);
             return HandleResult(result);
         }
 

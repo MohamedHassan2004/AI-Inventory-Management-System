@@ -135,5 +135,7 @@
   "InvalidUnitCost": "يجب أن تكون تكلفة الوحدة أكبر من أو تساوي صفر",
   "ReturnQuantityExceeded": "الكمية المرتجعة تتجاوز الكمية المسموح بها",
   "DuplicateReturnItem": "لا يمكن إضافة نفس العنصر مرتين لطلب الإرجاع",
-  "ReturnOrderNotFound": "طلب الإرجاع غير موجود"
+  "ReturnOrderNotFound": "طلب الإرجاع غير موجود",
+  "OrderNotOutForDelivery": "الطلب ليس في حالة التوصيل حاليًا",
+  "OrderDeliveryFailed": "فشل التوصيل — تمت استعادة المخزون"
 }
