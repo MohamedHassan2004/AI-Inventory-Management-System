@@ -16,7 +16,7 @@ namespace Inventory.Infrastructure.Repositories
 
         public async Task<bool> ExistsAsync(string name, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<Supplier>().AnyAsync(x => x.Name == name, cancellationToken);
+            return await _context.Set<Supplier>().IgnoreQueryFilters().AnyAsync(x => x.Name == name, cancellationToken);
         }
 
         public async Task<Supplier?> GetSupplierWithNotesAsync(int id, CancellationToken cancellationToken = default)
@@ -29,6 +29,21 @@ namespace Inventory.Infrastructure.Repositories
         public async Task<bool> HasRelatedStockBatchesAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.StockBatches.AnyAsync(sb => sb.SupplierId == id, cancellationToken);
+        }
+
+        public async Task<IEnumerable<Supplier>> GetDeletedSuppliersAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Supplier>()
+                .IgnoreQueryFilters()
+                .Where(s => s.IsDeleted)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Supplier?> GetByIdWithDeletedAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Supplier>()
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
     }
 }

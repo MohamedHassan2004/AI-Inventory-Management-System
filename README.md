@@ -154,6 +154,7 @@ Base route: `api/<controller>`
 | Method | Route | Description |
 |---|---|---|
 | GET | `/api/suppliers` | List suppliers |
+| GET | `/api/suppliers/deleted` | List soft-deleted suppliers |
 | GET | `/api/suppliers/{id}` | Get supplier details |
 | POST | `/api/suppliers` | Create supplier |
 | PUT | `/api/suppliers/{id}` | Update supplier |

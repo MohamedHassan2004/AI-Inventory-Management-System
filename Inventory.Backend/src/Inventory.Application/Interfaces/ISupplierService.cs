@@ -12,5 +12,6 @@ namespace Inventory.Application.Interfaces
         Task<Result> RestoreSupplierAsync(int id, CancellationToken cancellationToken = default);
         Task<Result<IEnumerable<SupplierNoteDto>>> GetSupplierNotesAsync(int supplierId, CancellationToken cancellationToken = default);
         Task<Result<SupplierDto>> AddSupplierRatingAsync(int supplierId, AddSupplierRatingDto dto, CancellationToken cancellationToken = default);
+        Task<Result<IEnumerable<SupplierDto>>> GetDeletedSuppliersAsync(CancellationToken cancellationToken = default);
     }
 }

@@ -130,5 +130,8 @@
   "DuplicateReturnItem": "Cannot add the same item twice to a return",
   "ReturnOrderNotFound": "Return order not found",
   "OrderNotOutForDelivery": "Order is not currently out for delivery",
-  "OrderDeliveryFailed": "Delivery failed — stock has been restored"
+  "OrderDeliveryFailed": "Delivery failed — stock has been restored",
+  "SupplierAlreadyExists": "Supplier with name '{0}' already exists.",
+  "SupplierNotFoundWithId": "Supplier with ID {0} not found.",
+  "SupplierHasStockBatches": "Cannot delete supplier because it is associated with existing stock batches."
 }

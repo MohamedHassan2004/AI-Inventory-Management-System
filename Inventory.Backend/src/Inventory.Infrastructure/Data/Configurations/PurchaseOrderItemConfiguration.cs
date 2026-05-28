@@ -14,6 +14,7 @@ namespace Inventory.Infrastructure.Data.Configurations
 
             builder.Property(i => i.Quantity).HasPrecision(18, 3);
             builder.Property(i => i.UnitCost).HasPrecision(18, 2);
+            builder.Property(i => i.DiscountPercentage).HasPrecision(18, 2);
 
             builder.HasOne(i => i.Product)
                 .WithMany()

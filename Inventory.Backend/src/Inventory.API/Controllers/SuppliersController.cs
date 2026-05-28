@@ -36,6 +36,14 @@ namespace Inventory.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("deleted")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDeleted(CancellationToken cancellationToken)
+        {
+            var result = await _supplierService.GetDeletedSuppliersAsync(cancellationToken);
+            return HandleResult(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {

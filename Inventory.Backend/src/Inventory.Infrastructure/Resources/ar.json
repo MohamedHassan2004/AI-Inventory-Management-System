@@ -137,5 +137,8 @@
   "DuplicateReturnItem": "لا يمكن إضافة نفس العنصر مرتين لطلب الإرجاع",
   "ReturnOrderNotFound": "طلب الإرجاع غير موجود",
   "OrderNotOutForDelivery": "الطلب ليس في حالة التوصيل حاليًا",
-  "OrderDeliveryFailed": "فشل التوصيل — تمت استعادة المخزون"
+  "OrderDeliveryFailed": "فشل التوصيل — تمت استعادة المخزون",
+  "SupplierAlreadyExists": "المورد بالاسم '{0}' موجود بالفعل.",
+  "SupplierNotFoundWithId": "المورد بالمعرف {0} غير موجود.",
+  "SupplierHasStockBatches": "لا يمكن حذف المورد لأنه مرتبط بدفعات مخزون موجودة."
 }

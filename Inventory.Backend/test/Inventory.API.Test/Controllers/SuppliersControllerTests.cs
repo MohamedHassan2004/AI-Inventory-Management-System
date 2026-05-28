@@ -241,4 +241,29 @@ public class SuppliersControllerTests
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
+    [Fact]
+    public async Task GetDeleted_ShouldCallService()
+    {
+        // Arrange
+        var deletedSuppliers = new List<SupplierDto>
+        {
+            new SupplierDto(1, "Deleted Supplier", "01000000000", null, null, 0, 0, 0, 0, 0)
+        };
+
+        _supplierServiceMock
+            .Setup(x => x.GetDeletedSuppliersAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IEnumerable<SupplierDto>>(deletedSuppliers));
+
+        // Act
+        var result = await _controller.GetDeleted(CancellationToken.None);
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(deletedSuppliers);
+
+        _supplierServiceMock.Verify(
+            x => x.GetDeletedSuppliersAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }

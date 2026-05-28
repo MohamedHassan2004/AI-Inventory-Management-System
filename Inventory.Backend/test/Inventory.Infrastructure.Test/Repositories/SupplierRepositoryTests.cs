@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.Domain.Entities;
 using Inventory.Infrastructure.Repositories;
 using Inventory.Infrastructure.Test.Helpers;
@@ -94,5 +94,70 @@ public class SupplierRepositoryTests
 
         // Assert
         result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExistsAsync_Should_Return_True_When_Supplier_Is_Soft_Deleted()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var supplier = new Supplier("Tech Supplier", "01000000000");
+        supplier.MarkAsDeleted();
+        context.Suppliers.Add(supplier);
+        await context.SaveChangesAsync();
+
+        var repository = new SupplierRepository(context);
+
+        // Act
+        var result = await repository.ExistsAsync("Tech Supplier");
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDeletedSuppliersAsync_Should_Return_Deleted_Suppliers()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var supplier1 = new Supplier("Supplier 1", "01000000000");
+        var supplier2 = new Supplier("Supplier 2", "01000000000");
+        supplier2.MarkAsDeleted();
+
+        context.Suppliers.AddRange(supplier1, supplier2);
+        await context.SaveChangesAsync();
+
+        var repository = new SupplierRepository(context);
+
+        // Act
+        var result = await repository.GetDeletedSuppliersAsync();
+
+        // Assert
+        result.Should().HaveCount(1);
+        result.First().Name.Should().Be("Supplier 2");
+    }
+
+    [Fact]
+    public async Task GetByIdWithDeletedAsync_Should_Return_Supplier_When_Soft_Deleted()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var supplier = new Supplier("Tech Supplier", "01000000000");
+        supplier.MarkAsDeleted();
+        context.Suppliers.Add(supplier);
+        await context.SaveChangesAsync();
+
+        var repository = new SupplierRepository(context);
+
+        // Act
+        var result = await repository.GetByIdWithDeletedAsync(supplier.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("Tech Supplier");
+        result.IsDeleted.Should().BeTrue();
     }
 }
