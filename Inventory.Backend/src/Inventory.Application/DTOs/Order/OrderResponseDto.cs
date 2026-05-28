@@ -1,4 +1,4 @@
-﻿using Inventory.Domain.Enums;
+using Inventory.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,5 +15,6 @@ namespace Inventory.Application.DTOs.Order
         public OrderType Type { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public decimal FinalTotal { get; set; }
+        public string RowVersion { get; set; } = string.Empty;
     }
 }

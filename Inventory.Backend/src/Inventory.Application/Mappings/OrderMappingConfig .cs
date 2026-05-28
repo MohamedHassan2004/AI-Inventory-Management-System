@@ -1,3 +1,4 @@
+using System;
 using Inventory.Application.DTOs.Order;
 using Inventory.Domain.Entities;
 using Mapster;
@@ -18,11 +19,15 @@ namespace Inventory.Application.Mappings
 
             config.NewConfig<Order, OrderResponseDto>()
                 .Map(dest => dest.CashierName,
-                    src => src.Cashier != null? src.Cashier.FullName : string.Empty);
+                    src => src.Cashier != null? src.Cashier.FullName : string.Empty)
+                .Map(dest => dest.RowVersion,
+                    src => src.RowVersion != null ? Convert.ToBase64String(src.RowVersion) : string.Empty);
 
             config.NewConfig<Order, DetailedOrderResponseDto>()
                 .Map(dest => dest.CashierName,
-                    src => src.Cashier != null ? src.Cashier.FullName : string.Empty);
+                    src => src.Cashier != null ? src.Cashier.FullName : string.Empty)
+                .Map(dest => dest.RowVersion,
+                    src => src.RowVersion != null ? Convert.ToBase64String(src.RowVersion) : string.Empty);
         }
     }
 }

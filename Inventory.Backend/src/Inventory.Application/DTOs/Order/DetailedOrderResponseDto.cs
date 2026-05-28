@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,6 +23,7 @@ namespace Inventory.Application.DTOs.Order
         public decimal TaxAmount { get; set; }
         public decimal FinalTotal { get; set; }
 
+        public string RowVersion { get; set; } = string.Empty;
         public List<OrderItemResponseDto> Items { get; set; } = new();
     }
 }
