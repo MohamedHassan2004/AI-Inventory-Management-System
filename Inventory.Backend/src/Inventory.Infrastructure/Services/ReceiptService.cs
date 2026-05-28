@@ -32,6 +32,9 @@ public class ReceiptService : IReceiptService
             .Include(o => o.Cashier)
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
+            .Include(o => o.Items)
+                .ThenInclude(i => i.Allocations)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
         if (order == null)
@@ -121,7 +124,23 @@ public class ReceiptService : IReceiptService
 
             foreach (var item in order.Items)
             {
-                table.Cell().Element(CellStyle).Text(item.Product?.Name ?? "Unknown");
+                table.Cell().Element(CellStyle).Column(column =>
+                {
+                    column.Item().Text(item.Product?.Name ?? "Unknown").SemiBold();
+                    
+                    if (item.Allocations != null && item.Allocations.Any())
+                    {
+                        foreach (var alloc in item.Allocations)
+                        {
+                            var discountText = alloc.DiscountPercentage > 0 ? $" (Discount {alloc.DiscountPercentage:0.#}%)" : "";
+                            var finalPrice = alloc.UnitPrice * (1 - alloc.DiscountPercentage / 100m);
+                            column.Item().PaddingLeft(10).Text($"• Batch #{alloc.StockBatchId}: {alloc.QuantityTaken:0.##} x ${alloc.UnitPrice:0.00}{discountText} = ${alloc.QuantityTaken * finalPrice:0.00}")
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Medium);
+                        }
+                    }
+                });
+
                 table.Cell().Element(CellStyle).AlignRight().Text($"{item.Quantity:0.##}");
                 table.Cell().Element(CellStyle).AlignRight().Text($"${item.UnitPrice:0.00}");
                 table.Cell().Element(CellStyle).AlignRight().Text($"${item.TotalPrice:0.00}");
