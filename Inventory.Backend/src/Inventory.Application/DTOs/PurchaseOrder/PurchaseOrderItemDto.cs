@@ -8,5 +8,6 @@ namespace Inventory.Application.DTOs.PurchaseOrder
         public decimal Quantity { get; set; }
         public decimal UnitCost { get; set; }
         public DateTime ExpiryDate { get; set; }
+        public decimal DiscountPercentage { get; set; }
     }
 }

@@ -31,7 +31,13 @@ namespace Inventory.Application.Validation.PurchaseOrder
 
                 item.RuleFor(i => i.ExpiryDate)
                     .NotEmpty()
-                    .WithMessage("ExpiryDate is required.");
+                    .WithMessage("ExpiryDate is required.")
+                    .GreaterThan(DateTime.UtcNow.AddDays(30))
+                    .WithMessage("ExpiryDate must be at least 30 days from current date.");
+
+                item.RuleFor(i => i.DiscountPercentage)
+                    .InclusiveBetween(0, 100)
+                    .WithMessage("Discount percentage must be between 0 and 100.");
             });
         }
     }

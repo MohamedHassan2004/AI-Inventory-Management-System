@@ -59,7 +59,7 @@ namespace Inventory.Domain.Entities
         // =========================================================================
 
         
-        public static Order CreateDraft(string cashierId, OrderType orderType)
+        public static Order CreateDraft(string cashierId)
         {
             if (string.IsNullOrWhiteSpace(cashierId))
                 throw new ArgumentNullException(nameof(cashierId));
@@ -69,7 +69,6 @@ namespace Inventory.Domain.Entities
                 CashierId = cashierId,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Draft,
-                Type = orderType,
                 ExpiresAt = DateTime.UtcNow.AddHours(DraftExpiryHours)
             };
         }
@@ -79,7 +78,7 @@ namespace Inventory.Domain.Entities
         // =========================================================================
 
         
-        public void AddItem(Product product, decimal quantity, decimal discountPercentage = 0)
+        public void AddItem(Product product, decimal quantity)
         {
             EnsureIsDraft();
 
@@ -89,14 +88,33 @@ namespace Inventory.Domain.Entities
             var existing = _items.FirstOrDefault(i => i.ProductId == product.Id);
             if (existing is not null)
             {
-                existing.UpdateQuantity(quantity);
+                var newQuantity = existing.Quantity + quantity;
+                if (product.StockQuantity >= newQuantity)
+                {
+                    existing.UpdateQuantity(existing.Quantity + quantity);
+                }
+                else
+                {
+                    throw new InsufficientStockException(product.Name, newQuantity, product.StockQuantity);
+                }
             }
             else
             {
                 _items.Add(new OrderItem(Id, product, quantity));
             }
+        }
 
-            ApplyDiscount(discountPercentage);
+        public void UpdateItemQuantity(int productId, decimal quantity)
+        {
+            EnsureIsDraft();
+
+            if (quantity <= 0) throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            var existing = _items.FirstOrDefault(i => i.ProductId == productId)
+                           ?? throw new InvalidOperationException($"Product {productId} is not in this order.");
+
+            existing.UpdateQuantity(quantity);
+            Recalculate();
         }
 
         
@@ -126,7 +144,7 @@ namespace Inventory.Domain.Entities
         // =========================================================================
 
         
-        public void Confirm(PaymentMethod paymentMethod)
+        public void Confirm(PaymentMethod paymentMethod, OrderType orderType)
         {
             EnsureIsDraft();
 
@@ -142,8 +160,9 @@ namespace Inventory.Domain.Entities
             }
 
             PaymentMethod = paymentMethod;
+            Type = orderType;
             Status = OrderStatus.Completed;
-            ExpiresAt = null; // no longer a draft
+            ExpiresAt = null;
         }
 
         

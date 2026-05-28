@@ -25,11 +25,12 @@ namespace Inventory.Infrastructure.Queries
         // ─────────────────────────────────────────────────────────────
         //  Shared EF Core-compatible projection
         // ─────────────────────────────────────────────────────────────
-        private static readonly Expression<Func<Order, OrderResponseDto>> ToResponseDto = o => new OrderResponseDto
+        private static readonly Expression<Func<Order, DetailedOrderResponseDto>> ToDetailedOrderResponseDto = o => new DetailedOrderResponseDto
         {
             Id = o.Id,
             OrderDate = o.OrderDate,
             CashierId = o.CashierId,
+            CashierName = o.Cashier != null ? o.Cashier.FullName : string.Empty,
             Status = o.Status,
             Type = o.Type,
             PaymentMethod = o.PaymentMethod,
@@ -42,26 +43,47 @@ namespace Inventory.Infrastructure.Queries
             {
                 Id = i.Id,
                 ProductId = i.ProductId,
-                ProductName = i.Product.Name,
+                ProductName = i.Product != null ? i.Product.Name : string.Empty,
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice,
-                TotalPrice = i.Quantity * i.UnitPrice
+                TotalPrice = i.Allocations.Any()
+                    ? i.Allocations.Sum(a => a.QuantityTaken * a.UnitPrice * (1 - a.DiscountPercentage / 100m))
+                    : i.Quantity * i.UnitPrice,
+                Allocations = i.Allocations.Select(a => new OrderItemBatchAllocationResponseDto
+                {
+                    StockBatchId = a.StockBatchId,
+                    Quantity = a.QuantityTaken,
+                    UnitPrice = a.UnitPrice,
+                    DiscountPercentage = a.DiscountPercentage
+                }).ToList()
             }).ToList()
+        };
+
+        private static readonly Expression<Func<Order, OrderResponseDto>> ToOrderResponseDto = o => new OrderResponseDto
+        {
+            Id = o.Id,
+            OrderDate = o.OrderDate,
+            CashierId = o.CashierId,
+            CashierName = o.Cashier != null ? o.Cashier.FullName : string.Empty,
+            Status = o.Status,
+            Type = o.Type,
+            PaymentMethod = o.PaymentMethod,
+            FinalTotal = o.FinalTotal
         };
 
         // ─────────────────────────────────────────────────────────────
         //  GET BY ID
         // ─────────────────────────────────────────────────────────────
-        public async Task<Result<OrderResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var order = await _context.Orders
                 .AsNoTracking()
                 .Where(o => o.Id == id)
-                .Select(ToResponseDto)
+                .Select(ToDetailedOrderResponseDto)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order is null)
-                return Result.Failure<OrderResponseDto>(
+                return Result.Failure<DetailedOrderResponseDto>(
                     new Error("NOT_FOUND",
                         _localizationService.GetMessage("OrderNotFound"),
                         ErrorType.NotFound));
@@ -114,10 +136,6 @@ namespace Inventory.Infrastructure.Queries
             {
                 (OrderSortBy.FinalTotal,  true)  => query.OrderByDescending(o => o.FinalTotal),
                 (OrderSortBy.FinalTotal,  false) => query.OrderBy(o => o.FinalTotal),
-                (OrderSortBy.Status,      true)  => query.OrderByDescending(o => o.Status),
-                (OrderSortBy.Status,      false) => query.OrderBy(o => o.Status),
-                (OrderSortBy.Type,        true)  => query.OrderByDescending(o => o.Type),
-                (OrderSortBy.Type,        false) => query.OrderBy(o => o.Type),
                 (_,                       true)  => query.OrderByDescending(o => o.OrderDate),  // default
                 (_,                       false) => query.OrderBy(o => o.OrderDate),
             };
@@ -129,7 +147,7 @@ namespace Inventory.Infrastructure.Queries
             var items = await query
                 .Skip(skip)
                 .Take(filter.PageSize)
-                .Select(ToResponseDto)
+                .Select(ToOrderResponseDto)
                 .ToListAsync(cancellationToken);
 
             return Result.Success(new PagedResult<OrderResponseDto>(items, filter.Page, filter.PageSize, totalCount));
@@ -151,10 +169,19 @@ namespace Inventory.Infrastructure.Queries
                     {
                         Id = i.Id,
                         ProductId = i.ProductId,
-                        ProductName = i.Product.Name,
+                        ProductName = i.Product != null ? i.Product.Name : string.Empty,
                         Quantity = i.Quantity,
                         UnitPrice = i.UnitPrice,
-                        TotalPrice = i.Quantity * i.UnitPrice
+                        TotalPrice = i.Allocations.Any()
+                            ? i.Allocations.Sum(a => a.QuantityTaken * a.UnitPrice * (1 - a.DiscountPercentage / 100m))
+                            : i.Quantity * i.UnitPrice,
+                        Allocations = i.Allocations.Select(a => new OrderItemBatchAllocationResponseDto
+                        {
+                            StockBatchId = a.StockBatchId,
+                            Quantity = a.QuantityTaken,
+                            UnitPrice = a.UnitPrice,
+                            DiscountPercentage = a.DiscountPercentage
+                        }).ToList()
                     }).ToList()
                 })
                 .FirstOrDefaultAsync(cancellationToken);

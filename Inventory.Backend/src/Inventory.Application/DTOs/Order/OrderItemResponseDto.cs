@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,5 +13,6 @@ namespace Inventory.Application.DTOs.Order
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
+        public List<OrderItemBatchAllocationResponseDto> Allocations { get; set; } = new();
     }
 }

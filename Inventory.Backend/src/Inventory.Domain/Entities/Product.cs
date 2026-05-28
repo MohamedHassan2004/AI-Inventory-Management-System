@@ -94,13 +94,13 @@ namespace Inventory.Domain.Entities
         // Stock Management
         // ──────────────────────────────────────────
 
-        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddStock(int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity, decimal discountPercentage = 0m)
         {
-            var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity);
+            var batch = new StockBatch(Id, supplierId, expiryDate, unitCost, quantity, discountPercentage);
             _batches.Add(batch);
         }
 
-        public void AddReturnedStock(int originalBatchId, int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity)
+        public void AddReturnedStock(int originalBatchId, int supplierId, DateTime expiryDate, decimal unitCost, decimal quantity, decimal discountPercentage)
         {
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
@@ -115,7 +115,7 @@ namespace Inventory.Domain.Entities
             }
             else
             {
-                AddStock(supplierId, expiryDate, unitCost, quantity);
+                AddStock(supplierId, expiryDate, unitCost, quantity, discountPercentage);
             }
         }
 
@@ -130,7 +130,9 @@ namespace Inventory.Domain.Entities
 
             var availableBatches = _batches
                 .Where(b => b.HasStock && !b.IsExpired)
-                .OrderBy(b => b.ExpireDate);
+                .OrderBy(b => b.ExpireDate)
+                .ThenBy(b => b.PurchaseDate)
+                .ThenBy(b => b.Id);
 
             var allocations = new List<(StockBatch batch, decimal taken)>();
 

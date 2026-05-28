@@ -18,7 +18,10 @@ namespace Inventory.Domain.Entities
         public decimal Quantity { get; private set; }
         public decimal ReturnedQuantity { get; private set; }
         public Order Order { get; private set; } = null!;
-        public decimal TotalPrice => Quantity * UnitPrice;
+        
+        public decimal TotalPrice => Allocations.Any()
+            ? Allocations.Sum(a => a.QuantityTaken * Product.SellingPrice * (1 - a.DiscountPercentage / 100m))
+            : CalculateEstimatedPrice();
 
         private readonly List<OrderItemBatchAllocation> _allocations = new();
         public IReadOnlyCollection<OrderItemBatchAllocation> Allocations => _allocations.AsReadOnly();
@@ -31,6 +34,9 @@ namespace Inventory.Domain.Entities
         {
             if (product is null) throw new ArgumentNullException(nameof(product));
             if (quantity <= 0) throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
+            if(product.StockQuantity < quantity)
+                throw new InsufficientStockException(product.Name, quantity, product.StockQuantity);
 
             OrderId = orderId;
             Product = product;
@@ -51,8 +57,44 @@ namespace Inventory.Domain.Entities
         {
             foreach (var a in allocations)
             {
-                _allocations.Add(new OrderItemBatchAllocation(a.batch.Id, a.taken));
+                _allocations.Add(new OrderItemBatchAllocation(a.batch.Id, a.taken, a.batch.Product.SellingPrice, a.batch.DiscountPercentage));
             }
+        }
+
+        private decimal CalculateEstimatedPrice()
+        {
+            if (Product == null || Product.Batches == null || !Product.Batches.Any())
+            {
+                return Quantity * UnitPrice;
+            }
+
+            var remaining = Quantity;
+            decimal total = 0;
+
+            var availableBatches = Product.Batches
+                .Where(b => b.HasStock && !b.IsExpired)
+                .OrderBy(b => b.ExpireDate)
+                .ThenBy(b => b.PurchaseDate)
+                .ThenBy(b => b.Id)
+                .ToList();
+
+            foreach (var batch in availableBatches)
+            {
+                if (remaining <= 0) break;
+
+                var taken = Math.Min(batch.RemainingQuantity, remaining);
+                var price = batch.Product.SellingPrice;
+                var discount = batch.DiscountPercentage;
+                total += taken * price * (1 - discount / 100m);
+                remaining -= taken;
+            }
+
+            if (remaining > 0)
+            {
+                total += remaining * Product.SellingPrice;
+            }
+
+            return total;
         }
 
         public IEnumerable<(StockBatch batch, decimal returned)> AddReturnedQuantity(decimal quantity)

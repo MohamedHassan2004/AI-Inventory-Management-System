@@ -6,6 +6,7 @@ namespace Inventory.Domain.Entities
         public DateTime PurchaseDate { get; private set; }
         public DateTime ExpireDate { get; private set; }
         public decimal UnitCost { get; private set; }
+        public decimal DiscountPercentage { get; private set; }
         public decimal OriginalQuantity { get; private set; }
         public decimal RemainingQuantity { get; private set; }
 
@@ -20,7 +21,7 @@ namespace Inventory.Domain.Entities
         // Required by EF Core
         private StockBatch() { }
 
-        public StockBatch(int productId, int supplierId, DateTime expireDate, decimal unitCost, decimal quantity)
+        public StockBatch(int productId, int supplierId, DateTime expireDate, decimal unitCost, decimal quantity, decimal discountPercentage = 0)
         {
             if (productId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(productId), "Product ID must be greater than zero.");
@@ -37,11 +38,15 @@ namespace Inventory.Domain.Entities
             if (quantity <= 0)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
 
+            if (discountPercentage < 0 || discountPercentage > 100)
+                throw new ArgumentOutOfRangeException(nameof(discountPercentage), "Discount percentage must be between 0 and 100.");
+
             ProductId = productId;
             SupplierId = supplierId;
             PurchaseDate = DateTime.UtcNow;
             ExpireDate = expireDate;
             UnitCost = unitCost;
+            DiscountPercentage = discountPercentage;
             OriginalQuantity = quantity;
             RemainingQuantity = quantity;
         }
@@ -76,7 +81,7 @@ namespace Inventory.Domain.Entities
             RemainingQuantity += amount;
         }
 
-        public void UpdateBatch(DateTime expireDate, decimal unitCost, decimal remainingQuantity)
+        public void UpdateBatch(DateTime expireDate, decimal unitCost, decimal remainingQuantity, decimal discountPercentage = 0)
         {
             if (expireDate <= PurchaseDate)
                 throw new ArgumentException("Expire date must be after purchase date.", nameof(expireDate));
@@ -84,9 +89,13 @@ namespace Inventory.Domain.Entities
                 throw new ArgumentOutOfRangeException(nameof(unitCost), "Unit cost cannot be negative.");
             if (remainingQuantity < 0 || remainingQuantity > OriginalQuantity)
                 throw new ArgumentOutOfRangeException(nameof(remainingQuantity), "Remaining quantity must be between 0 and original quantity.");
+            if (discountPercentage < 0 || discountPercentage > 100)
+                throw new ArgumentOutOfRangeException(nameof(discountPercentage), "Discount percentage must be between 0 and 100.");
+
             ExpireDate = expireDate;
             UnitCost = unitCost;
             RemainingQuantity = remainingQuantity;
+            DiscountPercentage = discountPercentage;
         }
 
         public bool HasStock => RemainingQuantity > 0;

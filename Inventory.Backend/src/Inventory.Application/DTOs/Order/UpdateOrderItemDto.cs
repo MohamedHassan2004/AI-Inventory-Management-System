@@ -1,8 +1,7 @@
 namespace Inventory.Application.DTOs.Order
 {
-    public class AddOrderItemDto
+    public class UpdateOrderItemDto
     {
-        public required string SKU { get; set; }
         public required decimal Quantity { get; set; }
     }
 }

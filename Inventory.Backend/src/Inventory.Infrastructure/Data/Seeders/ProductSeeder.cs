@@ -62,7 +62,8 @@ public class ProductSeeder
                 supplierId: supplier.Id,
                 expiryDate: DateTime.UtcNow.AddMonths(random.Next(1, 12)),
                 unitCost: Math.Round(product.SellingPrice * 0.6m, 2),
-                quantity: random.Next(50, 200)
+                quantity: random.Next(50, 200),
+                discountPercentage: 0m
             );
         }
 

@@ -8,6 +8,7 @@ namespace Inventory.Application.DTOs.StockBatch
         DateTime PurchaseDate,
         DateTime ExpireDate,
         decimal UnitCost,
+        decimal DiscountPercentage,
         decimal OriginalQuantity,
         decimal RemainingQuantity,
         int? SupplierId,

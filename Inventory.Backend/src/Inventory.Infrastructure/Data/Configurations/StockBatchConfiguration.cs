@@ -18,6 +18,10 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.Property(sb => sb.UnitCost)
                 .HasColumnType("decimal(18,2)");
 
+            builder.Property(sb => sb.DiscountPercentage)
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0m);
+
             builder.Property(sb => sb.OriginalQuantity)
                 .HasColumnType("decimal(18,2)");
 

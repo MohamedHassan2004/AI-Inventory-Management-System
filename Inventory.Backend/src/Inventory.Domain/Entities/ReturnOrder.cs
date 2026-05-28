@@ -74,7 +74,8 @@ namespace Inventory.Domain.Entities
                         alloc.batch.SupplierId, 
                         item.NewExpiryDate, 
                         alloc.batch.UnitCost, 
-                        alloc.returned);
+                        alloc.returned,
+                        alloc.batch.DiscountPercentage);
                 }
             }
 

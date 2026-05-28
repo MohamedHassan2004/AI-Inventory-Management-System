@@ -51,11 +51,10 @@ public class OrderQueryServiceTests
             supplier.Id,
             DateTime.UtcNow.AddDays(30),
             500,
-            20);
-
+            20,
+            0);
         var order = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
+            "cashier-1");
 
         order.AddItem(product, 2);
 
@@ -125,23 +124,23 @@ public class OrderQueryServiceTests
             supplier.Id,
             DateTime.UtcNow.AddDays(30),
             500,
-            20);
+            20,
+            0);
 
         await context.SaveChangesAsync();
 
         var draftOrder = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
+            "cashier-1");
 
         draftOrder.AddItem(product, 1);
 
         var completedOrder = Order.CreateDraft(
-            "cashier-2",
-            OrderType.InStore);
+            "cashier-2"
+            );
 
         completedOrder.AddItem(product, 1);
 
-        completedOrder.Confirm(PaymentMethod.Cash);
+        completedOrder.Confirm(PaymentMethod.Cash, OrderType.InStore);
 
         context.Orders.AddRange(
             draftOrder,
@@ -197,13 +196,12 @@ public class OrderQueryServiceTests
             supplier.Id,
             DateTime.UtcNow.AddDays(30),
             500,
-            50);
-
+            50,
+            0);
         for (int i = 0; i < 5; i++)
         {
             var order = Order.CreateDraft(
-                $"cashier-{i}",
-                OrderType.InStore);
+                $"cashier-{i}");
 
             order.AddItem(product, 1);
 
@@ -261,12 +259,10 @@ public class OrderQueryServiceTests
             supplier.Id,
             DateTime.UtcNow.AddDays(30),
             500,
-            20);
-
+            20,
+            0);
         var order = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
-
+            "cashier-1");
         order.AddItem(product, 2);
 
         context.Orders.Add(order);

@@ -19,6 +19,16 @@ namespace Inventory.Infrastructure.Data.Configurations
                 .HasPrecision(18, 2)
                 .HasDefaultValue(0m);
 
+            builder.Property(a => a.UnitPrice)
+                .IsRequired()
+                .HasPrecision(18, 2)
+                .HasDefaultValue(0m);
+
+            builder.Property(a => a.DiscountPercentage)
+                .IsRequired()
+                .HasPrecision(18, 2)
+                .HasDefaultValue(0m);
+
             builder.Ignore(a => a.RemainingToReturn);
 
             builder.HasOne(a => a.OrderItem)

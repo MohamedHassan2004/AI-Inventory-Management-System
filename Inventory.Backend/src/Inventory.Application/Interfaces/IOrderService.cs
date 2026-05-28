@@ -5,14 +5,13 @@ namespace Inventory.Application.Interfaces
 {
     public interface IOrderService
     {
-        Task<Result<OrderResponseDto>> SubmitAsync(
+        Task<Result<DetailedOrderResponseDto>> SubmitAsync(
             string userId,
             SubmitOrderDto dto,
             CancellationToken cancellationToken = default);
 
         Task<Result<OrderResponseDto>> CreateDraftAsync(
             string cashierId, 
-            CreateDraftOrderDto dto, 
             CancellationToken cancellationToken = default);
 
         Task<Result<OrderResponseDto>> AddItemAsync(
@@ -27,7 +26,14 @@ namespace Inventory.Application.Interfaces
             int productId, 
             CancellationToken cancellationToken = default);
 
-        Task<Result<OrderResponseDto>> ConfirmOrderAsync(
+        Task<Result<OrderResponseDto>> UpdateItemQuantityAsync(
+            string cashierId, 
+            int orderId, 
+            int productId, 
+            decimal quantity, 
+            CancellationToken cancellationToken = default);
+
+        Task<Result<DetailedOrderResponseDto>> ConfirmOrderAsync(
             string cashierId, 
             int orderId, 
             ConfirmOrderDto dto, 

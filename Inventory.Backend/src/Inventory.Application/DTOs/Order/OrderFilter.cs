@@ -5,9 +5,7 @@ namespace Inventory.Application.DTOs.Order
     public enum OrderSortBy
     {
         OrderDate,
-        FinalTotal,
-        Status,
-        Type
+        FinalTotal
     }
 
     public class OrderFilter

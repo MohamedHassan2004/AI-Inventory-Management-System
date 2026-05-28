@@ -15,17 +15,24 @@ namespace Inventory.Domain.Entities
         public decimal QuantityTaken { get; private set; }
         public decimal ReturnedQuantity { get; private set; }
 
+        public decimal UnitPrice { get; private set; }
+        public decimal DiscountPercentage { get; private set; }
+
         public decimal RemainingToReturn => QuantityTaken - ReturnedQuantity;
 
         private OrderItemBatchAllocation() { }
 
-        internal OrderItemBatchAllocation(int stockBatchId, decimal quantityTaken)
+        internal OrderItemBatchAllocation(int stockBatchId, decimal quantityTaken, decimal unitPrice, decimal discountPercentage)
         {
             if (stockBatchId <= 0) throw new ArgumentOutOfRangeException(nameof(stockBatchId));
             if (quantityTaken <= 0) throw new ArgumentOutOfRangeException(nameof(quantityTaken));
+            if (unitPrice < 0) throw new ArgumentOutOfRangeException(nameof(unitPrice));
+            if (discountPercentage < 0 || discountPercentage > 100) throw new ArgumentOutOfRangeException(nameof(discountPercentage));
 
             StockBatchId = stockBatchId;
             QuantityTaken = quantityTaken;
+            UnitPrice = unitPrice;
+            DiscountPercentage = discountPercentage;
             ReturnedQuantity = 0;
         }
 

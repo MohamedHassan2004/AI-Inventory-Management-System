@@ -191,6 +191,7 @@ Base route: `api/<controller>`
 | POST | `/api/orders/submit` | Submit an order (single-shot) |
 | POST | `/api/orders/draft` | Create a draft order |
 | POST | `/api/orders/{id}/items` | Add item to draft order |
+| PUT | `/api/orders/{id}/items/{productId}` | Update item quantity in draft order |
 | DELETE | `/api/orders/{id}/items/{productId}` | Remove item from draft order |
 | POST | `/api/orders/{id}/confirm` | Confirm draft (consumes stock FEFO) |
 | DELETE | `/api/orders/{id}` | Cancel a draft order |
@@ -277,7 +278,8 @@ Base route: `api/<controller>`
 - **JWT authentication** with refresh tokens via a secure cookie-based refresh flow.
 - **Role- and policy-based authorization** — Admin, InventoryStaff, Cashier, and Active account policies.
 - **Full inventory lifecycle** — products, stock batches with FEFO consumption, and purchase orders.
-- **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support.
+- **Full inventory lifecycle** — products, stock batches with FEFO/FIFO consumption, and purchase orders. Supports batch-level selling prices and discount percentages, allowing different batches of the same product to be sold at custom clearance/promotional prices.
+- **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support. Eagerly simulates FEFO/FIFO prices and batch-level discounts for draft items, finalizing and snapshotting prices permanently at confirmation.
 - **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
 - **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance.
 - **Soft-delete** for Suppliers and Categories with restore capability.
@@ -292,11 +294,13 @@ Base route: `api/<controller>`
 | Entity | Key Relationships |
 |---|---|
 | `Product` | Has many `StockBatch`; optional `CategoryId` |
-| `StockBatch` | Belongs to `Product` and `Supplier`; tracks `OriginalQuantity` / `RemainingQuantity` |
+| `StockBatch` | Belongs to `Product` and `Supplier`; tracks `OriginalQuantity` / `RemainingQuantity`, `SellingPrice`, and `DiscountPercentage` |
 | `ReturnOrder` | Belongs to `Order`; includes `TotalRefundAmount`, `CashierId`, and `ReturnDate` |
 | `ReturnOrderItem` | Belongs to `ReturnOrder` and `OrderItem`; captures refunded quantity and new expiry date |
 | `Supplier` | Has many `SupplierNotes`; soft-deleted via `IsDeleted` query filter |
 | `Order` | Has many `OrderItem`; tracks draft/confirm flow, financials, and `CashierId` |
+| `OrderItem` | Belongs to `Order` and `Product`; tracks requested quantity and base price |
+| `OrderItemBatchAllocation` | Belongs to `OrderItem` and `StockBatch`; snapshots `UnitPrice` and `DiscountPercentage` at purchase time |
 | `PurchaseOrder` | Has many `PurchaseOrderItem`; on submit, items create stock batches and status → Completed |
 | `Category` | Has many `Product`; soft-deleted; supports image upload |
 

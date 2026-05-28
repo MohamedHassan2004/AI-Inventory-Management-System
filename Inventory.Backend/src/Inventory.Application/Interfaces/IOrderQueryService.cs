@@ -5,7 +5,7 @@ namespace Inventory.Application.Interfaces
 {
     public interface IOrderQueryService
     {
-        Task<Result<OrderResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Result<DetailedOrderResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
         Task<Result<PagedResult<OrderResponseDto>>> GetAllAsync(OrderFilter filter, CancellationToken cancellationToken = default);
 

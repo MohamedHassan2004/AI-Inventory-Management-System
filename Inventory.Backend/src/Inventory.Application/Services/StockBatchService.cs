@@ -67,13 +67,13 @@ namespace Inventory.Application.Services
             StockBatch batch;
             try
             {
-                batch = new StockBatch(dto.ProductId, dto.SupplierId, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity);
+                batch = new StockBatch(dto.ProductId, dto.SupplierId, dto.ExpireDate, dto.UnitCost, dto.OriginalQuantity, dto.DiscountPercentage);
             }
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Invalid StockBatch data provided.");
                 return Result.Failure<StockBatchResponseDto>(new Error(
-                    "INVALID_BATCH_DATA",
+                     "INVALID_BATCH_DATA",
                     _localizationService.GetMessage("InvalidBatchData") ?? "Invalid batch data.",
                     ErrorType.Validation));
             }
@@ -101,7 +101,7 @@ namespace Inventory.Application.Services
 
             try
             {
-                batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity);
+                batch.UpdateBatch(dto.ExpireDate, dto.UnitCost, dto.RemainingQuantity, dto.DiscountPercentage);
             }
             catch(ArgumentException ex)
             {

@@ -16,11 +16,13 @@ namespace Inventory.Domain.Entities
         public decimal UnitCost { get; private set; }
         public DateTime ExpiryDate { get; private set; }
 
+        public decimal DiscountPercentage { get; private set; } = 0;  
+
         public decimal TotalPrice => Quantity * UnitCost;
 
         private PurchaseOrderItem() { }
 
-        internal PurchaseOrderItem(Product product, decimal quantity, decimal unitCost, DateTime expiryDate)
+        internal PurchaseOrderItem(Product product, decimal quantity, decimal unitCost, DateTime expiryDate, decimal discountPercentage = 0)
         {
             if (product == null) throw new ArgumentNullException(nameof(product));
             if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
@@ -31,6 +33,7 @@ namespace Inventory.Domain.Entities
             Quantity = quantity;
             UnitCost = unitCost;
             ExpiryDate = expiryDate;
+            DiscountPercentage = discountPercentage;
         }
     }
 }

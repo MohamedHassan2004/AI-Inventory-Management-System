@@ -59,6 +59,7 @@ public class StockBatchesControllerTests
                 100,
                 50,
                 50,
+                50,
                 1,
                 "Mohamed")
         };
@@ -90,6 +91,7 @@ public class StockBatchesControllerTests
             100,
             50,
             50,
+            50,
             1,
             "Mohamed");
 
@@ -116,8 +118,9 @@ public class StockBatchesControllerTests
             1,
             DateTime.UtcNow.AddDays(30),
             100,
+            1,
             50,
-            1);
+            0);
 
         var response = new StockBatchResponseDto(
             1,
@@ -125,6 +128,7 @@ public class StockBatchesControllerTests
             DateTime.UtcNow,
             DateTime.UtcNow.AddDays(30),
             100,
+            0,
             50,
             50,
             1,
@@ -177,6 +181,7 @@ public class StockBatchesControllerTests
                 DateTime.UtcNow.AddDays(5),
                 100,
                 50,
+                0,
                 50,
                 1,
                 "Mohamed")
@@ -204,7 +209,7 @@ public class StockBatchesControllerTests
         // Arrange
         var batches = new List<StockBatchResponseDto>
         {
-            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1, "Mohamed")
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 0, 50, 50, 1, "Mohamed")
         };
 
         _stockBatchServiceMock
@@ -226,7 +231,7 @@ public class StockBatchesControllerTests
         // Arrange
         var batches = new List<StockBatchResponseDto>
         {
-            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 50, 50, 1, "Mohamed")
+            new(1, 1, DateTime.UtcNow, DateTime.UtcNow.AddDays(30), 100, 0, 50, 50, 1, "Mohamed")
         };
 
         _stockBatchServiceMock

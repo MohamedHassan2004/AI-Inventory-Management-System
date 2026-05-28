@@ -47,11 +47,10 @@ namespace Inventory.API.Controllers
         // POST: api/orders/draft
         [HttpPost("draft")]
         public async Task<IActionResult> CreateDraft(
-            [FromBody] CreateDraftOrderDto dto,
             CancellationToken cancellationToken)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            var result = await _orderService.CreateDraftAsync(userId, dto, cancellationToken);
+            var result = await _orderService.CreateDraftAsync(userId, cancellationToken);
             return HandleResult(result);
         }
 
@@ -76,6 +75,19 @@ namespace Inventory.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _orderService.RemoveItemAsync(userId, id, productId, cancellationToken);
+            return HandleResult(result);
+        }
+
+        // PUT: api/orders/{id}/items/{productId}
+        [HttpPut("{id}/items/{productId}")]
+        public async Task<IActionResult> UpdateItemQuantity(
+            int id,
+            int productId,
+            [FromBody] UpdateOrderItemDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.UpdateItemQuantityAsync(userId, id, productId, dto.Quantity, cancellationToken);
             return HandleResult(result);
         }
 

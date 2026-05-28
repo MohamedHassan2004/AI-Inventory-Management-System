@@ -131,7 +131,7 @@ namespace Inventory.Application.Services
             var order = PurchaseOrder.Create(dto.SupplierId);
 
             foreach (var item in dto.Items)
-                order.AddItem(productMap[item.ProductId], item.Quantity, item.UnitCost, item.ExpiryDate);
+                order.AddItem(productMap[item.ProductId], item.Quantity, item.UnitCost, item.ExpiryDate, item.DiscountPercentage);
 
             order.Complete();
 

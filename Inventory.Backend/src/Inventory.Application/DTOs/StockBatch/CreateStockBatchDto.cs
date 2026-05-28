@@ -7,6 +7,7 @@ namespace Inventory.Application.DTOs.StockBatch
         DateTime ExpireDate,
         decimal UnitCost,
         decimal OriginalQuantity,
-        int SupplierId
+        int SupplierId,
+        decimal DiscountPercentage = 0
     );
 }

@@ -43,7 +43,7 @@ namespace Inventory.Application.Services
         //  SUBMIT — single-transaction order creation (LEGACY)
         // ─────────────────────────────────────────────────────────────
 
-        public async Task<Result<OrderResponseDto>> SubmitAsync(
+        public async Task<Result<DetailedOrderResponseDto>> SubmitAsync(
             string userId,
             SubmitOrderDto dto,
             CancellationToken cancellationToken = default)
@@ -59,7 +59,7 @@ namespace Inventory.Application.Services
             if (missingIds.Any())
             {
                 _logger.LogWarning("Products not found: {MissingIds}", string.Join(", ", missingIds));
-                return Result.Failure<OrderResponseDto>(new Error(
+                return Result.Failure<DetailedOrderResponseDto>(new Error(
                     "PRODUCT_NOT_FOUND",
                     _localizationService.GetMessage("ProductNotFound"),
                     ErrorType.NotFound));
@@ -85,7 +85,7 @@ namespace Inventory.Application.Services
             catch (InsufficientStockException ex)
             {
                 _logger.LogWarning(ex, "Insufficient stock while submitting order for user {UserId}", userId);
-                return Result.Failure<OrderResponseDto>(new Error(
+                return Result.Failure<DetailedOrderResponseDto>(new Error(
                     "INSUFFICIENT_STOCK",
                     _localizationService.GetMessage("InsufficientStock"),
                     ErrorType.Validation));
@@ -93,7 +93,7 @@ namespace Inventory.Application.Services
             catch (InvalidDiscountException ex)
             {
                 _logger.LogWarning(ex, "Invalid discount {Discount} for order", dto.DiscountPercentage);
-                return Result.Failure<OrderResponseDto>(new Error(
+                return Result.Failure<DetailedOrderResponseDto>(new Error(
                     "INVALID_DISCOUNT",
                     _localizationService.GetMessage("InvalidDiscount"),
                     ErrorType.Validation));
@@ -101,7 +101,7 @@ namespace Inventory.Application.Services
             catch (EmptyOrderException ex)
             {
                 _logger.LogWarning(ex, "Attempted to submit empty order");
-                return Result.Failure<OrderResponseDto>(new Error(
+                return Result.Failure<DetailedOrderResponseDto>(new Error(
                     "EMPTY_ORDER",
                     _localizationService.GetMessage("EmptyOrder"),
                     ErrorType.Validation));
@@ -113,7 +113,7 @@ namespace Inventory.Application.Services
 
             _logger.LogInformation("Order {OrderId} submitted successfully for user {UserId}", order.Id, userId);
 
-            var response = _mapper.Map<OrderResponseDto>(order);
+            var response = _mapper.Map<DetailedOrderResponseDto>(order);
             return Result.Success(response);
         }
 
@@ -121,9 +121,9 @@ namespace Inventory.Application.Services
         //  DRAFT WORKFLOW
         // ─────────────────────────────────────────────────────────────
 
-        public async Task<Result<OrderResponseDto>> CreateDraftAsync(string cashierId, CreateDraftOrderDto dto, CancellationToken cancellationToken = default)
+        public async Task<Result<OrderResponseDto>> CreateDraftAsync(string cashierId, CancellationToken cancellationToken = default)
         {
-            var order = Order.CreateDraft(cashierId, dto.OrderType);
+            var order = Order.CreateDraft(cashierId);
             
             await _orderRepository.AddAsync(order, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -140,7 +140,7 @@ namespace Inventory.Application.Services
                 return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
             }
 
-            var product = await _productRepository.GetByIdAsync(dto.ProductId, cancellationToken);
+            var product = await _productRepository.GetBySkuWithBatchesAsync(dto.SKU, cancellationToken);
             if (product == null)
             {
                  return Result.Failure<OrderResponseDto>(new Error("PRODUCT_NOT_FOUND", "Product not found.", ErrorType.NotFound));
@@ -148,8 +148,13 @@ namespace Inventory.Application.Services
 
             try
             {
-                order.AddItem(product, dto.Quantity, dto.DiscountPercentage);
+                order.AddItem(product, dto.Quantity);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch(InsufficientStockException ex)
+            {
+                _logger.LogWarning(ex, "Insufficient stock while adding product {ProductId} to order {OrderId}", product.Id, orderId);
+                return Result.Failure<OrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -192,7 +197,34 @@ namespace Inventory.Application.Services
             return Result.Success(response);
         }
 
-        public async Task<Result<OrderResponseDto>> ConfirmOrderAsync(string cashierId, int orderId, ConfirmOrderDto dto, CancellationToken cancellationToken = default)
+        public async Task<Result<OrderResponseDto>> UpdateItemQuantityAsync(string cashierId, int orderId, int productId, decimal quantity, CancellationToken cancellationToken = default)
+        {
+            var order = await _orderRepository.GetDraftByIdAsync(orderId, cancellationToken);
+            if (order == null || order.Status != OrderStatus.Draft)
+            {
+                return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+            }
+
+            try
+            {
+                order.UpdateItemQuantity(productId, quantity);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrency conflict while updating item quantity in order {OrderId}", orderId);
+                return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+            {
+                 return Result.Failure<OrderResponseDto>(new Error("VALIDATION_ERROR", ex.Message, ErrorType.Validation));
+            }
+
+            var response = _mapper.Map<OrderResponseDto>(order);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<DetailedOrderResponseDto>> ConfirmOrderAsync(string cashierId, int orderId, ConfirmOrderDto dto, CancellationToken cancellationToken = default)
         {
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
@@ -202,7 +234,7 @@ namespace Inventory.Application.Services
                 if (order == null || order.Status != OrderStatus.Draft)
                 {
                     await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                    return Result.Failure<OrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
+                    return Result.Failure<DetailedOrderResponseDto>(new Error("ORDER_NOT_FOUND_OR_NOT_DRAFT", "Draft order not found.", ErrorType.NotFound));
                 }
 
                 // Optimistic Concurrency check using RowVersion
@@ -212,35 +244,35 @@ namespace Inventory.Application.Services
                     if (!clientRowVersion.SequenceEqual(order.RowVersion))
                     {
                         await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                        return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                        return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
                     }
                 }
 
-                order.Confirm(dto.PaymentMethod);
+                order.Confirm(dto.PaymentMethod, dto.OrderType);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-                var response = _mapper.Map<OrderResponseDto>(order);
+                var response = _mapper.Map<DetailedOrderResponseDto>(order);
                 return Result.Success(response);
             }
             catch (DbUpdateConcurrencyException)
             {
                  await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                  _logger.LogWarning("Concurrency conflict while confirming order {OrderId}", orderId);
-                 return Result.Failure<OrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
+                 return Result.Failure<DetailedOrderResponseDto>(new Error("CONCURRENCY_CONFLICT", "Order was modified by another request.", ErrorType.Conflict));
             }
             catch (InsufficientStockException ex)
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 _logger.LogWarning(ex, "Insufficient stock while confirming order {OrderId}", orderId);
-                return Result.Failure<OrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("INSUFFICIENT_STOCK", ex.Message, ErrorType.Validation));
             }
             catch (EmptyOrderException ex)
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 _logger.LogWarning(ex, "Attempted to confirm empty order {OrderId}", orderId);
-                return Result.Failure<OrderResponseDto>(new Error("EMPTY_ORDER", "Order has no items.", ErrorType.Validation));
+                return Result.Failure<DetailedOrderResponseDto>(new Error("EMPTY_ORDER", "Order has no items.", ErrorType.Validation));
             }
             catch (Exception)
             {

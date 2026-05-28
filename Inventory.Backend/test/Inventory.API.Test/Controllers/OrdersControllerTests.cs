@@ -77,7 +77,7 @@ public class OrdersControllerTests
             OrderType = OrderType.InStore
         };
 
-        var response = new OrderResponseDto
+        var response = new DetailedOrderResponseDto
         {
             Id = 1,
             CashierId = "user-123"
@@ -109,11 +109,6 @@ public class OrdersControllerTests
     public async Task CreateDraft_DraftIsCreated_ReturnsOk()
     {
         // Arrange
-        var dto = new CreateDraftOrderDto
-        {
-            OrderType = OrderType.InStore
-        };
-
         var response = new OrderResponseDto
         {
             Id = 1,
@@ -124,7 +119,6 @@ public class OrdersControllerTests
         _orderServiceMock
             .Setup(x => x.CreateDraftAsync(
                 "user-123",
-                dto,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(response));
 
@@ -132,7 +126,6 @@ public class OrdersControllerTests
 
         // Act
         var result = await controller.CreateDraft(
-            dto,
             CancellationToken.None);
 
         // Assert
@@ -143,7 +136,7 @@ public class OrdersControllerTests
     public async Task GetById_OrderExists_ReturnsOk()
     {
         // Arrange
-        var response = new OrderResponseDto
+        var response = new DetailedOrderResponseDto
         {
             Id = 1,
             CashierId = "user-123"
@@ -176,7 +169,7 @@ public class OrdersControllerTests
             .Setup(x => x.GetByIdAsync(
                 99,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Failure<OrderResponseDto>(error));
+            .ReturnsAsync(Result.Failure<DetailedOrderResponseDto>(error));
 
         _localizationMock
             .Setup(x => x.GetMessage(It.IsAny<string>()))
@@ -206,7 +199,7 @@ public class OrdersControllerTests
                 "user-123",
                 dto,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Failure<OrderResponseDto>(error));
+            .ReturnsAsync(Result.Failure<DetailedOrderResponseDto>(error));
 
         _localizationMock
             .Setup(x => x.GetMessage(It.IsAny<string>()))

@@ -17,8 +17,7 @@ public class OrderRepositoryTests
         await using var context = DbContextFactory.Create();
 
         var order = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
+            "cashier-1");
 
         context.Orders.Add(order);
 
@@ -67,12 +66,11 @@ public class OrderRepositoryTests
         await context.SaveChangesAsync();
 
         var order = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
+            "cashier-1");
 
         order.AddItem(product, 1);
 
-        order.Confirm(PaymentMethod.Cash);
+        order.Confirm(PaymentMethod.Cash, OrderType.InStore);
 
         context.Orders.Add(order);
 
@@ -94,12 +92,9 @@ public class OrderRepositoryTests
         await using var context = DbContextFactory.Create();
 
         var expiredOrder = Order.CreateDraft(
-            "cashier-1",
-            OrderType.InStore);
-
+            "cashier-1");
         var validOrder = Order.CreateDraft(
-            "cashier-2",
-            OrderType.InStore);
+            "cashier-2");
 
         typeof(Order)
             .GetProperty(nameof(Order.ExpiresAt))!

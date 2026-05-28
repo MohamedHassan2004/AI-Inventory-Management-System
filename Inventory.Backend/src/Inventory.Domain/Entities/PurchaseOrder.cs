@@ -45,15 +45,15 @@ namespace Inventory.Domain.Entities
         // ──────────────────────────────────────────
 
         
-        public void AddItem(Product product, decimal quantity, decimal unitCost, DateTime expiryDate)
+        public void AddItem(Product product, decimal quantity, decimal unitCost, DateTime expiryDate, decimal discountPercentage = 0)
         {
             if (product is null) throw new ArgumentNullException(nameof(product));
             if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
             if (unitCost < 0) throw new ArgumentOutOfRangeException(nameof(unitCost), "Unit cost cannot be negative.");
 
-            product.AddStock(SupplierId, expiryDate, unitCost, quantity);
+            product.AddStock(SupplierId, expiryDate, unitCost, quantity, discountPercentage);
 
-            _items.Add(new PurchaseOrderItem(product, quantity, unitCost, expiryDate));
+            _items.Add(new PurchaseOrderItem(product, quantity, unitCost, expiryDate, discountPercentage));
 
             Recalculate();
         }

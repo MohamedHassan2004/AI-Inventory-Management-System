@@ -29,7 +29,7 @@ public class PurchaseOrderSeeder
                 var quantity = random.Next(10, 100);
                 var unitCost = Math.Round(product.SellingPrice * 0.6m, 2);
                 var expiryDate = DateTime.UtcNow.AddMonths(random.Next(1, 24));
-                po.AddItem(product, quantity, unitCost, expiryDate);
+                po.AddItem(product, quantity, unitCost, expiryDate, 0);
             }
 
             po.Complete();
