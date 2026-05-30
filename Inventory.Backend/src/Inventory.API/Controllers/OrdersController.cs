@@ -93,6 +93,18 @@ namespace Inventory.API.Controllers
             return HandleResult(result);
         }
 
+        // PUT: api/orders/{id}/discount
+        [HttpPut("{id}/discount")]
+        public async Task<IActionResult> ApplyDiscount(
+            int id,
+            [FromBody] ApplyDiscountDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderService.ApplyDiscountAsync(userId, id, dto, cancellationToken);
+            return HandleResult(result);
+        }
+
         // POST: api/orders/{id}/confirm
         [HttpPost("{id}/confirm")]
         public async Task<IActionResult> ConfirmOrder(

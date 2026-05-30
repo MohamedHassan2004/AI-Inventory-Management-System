@@ -39,6 +39,12 @@ namespace Inventory.Application.Interfaces
             ConfirmOrderDto dto, 
             CancellationToken cancellationToken = default);
 
+        Task<Result<DetailedOrderResponseDto>> ApplyDiscountAsync(
+            string cashierId,
+            int orderId,
+            ApplyDiscountDto dto,
+            CancellationToken cancellationToken = default);
+
         Task<Result> CancelDraftAsync(
             string cashierId, 
             int orderId, 

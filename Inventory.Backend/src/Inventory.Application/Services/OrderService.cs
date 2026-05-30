@@ -163,6 +163,13 @@ namespace Inventory.Application.Services
                 order => order.UpdateItemQuantity(productId, quantity), ct);
         }
 
+        public async Task<Result<DetailedOrderResponseDto>> ApplyDiscountAsync(
+            string cashierId, int orderId, ApplyDiscountDto dto, CancellationToken ct = default)
+        {
+            return await ExecuteOnDraftAsync(cashierId, orderId,
+                order => order.ApplyDiscount(dto.DiscountPercentage), ct);
+        }
+
         public async Task<Result<DetailedOrderResponseDto>> ConfirmOrderAsync(string cashierId, int orderId, ConfirmOrderDto dto, CancellationToken cancellationToken = default)
         {
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -193,7 +200,6 @@ namespace Inventory.Application.Services
                     }
                 }
 
-                order.ApplyDiscount(dto.DiscountPercentage ?? 0);
                 order.Confirm(dto.PaymentMethod, dto.OrderType);
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
