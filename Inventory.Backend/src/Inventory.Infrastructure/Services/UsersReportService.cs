@@ -49,6 +49,26 @@ public class UsersReportService : IUsersReportService
             .OrderByDescending(x => x.TotalRevenue)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<CashierDto>> GetCashiersAsync(CancellationToken cancellationToken)
+    {
+       var cashiers = await (
+                from user in _dbContext.Users
+                join userRole in _dbContext.UserRoles
+                    on user.Id equals userRole.UserId
+                join role in _dbContext.Roles
+                    on userRole.RoleId equals role.Id
+                where role.Name == UserRole.Cashier.ToString()
+                select new CashierDto
+                {
+                    Id = user.Id,
+                    Name = user.FullName
+                })
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        return cashiers;
+    }
+
     public async Task<IEnumerable<UserStatusBreakdownDto>> GetUserStatusBreakdownAsync(
     CancellationToken cancellationToken)
     {

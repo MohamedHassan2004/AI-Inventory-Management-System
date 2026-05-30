@@ -243,6 +243,7 @@ Delivery: Draft ──[confirm]──► OutForDelivery ──[deliver]───
 | GET | `/api/reports/sales/profit-margin` | Profit margin analysis |
 | GET | `/api/reports/users/cashier-sales` | Cashier sales performance |
 | GET | `/api/reports/users/status-breakdown` | User status breakdown |
+| GET | `/api/reports/users/cashiers` | List of cashiers |
 
 ### Categories
 
@@ -298,8 +299,10 @@ Delivery: Draft ──[confirm]──► OutForDelivery ──[deliver]───
 - **Role- and policy-based authorization** — Admin, InventoryStaff, Cashier, and Active account policies.
 - **Full inventory lifecycle** — products, stock batches with FEFO consumption, and purchase orders.
 - **Full inventory lifecycle** — products, stock batches with FEFO/FIFO consumption, and purchase orders. Supports batch-level selling prices and discount percentages, allowing different batches of the same product to be sold at custom clearance/promotional prices.
-- **Draft order workflow** — cashiers build orders incrementally with expiration, confirm, and cancel support. Eagerly simulates FEFO/FIFO prices and batch-level discounts for draft items, finalizing and snapshotting prices permanently at confirmation.
+- **Draft order workflow** — cashiers build orders incrementally. Items added to a draft order immediately perform an **eager allocation**, locking stock via a Soft Reservation for 30 minutes. 
+- **Automated background jobs** — includes an `ExpiredAllocationCleanupBackgroundService` that runs every 5 minutes to release expired allocations back to inventory, ensuring stock isn't permanently locked while allowing the cashier to retain the active draft.
 - **Delivery order workflow** — `confirm` with `orderType: Delivery` moves the order to `OutForDelivery`. A subsequent `POST /deliver` marks it `Completed`; `POST /fail-delivery` cancels the order and restores each stock batch using exact allocation-level quantities (partial returns already processed are respected).
+- **Optimistic Concurrency** — the `GET /api/orders/{id}` endpoint projects a Base64 `RowVersion` for clients, guaranteeing safe, conflict-free updates and confirmations.
 - **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
 - **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance.
 - **Soft-delete** for Suppliers and Categories with restore capability.

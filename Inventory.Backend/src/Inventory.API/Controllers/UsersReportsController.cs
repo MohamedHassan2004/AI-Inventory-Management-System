@@ -39,4 +39,15 @@ public class UsersReportsController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("cashiers")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCashiers(
+    CancellationToken cancellationToken)
+    {
+        var result = await _reportService.GetCashiersAsync(
+            cancellationToken);
+
+        return Ok(result);
+    }
 }
