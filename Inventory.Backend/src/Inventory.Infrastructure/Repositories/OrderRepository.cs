@@ -14,31 +14,18 @@ namespace Inventory.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Order?> GetOrderWithItemsAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
-        }
-
-        public async Task<Order?> GetFullOrderAsync(
-            int id,
-            CancellationToken cancellationToken = default)
+        public async Task<Order?> GetForDetailedResponseAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Product)
-                        .ThenInclude(p => p.Batches)
-
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Allocations)
-                        .ThenInclude(a => a.StockBatch)
-
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }
 
-        public async Task<Order?> GetDraftByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Order?> GetDraftForMutationAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
@@ -51,8 +38,38 @@ namespace Inventory.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Draft, cancellationToken);
         }
 
-        // Loads Items → Allocations → StockBatch for FailDelivery to restore exact batch quantities
-        public async Task<Order?> GetOutForDeliveryByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Order?> GetDraftForConfirmationAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                        .ThenInclude(p => p.Batches)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Draft, cancellationToken);
+        }
+
+        public async Task<Order?> GetCompletedForReturnAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Allocations)
+                        .ThenInclude(a => a.StockBatch)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.Completed, cancellationToken);
+        }
+
+        public async Task<Order?> GetOutForDeliveryForStatusChangeAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.OutForDelivery, cancellationToken);
+        }
+
+        public async Task<Order?> GetOutForDeliveryForRestockAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
@@ -62,7 +79,7 @@ namespace Inventory.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id && o.Status == Domain.Enums.OrderStatus.OutForDelivery, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Order>> GetExpiredDraftsForCleanupAsync(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             return await _context.Orders
                 .Include(o => o.Items)
@@ -73,4 +90,4 @@ namespace Inventory.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
     }
-}
+}

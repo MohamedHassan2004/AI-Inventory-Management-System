@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Reports.Sales;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -11,11 +11,11 @@ namespace Inventory.API.Test.Controllers;
 
 public class SalesReportsControllerTests
 {
-    private readonly Mock<ISalesReportService> _salesReportServiceMock;
+    private readonly Mock<ISalesReportQuery> _salesReportServiceMock;
 
     public SalesReportsControllerTests()
     {
-        _salesReportServiceMock = new Mock<ISalesReportService>();
+        _salesReportServiceMock = new Mock<ISalesReportQuery>();
     }
 
     private SalesReportsController CreateController()

@@ -23,9 +23,9 @@ namespace Inventory.Domain.Test.Entities
         [InlineData("sku", null, 10, 1)]
         [InlineData("sku", "name", -1, 1)]
         [InlineData("sku", "name", 10, -1)]
-        public void Product_Constructor_WithInvalidData_ShouldThrow(string sku, string name, decimal price, int reorder)
+        public void Product_Constructor_WithInvalidData_ShouldThrow(string? sku, string? name, decimal price, int reorder)
         {
-            Assert.ThrowsAny<System.Exception>(() => new Product(sku, name, price, reorder));
+            Assert.ThrowsAny<System.Exception>(() => new Product(sku!, name!, price, reorder));
         }
 
         [Fact]

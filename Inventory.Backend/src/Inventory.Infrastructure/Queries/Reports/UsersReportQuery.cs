@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
 using Inventory.Application.DTOs.Reports.Users;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class UsersReportService : IUsersReportService
+public class UsersReportQuery : IUsersReportQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public UsersReportService(ApplicationDbContext dbContext)
+    public UsersReportQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

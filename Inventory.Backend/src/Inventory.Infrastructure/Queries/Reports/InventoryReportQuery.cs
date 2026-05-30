@@ -1,5 +1,4 @@
 ﻿using Inventory.Application.DTOs.Reports.Inventory;
-using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,14 +7,15 @@ using System.Collections.Generic;
 using System.Text;
 
 using Inventory.Domain.Shared;
+using Inventory.Application.Interfaces.Queries.Reports;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class InventoryReportService : IInventoryReportService
+public class InventoryReportQuery : IInventoryReportQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public InventoryReportService(ApplicationDbContext dbContext)
+    public InventoryReportQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

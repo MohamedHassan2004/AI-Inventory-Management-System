@@ -9,6 +9,8 @@ namespace Inventory.Domain.Test.Entities
 {
     public class OrderTests
     {
+        private const decimal DefaultTaxPercentage = 0m;
+
         // ─── Helpers ────────────────────────────────────────────────────────────
 
         private void SetId(object entity, int id)
@@ -66,12 +68,13 @@ namespace Inventory.Domain.Test.Entities
             var (product, _) = CreateProductWithStock(10, sellingPrice: 150m);
             var order = Order.CreateDraft("cashier1");
 
-            order.AddItem(product, 2); // 2 * 150 = 300 SubTotal
+        order.AddItem(product, 2); // 2 * 150 = 300 SubTotal
 
             Assert.Equal(300m, order.SubTotal);
-            // DefaultTaxPercentage is 14% -> 300 * 0.14 = 42
-            Assert.Equal(42m, order.TaxAmount);
-            Assert.Equal(342m, order.FinalTotal);
+
+            var expectedTax = 300m * DefaultTaxPercentage / 100m;
+            Assert.Equal(expectedTax, order.TaxAmount);
+            Assert.Equal(300m + expectedTax, order.FinalTotal);
         }
 
         [Fact]
@@ -81,9 +84,9 @@ namespace Inventory.Domain.Test.Entities
             var order = ConfirmDraft(product, 2, OrderType.InStore);
 
             Assert.Equal(400m, order.SubTotal);
-            // DefaultTaxPercentage is 14% -> 400 * 0.14 = 56
-            Assert.Equal(56m, order.TaxAmount);
-            Assert.Equal(456m, order.FinalTotal);
+            var expectedTax = 400m * DefaultTaxPercentage / 100m;
+            Assert.Equal(expectedTax, order.TaxAmount);
+            Assert.Equal(400m + expectedTax, order.FinalTotal);
         }
 
         [Fact]

@@ -2,7 +2,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Application.Interfaces;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Documents;
+using Inventory.Application.Interfaces.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

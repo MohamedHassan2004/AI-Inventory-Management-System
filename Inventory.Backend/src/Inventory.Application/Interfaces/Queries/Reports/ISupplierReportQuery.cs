@@ -1,9 +1,9 @@
 using Inventory.Application.DTOs.Supplier;
 using Inventory.Domain.Shared;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Queries.Reports;
 
-public interface ISupplierReportService
+public interface ISupplierReportQuery
 {
     Task<PagedResult<SupplierReportItemDto>> GetSuppliersReportAsync(
         DateTime? startDate,

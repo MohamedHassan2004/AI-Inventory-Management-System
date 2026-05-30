@@ -2,6 +2,7 @@ using FluentAssertions;
 using Inventory.Application.DTOs.Reports.Returns;
 using Inventory.Domain.Entities;
 using Inventory.Infrastructure.Data;
+using Inventory.Infrastructure.Queries.Reports;
 using Inventory.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -26,7 +27,7 @@ public class ReturnsReportServiceTests
         // Arrange
         using var dbContext = CreateDbContext();
 
-        var service = new ReturnsReportService(dbContext);
+        var service = new ReturnsReportQuery(dbContext);
 
         // Act
         var result = await service.GetTopReturnedProductsAsync(

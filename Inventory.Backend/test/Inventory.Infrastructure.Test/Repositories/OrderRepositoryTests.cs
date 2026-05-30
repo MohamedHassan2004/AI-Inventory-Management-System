@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Inventory.Domain.Entities;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Repositories;
@@ -26,7 +26,7 @@ public class OrderRepositoryTests
         var repository = new OrderRepository(context);
 
         // Act
-        var result = await repository.GetDraftByIdAsync(order.Id);
+        var result = await repository.GetDraftForMutationAsync(order.Id);
 
         // Assert
         result.Should().NotBeNull();
@@ -79,7 +79,7 @@ public class OrderRepositoryTests
         var repository = new OrderRepository(context);
 
         // Act
-        var result = await repository.GetDraftByIdAsync(order.Id);
+        var result = await repository.GetDraftForMutationAsync(order.Id);
 
         // Assert
         result.Should().BeNull();
@@ -113,7 +113,7 @@ public class OrderRepositoryTests
         var repository = new OrderRepository(context);
 
         // Act
-        var result = await repository.GetExpiredDraftsAsync(
+        var result = await repository.GetExpiredDraftsForCleanupAsync(
             DateTime.UtcNow);
 
         // Assert

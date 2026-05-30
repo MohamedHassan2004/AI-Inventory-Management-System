@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Inventory.Application.DTOs.Reports.Dashboard;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class DashboardService : IDashboardService
+public class DashboardQuery : IDashboardQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public DashboardService(ApplicationDbContext dbContext)
+    public DashboardQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

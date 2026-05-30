@@ -6,6 +6,7 @@ using Inventory.Domain.Shared;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Inventory.Application.Interfaces.Queries;
 
 namespace Inventory.Infrastructure.Queries
 {
@@ -75,8 +76,23 @@ namespace Inventory.Infrastructure.Queries
         // ─────────────────────────────────────────────────────────────
         //  GET BY ID
         // ─────────────────────────────────────────────────────────────
-        public async Task<Result<DetailedOrderResponseDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Result<DetailedOrderResponseDto>> GetByIdAsync(
+            string cashierId,
+            int id,
+            CancellationToken cancellationToken = default)
         {
+            var accessInfo = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.Id == id)
+                .Select(o => new { o.Status, o.CashierId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (accessInfo is null)
+                return Result.Failure<DetailedOrderResponseDto>(OrderNotFoundError());
+
+            if (accessInfo.Status == OrderStatus.Draft && accessInfo.CashierId != cashierId)
+                return Result.Failure<DetailedOrderResponseDto>(DraftOrderAccessDeniedError());
+
             var order = await _context.Orders
                 .AsNoTracking()
                 .AsSplitQuery()
@@ -85,10 +101,7 @@ namespace Inventory.Infrastructure.Queries
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order is null)
-                return Result.Failure<DetailedOrderResponseDto>(
-                    new Error("NOT_FOUND",
-                        _localizationService.GetMessage("OrderNotFound"),
-                        ErrorType.NotFound));
+                return Result.Failure<DetailedOrderResponseDto>(OrderNotFoundError());
 
             return Result.Success(order);
         }
@@ -159,9 +172,22 @@ namespace Inventory.Infrastructure.Queries
         //  GET ITEMS BY ORDER ID
         // ─────────────────────────────────────────────────────────────
         public async Task<Result<IEnumerable<OrderItemResponseDto>>> GetItemsByOrderIdAsync(
+            string cashierId,
             int orderId,
             CancellationToken cancellationToken = default)
         {
+            var accessInfo = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.Id == orderId)
+                .Select(o => new { o.Status, o.CashierId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (accessInfo is null)
+                return Result.Failure<IEnumerable<OrderItemResponseDto>>(OrderNotFoundError());
+
+            if (accessInfo.Status == OrderStatus.Draft && accessInfo.CashierId != cashierId)
+                return Result.Failure<IEnumerable<OrderItemResponseDto>>(DraftOrderAccessDeniedError());
+
             var order = await _context.Orders
                 .AsNoTracking()
                 .AsSplitQuery()
@@ -190,12 +216,17 @@ namespace Inventory.Infrastructure.Queries
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (order is null)
-                return Result.Failure<IEnumerable<OrderItemResponseDto>>(
-                    new Error("NOT_FOUND",
-                        _localizationService.GetMessage("OrderNotFound"),
-                        ErrorType.NotFound));
+                return Result.Failure<IEnumerable<OrderItemResponseDto>>(OrderNotFoundError());
 
             return Result.Success<IEnumerable<OrderItemResponseDto>>(order.Items);
         }
+
+        private Error OrderNotFoundError() =>
+            new("NOT_FOUND", _localizationService.GetMessage("OrderNotFound"), ErrorType.NotFound);
+
+        private Error DraftOrderAccessDeniedError() =>
+            new("DRAFT_ORDER_ACCESS_DENIED",
+                _localizationService.GetMessage("DraftOrderAccessDenied"),
+                ErrorType.Forbidden);
     }
 }

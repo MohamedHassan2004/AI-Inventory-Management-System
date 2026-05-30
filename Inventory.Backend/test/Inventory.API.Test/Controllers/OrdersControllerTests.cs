@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Security.Claims;
-using Inventory.Application.Interfaces.Services;
 using Xunit;
+using Inventory.Application.Interfaces.Queries;
+using Inventory.Application.Interfaces.Documents;
 
 namespace Inventory.API.Test.Controllers;
 
@@ -144,6 +145,7 @@ public class OrdersControllerTests
 
         _orderQueryServiceMock
             .Setup(x => x.GetByIdAsync(
+                "user-123",
                 1,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(response));
@@ -167,6 +169,7 @@ public class OrdersControllerTests
         var error = new Error("Order.NotFound", "Order not found", ErrorType.NotFound);
         _orderQueryServiceMock
             .Setup(x => x.GetByIdAsync(
+                "user-123",
                 99,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<DetailedOrderResponseDto>(error));
@@ -185,6 +188,38 @@ public class OrdersControllerTests
         // Assert
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [Fact]
+    public async Task GetById_DraftOrderBelongsToAnotherCashier_ReturnsForbidden()
+    {
+        // Arrange
+        var error = new Error(
+            "DRAFT_ORDER_ACCESS_DENIED",
+            "Draft order access denied",
+            ErrorType.Forbidden);
+
+        _orderQueryServiceMock
+            .Setup(x => x.GetByIdAsync(
+                "user-123",
+                1,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure<DetailedOrderResponseDto>(error));
+
+        _localizationMock
+            .Setup(x => x.GetMessage(It.IsAny<string>()))
+            .Returns("Forbidden");
+
+        var controller = CreateController();
+
+        // Act
+        var result = await controller.GetById(
+            1,
+            CancellationToken.None);
+
+        // Assert
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
     [Fact]

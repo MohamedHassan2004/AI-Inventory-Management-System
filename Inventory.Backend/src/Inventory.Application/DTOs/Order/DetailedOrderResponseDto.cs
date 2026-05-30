@@ -20,6 +20,7 @@ namespace Inventory.Application.DTOs.Order
         public decimal SubTotal { get; set; }
         public decimal DiscountPercentage { get; set; }
         public decimal DiscountAmount { get; set; }
+        public decimal DeliveryFee { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal FinalTotal { get; set; }
 

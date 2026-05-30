@@ -1,7 +1,7 @@
 using Inventory.Application.DTOs.ReturnOrder;
 using Inventory.Domain.Shared;
 
-namespace Inventory.Application.Interfaces
+namespace Inventory.Application.Interfaces.Queries
 {
     public interface IReturnOrderQueryService
     {

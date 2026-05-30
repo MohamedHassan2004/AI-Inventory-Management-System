@@ -1,5 +1,4 @@
 ﻿using Inventory.Application.DTOs.Reports.Sales;
-using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,14 +7,15 @@ using System.Collections.Generic;
 using System.Text;
 
 using Inventory.Domain.Shared;
+using Inventory.Application.Interfaces.Queries.Reports;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class SalesReportService : ISalesReportService
+public class SalesReportQuery : ISalesReportQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public SalesReportService(ApplicationDbContext dbContext)
+    public SalesReportQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -92,7 +92,7 @@ public class SalesReportService : ISalesReportService
             .GroupBy(o => o.PaymentMethod)
             .Select(g => new SalesByPaymentMethodDto
             {
-                PaymentMethod = g.Key != null ? g.Key.ToString() : "Unknown",
+                PaymentMethod = g.Key.ToString() ?? "Unknown",
                 TotalOrders = g.Count(),
                 TotalRevenue = g.Sum(x => x.FinalTotal)
             })

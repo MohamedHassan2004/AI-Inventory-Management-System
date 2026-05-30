@@ -170,7 +170,7 @@ Base route: `api/<controller>`
 | POST | `/api/purchaseorders/submit` | Submit a purchase order with items |
 | GET | `/api/purchaseorders/{id}` | Get purchase order by ID |
 | GET | `/api/purchase-orders/{id}/invoice` | Generate PDF invoice for purchase order |
-| GET | `/api/purchaseorders` | List all purchase orders (with filtering) |
+| GET | `/api/purchaseorders` | List all purchase orders (with filtering via `PurchaseOrderQueryService`) |
 | GET | `/api/purchaseorders/{id}/items` | Get items for a purchase order |
 
 ### Stock Batches
@@ -201,7 +201,7 @@ Base route: `api/<controller>`
 | DELETE | `/api/orders/{id}` | Cancel a draft order |
 | GET | `/api/orders/{id}` | Get order by ID |
 | GET | `/api/orders/{id}/receipt` | Generate PDF receipt for order |
-| GET | `/api/orders` | List orders (status, sorting, paging) |
+| GET | `/api/orders` | List orders (status, sorting, paging via `OrderQueryService`) |
 | GET | `/api/orders/{orderId}/items` | Get order items |
 
 #### Order Status Lifecycle
@@ -225,23 +225,23 @@ Delivery: Draft ──[confirm]──► OutForDelivery ──[deliver]───
 |---|---|---|
 | POST | `/api/return-orders` | Create a return order |
 | GET | `/api/return-orders/{id}` | Get return order by ID |
-| GET | `/api/return-orders` | List return orders (filter + paging) |
+| GET | `/api/return-orders` | List return orders (filter + paging via `ReturnOrderQueryService`) |
 
-### Dashboard & Reports
+### Dashboard & Reports (Query Services)
 
 | Method | Route | Description |
 |---|---|---|
-| GET | `/api/dashboard/summary` | Dashboard summary metrics |
-| GET | `/api/reports/inventory/expiring-batches` | Batches expiring soon |
+| GET | `/api/dashboard/summary` | Dashboard summary metrics using `DashboardQuery` |
+| GET | `/api/reports/inventory/expiring-batches` | Batches expiring soon using `InventoryReportQuery` |
 | GET | `/api/reports/inventory/dead-stock` | Dead stock analysis |
 | GET | `/api/reports/inventory/low-stock` | Low stock products |
 | GET | `/api/reports/inventory/out-of-stock` | Out of stock products |
 | GET | `/api/reports/inventory/turnover` | Inventory turnover rate |
-| GET | `/api/reports/returns/top-products` | Top returned products |
-| GET | `/api/reports/sales/top-products` | Top selling products |
+| GET | `/api/reports/returns/top-products` | Top returned products using `ReturnsReportQuery` |
+| GET | `/api/reports/sales/top-products` | Top selling products using `SalesReportQuery` |
 | GET | `/api/reports/sales/analytics` | Sales analytics data |
 | GET | `/api/reports/sales/profit-margin` | Profit margin analysis |
-| GET | `/api/reports/users/cashier-sales` | Cashier sales performance |
+| GET | `/api/reports/users/cashier-sales` | Cashier sales performance using `UsersReportQuery` |
 | GET | `/api/reports/users/status-breakdown` | User status breakdown |
 | GET | `/api/reports/users/cashiers` | List of cashiers |
 
@@ -304,7 +304,7 @@ Delivery: Draft ──[confirm]──► OutForDelivery ──[deliver]───
 - **Delivery order workflow** — `confirm` with `orderType: Delivery` moves the order to `OutForDelivery`. A subsequent `POST /deliver` marks it `Completed`; `POST /fail-delivery` cancels the order and restores each stock batch using exact allocation-level quantities (partial returns already processed are respected).
 - **Optimistic Concurrency** — the `GET /api/orders/{id}` endpoint projects a Base64 `RowVersion` for clients, guaranteeing safe, conflict-free updates and confirmations.
 - **Return orders** — create returns against completed orders, track refunded quantities, and restock with new expiry dates.
-- **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance.
+- **Dashboard & Reports** — extensive reporting on sales, returns, purchases, inventory status, and user performance using specialized query services for performance optimization.
 - **Soft-delete** for Suppliers and Categories with restore capability.
 - **File upload** support for category images and user identity images.
 - **Serilog** structured logging and SQL Server health checks.

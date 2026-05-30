@@ -1,4 +1,4 @@
-﻿using Inventory.Application.Interfaces.Services;
+﻿using Inventory.Application.Interfaces.Queries.Reports;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +8,9 @@ namespace Inventory.API.Controllers;
 [Route("api/dashboard")]
 public class DashboardController : ControllerBase
 {
-    private readonly IDashboardService _dashboardService;
+    private readonly IDashboardQuery _dashboardService;
 
-    public DashboardController(IDashboardService dashboardService)
+    public DashboardController(IDashboardQuery dashboardService)
     {
         _dashboardService = dashboardService;
     }

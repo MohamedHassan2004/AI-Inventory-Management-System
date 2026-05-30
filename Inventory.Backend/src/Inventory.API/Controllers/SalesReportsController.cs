@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 
 namespace Inventory.API.Controllers;
 
@@ -8,9 +7,9 @@ namespace Inventory.API.Controllers;
 [Route("api/reports/sales")]
 public class SalesReportsController : ControllerBase
 {
-    private readonly ISalesReportService _salesReportService;
+    private readonly ISalesReportQuery _salesReportService;
 
-    public SalesReportsController(ISalesReportService salesReportService)
+    public SalesReportsController(ISalesReportQuery salesReportService)
     {
         _salesReportService = salesReportService;
     }

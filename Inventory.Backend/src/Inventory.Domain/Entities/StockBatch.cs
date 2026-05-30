@@ -11,7 +11,7 @@ namespace Inventory.Domain.Entities
         public decimal RemainingQuantity { get; private set; }
 
         public int SupplierId { get; private set; }
-        public Supplier Supplier { get; private set; }
+        public Supplier Supplier { get; private set; } = null!;
 
         public int ProductId { get; private set; }
         public Product Product { get; private set; } = null!;

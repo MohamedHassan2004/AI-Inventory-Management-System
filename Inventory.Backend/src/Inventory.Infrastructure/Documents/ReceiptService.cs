@@ -1,4 +1,3 @@
-using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Exceptions;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +8,9 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using Inventory.Domain.Shared;
 using Microsoft.Extensions.Logging;
+using Inventory.Application.Interfaces.Documents;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Documents;
 
 public class ReceiptService : IReceiptService
 {
@@ -73,7 +73,7 @@ public class ReceiptService : IReceiptService
         });
     }
 
-    private void ComposeContent(IContainer container, Inventory.Domain.Entities.Order order)
+    private void ComposeContent(IContainer container, Domain.Entities.Order order)
     {
         container.PaddingVertical(1, Unit.Centimetre).Column(column =>
         {
@@ -97,7 +97,7 @@ public class ReceiptService : IReceiptService
         });
     }
 
-    private void ComposeTable(IContainer container, Inventory.Domain.Entities.Order order)
+    private void ComposeTable(IContainer container, Domain.Entities.Order order)
     {
         container.Table(table =>
         {
@@ -153,7 +153,7 @@ public class ReceiptService : IReceiptService
         });
     }
 
-    private void ComposeSummary(IContainer container, Inventory.Domain.Entities.Order order)
+    private void ComposeSummary(IContainer container, Domain.Entities.Order order)
     {
         container.Row(row =>
         {
@@ -164,6 +164,12 @@ public class ReceiptService : IReceiptService
                 column.Item().Row(r => { r.RelativeItem().Text("Subtotal:"); r.RelativeItem().AlignRight().Text($"${order.SubTotal:0.00}"); });
                 column.Item().Row(r => { r.RelativeItem().Text($"Discount ({order.DiscountPercentage}%):"); r.RelativeItem().AlignRight().Text($"${order.DiscountAmount:0.00}"); });
                 column.Item().Row(r => { r.RelativeItem().Text("Tax:"); r.RelativeItem().AlignRight().Text($"${order.TaxAmount:0.00}"); });
+                
+                if (order.Type == Domain.Enums.OrderType.Delivery)
+                {
+                    column.Item().Row(r => { r.RelativeItem().Text("Delivery Fee:"); r.RelativeItem().AlignRight().Text($"${order.DeliveryFee:0.00}"); });
+                }
+
                 column.Item().PaddingTop(5).BorderTop(1).BorderColor(Colors.Black).PaddingTop(5).Row(r => 
                 { 
                     r.RelativeItem().Text("Final Total:").SemiBold(); 

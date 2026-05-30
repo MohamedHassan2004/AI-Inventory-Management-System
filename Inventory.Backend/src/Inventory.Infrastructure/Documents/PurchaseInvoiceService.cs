@@ -1,4 +1,3 @@
-using Inventory.Application.Interfaces.Services;
 using Inventory.Domain.Exceptions;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +8,9 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using Inventory.Domain.Shared;
 using Microsoft.Extensions.Logging;
+using Inventory.Application.Interfaces.Documents;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Documents;
 
 public class PurchaseInvoiceService : IPurchaseInvoiceService
 {
@@ -70,7 +70,7 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         });
     }
 
-    private void ComposeContent(IContainer container, Inventory.Domain.Entities.PurchaseOrder order)
+    private void ComposeContent(IContainer container, Domain.Entities.PurchaseOrder order)
     {
         container.PaddingVertical(1, Unit.Centimetre).Column(column =>
         {
@@ -90,7 +90,7 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         });
     }
 
-    private void ComposeSupplierDetails(IContainer container, Inventory.Domain.Entities.Supplier supplier)
+    private void ComposeSupplierDetails(IContainer container, Domain.Entities.Supplier supplier)
     {
         container.Background(Colors.Grey.Lighten4).Padding(10).Column(column =>
         {
@@ -102,7 +102,7 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         });
     }
 
-    private void ComposeTable(IContainer container, Inventory.Domain.Entities.PurchaseOrder order)
+    private void ComposeTable(IContainer container, Domain.Entities.PurchaseOrder order)
     {
         container.Table(table =>
         {
@@ -150,7 +150,7 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         });
     }
 
-    private void ComposeSummary(IContainer container, Inventory.Domain.Entities.PurchaseOrder order)
+    private void ComposeSummary(IContainer container, Domain.Entities.PurchaseOrder order)
     {
         container.Row(row =>
         {

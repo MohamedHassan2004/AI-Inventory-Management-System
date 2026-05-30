@@ -1,5 +1,6 @@
 using Inventory.Application.DTOs.ReturnOrder;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Queries;
 using Inventory.Domain.Shared;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

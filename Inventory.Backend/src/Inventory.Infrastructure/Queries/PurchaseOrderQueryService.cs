@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Queries;
 using Inventory.Domain.Entities;
 using Inventory.Domain.Enums;
 using Inventory.Domain.Shared;

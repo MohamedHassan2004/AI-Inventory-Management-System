@@ -2,7 +2,7 @@ using Inventory.Domain.Shared;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Documents;
 
 public interface IPurchaseInvoiceService
 {

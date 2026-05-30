@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Reports.Dashboard;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -10,11 +10,11 @@ namespace Inventory.API.Test.Controllers;
 
 public class DashboardControllerTests
 {
-    private readonly Mock<IDashboardService> _dashboardServiceMock;
+    private readonly Mock<IDashboardQuery> _dashboardServiceMock;
 
     public DashboardControllerTests()
     {
-        _dashboardServiceMock = new Mock<IDashboardService>();
+        _dashboardServiceMock = new Mock<IDashboardQuery>();
     }
 
     private DashboardController CreateController()

@@ -1,6 +1,7 @@
 using Inventory.Application.DTOs.Order;
 using Inventory.Application.Interfaces;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Documents;
+using Inventory.Application.Interfaces.Queries;
 using Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -147,7 +148,8 @@ namespace Inventory.API.Controllers
             int id,
             CancellationToken cancellationToken)
         {
-            var result = await _orderQueryService.GetByIdAsync(id, cancellationToken);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderQueryService.GetByIdAsync(userId, id, cancellationToken);
             return HandleResult(result);
         }
 
@@ -188,7 +190,8 @@ namespace Inventory.API.Controllers
             int orderId,
             CancellationToken cancellationToken)
         {
-            var result = await _orderQueryService.GetItemsByOrderIdAsync(orderId, cancellationToken);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _orderQueryService.GetItemsByOrderIdAsync(userId, orderId, cancellationToken);
             return HandleResult(result);
         }
 

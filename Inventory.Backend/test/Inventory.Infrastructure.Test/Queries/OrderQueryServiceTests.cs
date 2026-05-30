@@ -21,6 +21,10 @@ public class OrderQueryServiceTests
         _localizationMock
             .Setup(x => x.GetMessage("OrderNotFound"))
             .Returns("Order not found");
+
+        _localizationMock
+            .Setup(x => x.GetMessage("DraftOrderAccessDenied"))
+            .Returns("Draft order access denied");
     }
 
     [Fact]
@@ -67,7 +71,7 @@ public class OrderQueryServiceTests
             _localizationMock.Object);
 
         // Act
-        var result = await service.GetByIdAsync(order.Id);
+        var result = await service.GetByIdAsync("cashier-1", order.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -88,7 +92,7 @@ public class OrderQueryServiceTests
             _localizationMock.Object);
 
         // Act
-        var result = await service.GetByIdAsync(999);
+        var result = await service.GetByIdAsync("cashier-1", 999);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -274,7 +278,7 @@ public class OrderQueryServiceTests
             _localizationMock.Object);
 
         // Act
-        var result = await service.GetItemsByOrderIdAsync(order.Id);
+        var result = await service.GetItemsByOrderIdAsync("cashier-1", order.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -282,5 +286,87 @@ public class OrderQueryServiceTests
         result.Value.Should().ContainSingle();
 
         result.Value.First().ProductName.Should().Be("Laptop");
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_Should_Return_Forbidden_When_Draft_Order_Belongs_To_Another_Cashier()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var order = Order.CreateDraft("owner-cashier");
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        var service = new OrderQueryService(
+            context,
+            _localizationMock.Object);
+
+        // Act
+        var result = await service.GetByIdAsync("other-cashier", order.Id);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("DRAFT_ORDER_ACCESS_DENIED");
+        result.Error.Type.Should().Be(Inventory.Domain.Shared.ErrorType.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_Should_Return_Order_When_NonDraft_Order_Belongs_To_Another_Cashier()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var supplier = new Supplier("Supplier", "01000000000");
+        context.Suppliers.Add(supplier);
+        await context.SaveChangesAsync();
+
+        var product = new Product("P-001", "Laptop", 1000, 5);
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+
+        product.AddStock(supplier.Id, DateTime.UtcNow.AddDays(30), 500, 20, 0);
+
+        var order = Order.CreateDraft("owner-cashier");
+        order.AddItem(product, 1);
+        order.Confirm(PaymentMethod.Cash, OrderType.InStore);
+
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        var service = new OrderQueryService(
+            context,
+            _localizationMock.Object);
+
+        // Act
+        var result = await service.GetByIdAsync("other-cashier", order.Id);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(order.Id);
+        result.Value.Status.Should().Be(OrderStatus.Completed);
+    }
+
+    [Fact]
+    public async Task GetItemsByOrderIdAsync_Should_Return_Forbidden_When_Draft_Order_Belongs_To_Another_Cashier()
+    {
+        // Arrange
+        await using var context = DbContextFactory.Create();
+
+        var order = Order.CreateDraft("owner-cashier");
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        var service = new OrderQueryService(
+            context,
+            _localizationMock.Object);
+
+        // Act
+        var result = await service.GetItemsByOrderIdAsync("other-cashier", order.Id);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("DRAFT_ORDER_ACCESS_DENIED");
+        result.Error.Type.Should().Be(Inventory.Domain.Shared.ErrorType.Forbidden);
     }
 }

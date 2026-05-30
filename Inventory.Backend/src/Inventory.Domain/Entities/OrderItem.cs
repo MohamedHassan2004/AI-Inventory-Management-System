@@ -57,7 +57,8 @@ namespace Inventory.Domain.Entities
         {
             foreach (var a in allocations)
             {
-                var alloc = new OrderItemBatchAllocation(a.batch.Id, a.taken, a.batch.Product.SellingPrice, a.batch.DiscountPercentage);
+                var price = a.batch.Product?.SellingPrice ?? Product.SellingPrice;
+                var alloc = new OrderItemBatchAllocation(a.batch.Id, a.taken, price, a.batch.DiscountPercentage);
                 alloc.SetStockBatch(a.batch);
                 _allocations.Add(alloc);
             }

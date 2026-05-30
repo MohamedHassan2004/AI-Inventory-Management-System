@@ -2,7 +2,7 @@ using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Supplier;
 using Inventory.Application.Interfaces;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -13,14 +13,14 @@ namespace Inventory.API.Tests.Controllers;
 public class SuppliersControllerTests
 {
     private readonly Mock<ISupplierService> _supplierServiceMock;
-    private readonly Mock<ISupplierReportService> _supplierReportServiceMock;
+    private readonly Mock<ISupplierReportQuery> _supplierReportServiceMock;
 
     private readonly SuppliersController _controller;
 
     public SuppliersControllerTests()
     {
         _supplierServiceMock = new Mock<ISupplierService>();
-        _supplierReportServiceMock = new Mock<ISupplierReportService>();
+        _supplierReportServiceMock = new Mock<ISupplierReportQuery>();
 
         _controller = new SuppliersController(
             _supplierServiceMock.Object,

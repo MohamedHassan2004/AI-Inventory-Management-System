@@ -4,19 +4,18 @@ namespace Inventory.Domain.Interfaces
 {
     public interface IOrderRepository : IRepository<Order>
     {
-        
-        Task<Order?> GetOrderWithItemsAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetForDetailedResponseAsync(int id, CancellationToken cancellationToken = default);
 
-        
-        Task<Order?> GetFullOrderAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetDraftForMutationAsync(int id, CancellationToken cancellationToken = default);
 
-        
-        Task<Order?> GetDraftByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetDraftForConfirmationAsync(int id, CancellationToken cancellationToken = default);
 
-        // Loads order with Items → Allocations → StockBatch — needed for FailDelivery stock restoration
-        Task<Order?> GetOutForDeliveryByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Order?> GetCompletedForReturnAsync(int id, CancellationToken cancellationToken = default);
 
-        
-        Task<IReadOnlyList<Order>> GetExpiredDraftsAsync(DateTime olderThan, CancellationToken cancellationToken = default);
+        Task<Order?> GetOutForDeliveryForStatusChangeAsync(int id, CancellationToken cancellationToken = default);
+
+        Task<Order?> GetOutForDeliveryForRestockAsync(int id, CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<Order>> GetExpiredDraftsForCleanupAsync(DateTime olderThan, CancellationToken cancellationToken = default);
     }
 }

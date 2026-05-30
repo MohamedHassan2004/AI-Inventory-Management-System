@@ -6,6 +6,7 @@ using Xunit;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
+using Inventory.Infrastructure.Queries.Reports;
 
 namespace Inventory.Infrastructure.Test.Services;
 
@@ -16,7 +17,7 @@ public class DashboardServiceTests
     {
         // Arrange
         await using var dbContext = DbContextFactory.Create();
-        var service = new DashboardService(dbContext);
+        var service = new DashboardQuery(dbContext);
 
         // Act
         var result = await service.GetSummaryAsync(DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), CancellationToken.None);

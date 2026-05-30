@@ -49,6 +49,7 @@
   "BadRequest": "Bad Request",
   "ResourceConflict": "Resource Conflict",
   "UnauthorizedAccess": "Unauthorized Access",
+  "ForbiddenAccess": "Forbidden Access",
   "ValidationErrorTitle": "Validation Error",
 
   "UsernameRequired": "Username is required.",
@@ -102,6 +103,9 @@
   "BatchNotFound": "Stock batch not found.",
 
   "OrderNotFound": "Order not found",
+  "DraftOrderNotFound": "Draft order not found.",
+  "DraftOrderAccessDenied": "You are not allowed to access or modify another cashier's draft order.",
+  "OrderModifiedByAnotherRequest": "Order was modified by another request.",
   "PurchaseOrderNotFound": "Purchase order not found.",
   "EmptyPurchaseOrder": "Cannot submit an empty purchase order.",
   "SupplierNotFound": "Supplier not found.",

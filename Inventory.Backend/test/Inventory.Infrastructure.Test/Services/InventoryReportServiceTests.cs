@@ -1,3 +1,4 @@
+using Inventory.Infrastructure.Queries.Reports;
 using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Test.Helpers;
 using Xunit;
@@ -11,7 +12,7 @@ public class InventoryReportServiceTests
     {
         // Arrange
         await using var dbContext = DbContextFactory.Create();
-        var service = new InventoryReportService(dbContext);
+        var service = new InventoryReportQuery(dbContext);
 
         // Act
         var result = await service.GetLowStockProductsAsync(CancellationToken.None);

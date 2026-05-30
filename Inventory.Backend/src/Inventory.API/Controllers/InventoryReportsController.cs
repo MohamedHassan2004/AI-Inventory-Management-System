@@ -1,4 +1,4 @@
-﻿using Inventory.Application.Interfaces.Services;
+﻿using Inventory.Application.Interfaces.Queries.Reports;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +8,9 @@ namespace Inventory.API.Controllers;
 [Route("api/reports/inventory")]
 public class InventoryReportsController : ControllerBase
 {
-    private readonly IInventoryReportService _reportService;
+    private readonly IInventoryReportQuery _reportService;
 
-    public InventoryReportsController(IInventoryReportService reportService)
+    public InventoryReportsController(IInventoryReportQuery reportService)
     {
         _reportService = reportService;
     }

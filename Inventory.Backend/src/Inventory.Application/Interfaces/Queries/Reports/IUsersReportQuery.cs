@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Inventory.Application.DTOs.Reports.Users;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Queries.Reports;
 
-public interface IUsersReportService
+public interface IUsersReportQuery
 {
     Task<IEnumerable<CashierSalesDto>> GetCashierSalesAsync(
         DateTime startDate,

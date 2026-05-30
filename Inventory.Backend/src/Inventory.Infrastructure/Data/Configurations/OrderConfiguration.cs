@@ -26,6 +26,7 @@ namespace Inventory.Infrastructure.Data.Configurations
             builder.Property(o => o.SubTotal).HasPrecision(18, 2);
             builder.Property(o => o.DiscountPercentage).HasPrecision(5, 2);
             builder.Property(o => o.DiscountAmount).HasPrecision(18, 2);
+            builder.Property(o => o.DeliveryFee).HasPrecision(18, 2);
             builder.Property(o => o.TaxAmount).HasPrecision(18, 2);
             builder.Property(o => o.FinalTotal).HasPrecision(18, 2);
 

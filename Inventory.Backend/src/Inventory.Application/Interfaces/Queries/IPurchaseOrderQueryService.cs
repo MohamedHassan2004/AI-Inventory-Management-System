@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Inventory.Application.DTOs.PurchaseOrder;
 using Inventory.Domain.Shared;
 
-namespace Inventory.Application.Interfaces
+namespace Inventory.Application.Interfaces.Queries
 {
     public interface IPurchaseOrderQueryService
     {

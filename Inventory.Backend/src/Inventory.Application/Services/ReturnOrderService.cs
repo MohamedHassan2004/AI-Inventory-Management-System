@@ -50,7 +50,7 @@ namespace Inventory.Application.Services
         {
             _logger.LogInformation("Creating return order for original order {OrderId}", dto.OriginalOrderId);
 
-            var originalOrder = await _orderRepository.GetFullOrderAsync(dto.OriginalOrderId, cancellationToken);
+            var originalOrder = await _orderRepository.GetCompletedForReturnAsync(dto.OriginalOrderId, cancellationToken);
             if (originalOrder == null)
             {
                 return Result.Failure<ReturnOrderResponseDto>(new Error(

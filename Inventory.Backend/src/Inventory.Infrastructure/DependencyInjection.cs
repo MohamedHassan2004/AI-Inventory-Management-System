@@ -1,11 +1,16 @@
 using Inventory.Application.Interfaces;
 using Inventory.Application.Interfaces.Auth;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Documents;
+using Inventory.Application.Interfaces.Queries;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Domain.Entities.Users;
 using Inventory.Domain.Interfaces;
+using Inventory.Infrastructure.BackgroundServices;
 using Inventory.Infrastructure.Data;
 using Inventory.Infrastructure.Data.Settings;
+using Inventory.Infrastructure.Documents;
 using Inventory.Infrastructure.Queries;
+using Inventory.Infrastructure.Queries.Reports;
 using Inventory.Infrastructure.Repositories;
 using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Services.Auth;
@@ -96,12 +101,12 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
         services.AddScoped<IPurchaseOrderQueryService, PurchaseOrderQueryService>();
         services.AddScoped<IReturnOrderQueryService, ReturnOrderQueryService>();
-        services.AddScoped<ISalesReportService, SalesReportService>();
-        services.AddScoped<IInventoryReportService, InventoryReportService>();
-        services.AddScoped<IReturnsReportService, ReturnsReportService>();
-        services.AddScoped<ISupplierReportService, SupplierReportService>();
-        services.AddScoped<IUsersReportService, UsersReportService>();
-        services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<ISalesReportQuery, SalesReportQuery>();
+        services.AddScoped<IInventoryReportQuery, InventoryReportQuery>();
+        services.AddScoped<IReturnsReportQuery, ReturnsReportQuery>();
+        services.AddScoped<ISupplierReportQuery, SupplierReportQuery>();
+        services.AddScoped<IUsersReportQuery, UsersReportQuery>();
+        services.AddScoped<IDashboardQuery, DashboardQuery>();
         services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
 

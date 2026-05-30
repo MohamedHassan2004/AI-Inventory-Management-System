@@ -7,9 +7,10 @@ namespace Inventory.Domain.Entities
     public class Order
     {
         // ─── Constants ────────────────────────────────────────────────────────────
-        private const decimal DefaultTaxPercentage = 14m;
+        private const decimal DefaultTaxPercentage = 0m;
         private const decimal MaxDiscountPercentage = 70m;
         private const int DraftExpiryHours = 12;
+        private const decimal DefaultDeliveryFee = 10m;
 
         // ─── Identity ─────────────────────────────────────────────────────────────
         public int Id { get; private set; }
@@ -33,6 +34,7 @@ namespace Inventory.Domain.Entities
         public decimal SubTotal { get; private set; }
         public decimal DiscountPercentage { get; private set; }
         public decimal DiscountAmount { get; private set; }
+        public decimal DeliveryFee { get; private set; }
         public decimal TaxAmount { get; private set; }
         public decimal FinalTotal { get; private set; }
 
@@ -304,7 +306,9 @@ namespace Inventory.Domain.Entities
             var taxable = SubTotal - DiscountAmount;
             TaxAmount = taxable * DefaultTaxPercentage / 100m;
 
-            FinalTotal = taxable + TaxAmount;
+            DeliveryFee = Type == OrderType.Delivery ? DefaultDeliveryFee : 0m;
+
+            FinalTotal = taxable + TaxAmount + DeliveryFee;
         }
     }
 }

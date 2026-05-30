@@ -37,6 +37,7 @@ namespace Inventory.API.Controllers
                 ErrorType.Validation => StatusCodes.Status400BadRequest,
                 ErrorType.Conflict => StatusCodes.Status409Conflict,
                 ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+                ErrorType.Forbidden => StatusCodes.Status403Forbidden,
                 _ => StatusCodes.Status500InternalServerError
             };
 
@@ -46,6 +47,7 @@ namespace Inventory.API.Controllers
                 ErrorType.Validation => "BadRequest",
                 ErrorType.Conflict => "ResourceConflict",
                 ErrorType.Unauthorized => "UnauthorizedAccess",
+                ErrorType.Forbidden => "ForbiddenAccess",
                 _ => "InternalServerError"
             };
 

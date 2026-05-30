@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Text;
 using Inventory.Application.DTOs.Supplier;
-using Inventory.Application.Interfaces.Services;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 using Inventory.Domain.Shared;
+using Inventory.Application.Interfaces.Queries.Reports;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class SupplierReportService : ISupplierReportService
+public class SupplierReportQuery : ISupplierReportQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public SupplierReportService(ApplicationDbContext dbContext)
+    public SupplierReportQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

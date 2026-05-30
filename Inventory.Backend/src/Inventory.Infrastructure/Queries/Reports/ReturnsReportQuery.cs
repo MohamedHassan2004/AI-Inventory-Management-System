@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
 using Inventory.Application.DTOs.Reports.Returns;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Inventory.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Inventory.Infrastructure.Services;
+namespace Inventory.Infrastructure.Queries.Reports;
 
-public class ReturnsReportService : IReturnsReportService
+public class ReturnsReportQuery : IReturnsReportQuery
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public ReturnsReportService(ApplicationDbContext dbContext)
+    public ReturnsReportQuery(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

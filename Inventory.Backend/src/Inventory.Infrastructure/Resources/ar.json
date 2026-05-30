@@ -57,6 +57,7 @@
   "BadRequest": "طلب غير صالح",
   "ResourceConflict": "تعارض في المورد",
   "UnauthorizedAccess": "وصول غير مصرح به",
+  "ForbiddenAccess": "ممنوع الوصول",
   "ValidationErrorTitle": "حدث خطأ في التحقق من البيانات",
 
   "UsernameRequired": "اسم المستخدم مطلوب.",
@@ -121,6 +122,9 @@
   "InvalidProductId": "معرّف المنتج غير صحيح",
   "InvalidQuantity": "يجب أن تكون الكمية أكبر من صفر",
   "OrderNotFound": "الطلب غير موجود",
+  "DraftOrderNotFound": "مسودة الطلب غير موجودة.",
+  "DraftOrderAccessDenied": "غير مسموح لك بالوصول إلى مسودة طلب خاصة بكاشير آخر أو تعديلها.",
+  "OrderModifiedByAnotherRequest": "تم تعديل الطلب بواسطة طلب آخر.",
   "OrderIsEmpty": "يجب أن يحتوي الطلب على عنصر واحد على الأقل",
   "OrderNotEditable": "يمكن تعديل الطلبات قيد الانتظار فقط",
   "CannotCancelOrder": "لا يمكن إلغاء هذا الطلب في حالته الحالية",

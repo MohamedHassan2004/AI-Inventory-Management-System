@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Inventory.Application.DTOs.Reports.Sales;
 using Inventory.Domain.Shared;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Queries.Reports;
 
-public interface ISalesReportService
+public interface ISalesReportQuery
 {
     Task<SalesSummaryDto> GetSalesSummaryAsync(
         DateTime startDate,

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Inventory.Application.DTOs.Reports.Dashboard;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Queries.Reports;
 
-public interface IDashboardService
+public interface IDashboardQuery
 {
     Task<DashboardSummaryDto> GetSummaryAsync(
         DateTime? startDate,

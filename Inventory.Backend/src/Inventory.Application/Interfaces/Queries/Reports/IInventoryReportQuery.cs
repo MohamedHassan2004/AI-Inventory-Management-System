@@ -5,9 +5,9 @@ using System.Text;
 using Inventory.Application.DTOs.Reports;
 using Inventory.Domain.Shared;
 
-namespace Inventory.Application.Interfaces.Services;
+namespace Inventory.Application.Interfaces.Queries.Reports;
 
-public interface IInventoryReportService
+public interface IInventoryReportQuery
 {
     Task<IEnumerable<ExpiringBatchDto>> GetExpiringBatchesAsync(
     int days,

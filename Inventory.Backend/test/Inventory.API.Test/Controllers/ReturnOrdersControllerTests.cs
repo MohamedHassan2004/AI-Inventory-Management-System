@@ -2,6 +2,7 @@ using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.ReturnOrder;
 using Inventory.Application.Interfaces;
+using Inventory.Application.Interfaces.Queries;
 using Inventory.Domain.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

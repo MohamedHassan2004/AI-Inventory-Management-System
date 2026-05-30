@@ -1,3 +1,4 @@
+using Inventory.Infrastructure.Queries.Reports;
 using Inventory.Infrastructure.Services;
 using Inventory.Infrastructure.Test.Helpers;
 using Xunit;
@@ -11,7 +12,7 @@ public class SalesReportServiceTests
     {
         // Arrange
         await using var dbContext = DbContextFactory.Create();
-        var service = new SalesReportService(dbContext);
+        var service = new SalesReportQuery(dbContext);
 
         // Act
         var result = await service.GetSalesSummaryAsync(DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1), CancellationToken.None);

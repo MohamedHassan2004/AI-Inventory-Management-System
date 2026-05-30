@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Inventory.API.Controllers;
 using Inventory.Application.DTOs.Reports.Returns;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -10,11 +10,11 @@ namespace Inventory.API.Test.Controllers;
 
 public class ReturnsReportsControllerTests
 {
-    private readonly Mock<IReturnsReportService> _returnsReportServiceMock;
+    private readonly Mock<IReturnsReportQuery> _returnsReportServiceMock;
 
     public ReturnsReportsControllerTests()
     {
-        _returnsReportServiceMock = new Mock<IReturnsReportService>();
+        _returnsReportServiceMock = new Mock<IReturnsReportQuery>();
     }
 
     private ReturnsReportsController CreateController()

@@ -1,6 +1,6 @@
 using Inventory.Application.DTOs.Supplier;
 using Inventory.Application.Interfaces;
-using Inventory.Application.Interfaces.Services;
+using Inventory.Application.Interfaces.Queries.Reports;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventory.API.Controllers
@@ -9,9 +9,9 @@ namespace Inventory.API.Controllers
     public class SuppliersController : ActiveApiBaseController
     {
         private readonly ISupplierService _supplierService;
-        private readonly ISupplierReportService _supplierReportService;
+        private readonly ISupplierReportQuery _supplierReportService;
 
-        public SuppliersController(ISupplierService supplierService, ISupplierReportService supplierReportService)
+        public SuppliersController(ISupplierService supplierService, ISupplierReportQuery supplierReportService)
         {
             _supplierService = supplierService;
             _supplierReportService = supplierReportService;

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Inventory.Infrastructure.Services
+namespace Inventory.Infrastructure.BackgroundServices
 {
     public class DraftOrderCleanupService : BackgroundService
     {
@@ -50,7 +50,7 @@ namespace Inventory.Infrastructure.Services
 
                 var thresholdTime = DateTime.UtcNow;
 
-                var expiredDrafts = await orderRepository.GetExpiredDraftsAsync(thresholdTime, cancellationToken);
+                var expiredDrafts = await orderRepository.GetExpiredDraftsForCleanupAsync(thresholdTime, cancellationToken);
 
                 if (expiredDrafts.Any())
                 {
