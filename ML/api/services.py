@@ -204,6 +204,39 @@ def train_clustering() -> str:
     kmeans = KMeans(n_clusters=4, random_state=42, n_init="auto")
     product_data["Cluster"] = kmeans.fit_predict(scaled_features)
 
+    # Assign meaningful names to clusters
+    cluster_means = product_data.groupby("Cluster")[["quantity", "Price", "Frequency"]].mean()
+    unassigned = list(range(4))
+    cluster_names = {}
+
+    # 1. Premium Products: highest average Price
+    premium = cluster_means.loc[unassigned, "Price"].idxmax()
+    cluster_names[premium] = "Premium Products"
+    unassigned.remove(premium)
+
+    # Helper to evaluate Volume + Frequency
+    def perf_score(c):
+        # Multiply rank of frequency and quantity to give equal weight to both
+        freq_rank = cluster_means.loc[unassigned, "Frequency"].rank().loc[c]
+        qty_rank = cluster_means.loc[unassigned, "quantity"].rank().loc[c]
+        return freq_rank + qty_rank
+
+    # 2. Top Performers: highest Frequency and Quantity among remaining
+    top = max(unassigned, key=perf_score)
+    cluster_names[top] = "Top Performers"
+    unassigned.remove(top)
+
+    # 3. Slow Movers: lowest Frequency and Quantity among remaining
+    slow = min(unassigned, key=perf_score)
+    cluster_names[slow] = "Slow Movers"
+    unassigned.remove(slow)
+
+    # 4. Steady Sellers: remaining
+    steady = unassigned[0]
+    cluster_names[steady] = "Steady Sellers"
+
+    product_data["ClusterName"] = product_data["Cluster"].map(cluster_names)
+
     result = product_data.to_dict(orient="records")
     save_clusters(result)
 

@@ -6,7 +6,7 @@ namespace Inventory.Domain.Entities.ML
     {
         public int Id { get; set; }
         public string SKU { get; set; } = string.Empty;
-        public int ClusterId { get; set; }
+        public string ClusterName { get; set; } = string.Empty;
         public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
     }
 }

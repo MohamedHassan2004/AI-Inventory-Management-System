@@ -103,7 +103,7 @@ def save_clusters(clusters_dict: list[dict]):
         conn.execute(text("DELETE FROM ProductClusters"))
         for row in clusters_dict:
             conn.execute(
-                text(f"INSERT INTO ProductClusters (SKU, ClusterId, GeneratedAt) VALUES ('{row['sku']}', {row['Cluster']}, GETDATE())")
+                text(f"INSERT INTO ProductClusters (SKU, ClusterName, GeneratedAt) VALUES ('{row['sku']}', '{row['ClusterName']}', GETDATE())")
             )
 
 def save_forecast(sku: str, forecast_df: pd.DataFrame):

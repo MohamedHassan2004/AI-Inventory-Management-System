@@ -33,13 +33,13 @@ namespace Inventory.API.Controllers
         public async Task<IActionResult> GetClusters()
         {
             var clusters = await _context.ProductClusters
-                .GroupBy(c => c.ClusterId)
+                .GroupBy(c => c.ClusterName)
                 .Select(g => new
                 {
-                    cluster_id = g.Key,
+                    cluster_name = g.Key,
                     items = g.Select(c => new { sku = c.SKU }).ToList()
                 })
-                .OrderBy(c => c.cluster_id)
+                .OrderBy(c => c.cluster_name)
                 .ToListAsync();
 
             return Ok(new { clusters });
