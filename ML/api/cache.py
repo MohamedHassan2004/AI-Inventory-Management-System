@@ -184,10 +184,25 @@ def _load_prophet_models() -> None:
             model = joblib.load(model_path)
             PROPHET_MODELS[sku] = model
 
-            # Pre-compute 30-day forecast and warm FORECAST_CACHE
-            future = model.make_future_dataframe(periods=30)
+            import pandas as pd
+            # Fix: Predict exactly 30 days starting from tomorrow
+            tomorrow = pd.Timestamp.today().normalize() + pd.Timedelta(days=1)
+            future_dates = pd.date_range(start=tomorrow, periods=30, freq='D')
+            future = pd.DataFrame({'ds': future_dates})
+            
             forecast = model.predict(future)
-            recent = forecast.tail(30)
+            
+            # Note: _safe_forecast_values from services.py is not imported here, 
+            # but we can apply the same reverse log1p directly here.
+            import numpy as np
+            def safe_rev(x):
+                t = np.expm1(x).clip(lower=0)
+                return np.where(t < 0.5, 0.0, t)
+
+            recent = forecast.tail(30).copy()
+            recent["yhat"] = safe_rev(recent["yhat"])
+            recent["yhat_lower"] = safe_rev(recent["yhat_lower"])
+            recent["yhat_upper"] = safe_rev(recent["yhat_upper"])
             FORECAST_CACHE[sku] = {
                 "dates":      recent["ds"].dt.strftime("%Y-%m-%d").tolist(),
                 "yhat":       recent["yhat"].tolist(),
