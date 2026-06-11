@@ -318,8 +318,12 @@ def train_prophet_for_product(sku: str) -> str:
     model_path = os.path.join(PROPHET_MODELS_DIR, f"{safe_sku}_model.pkl")
     joblib.dump(model, model_path)
 
-    # Pre-compute and warm FORECAST_CACHE immediately — no need to reload all models
-    future = model.make_future_dataframe(periods=30)
+    # Pre-compute and warm FORECAST_CACHE immediately
+    # Fix: Predict exactly 30 days starting from tomorrow, regardless of when the SKU was last sold
+    tomorrow = pd.Timestamp.today().normalize() + pd.Timedelta(days=1)
+    future_dates = pd.date_range(start=tomorrow, periods=30, freq='D')
+    future = pd.DataFrame({'ds': future_dates})
+    
     forecast = model.predict(future)
     
     # Reverse log transform and apply mathematical safety boundaries

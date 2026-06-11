@@ -18,7 +18,8 @@ public class CategorySeeder
             new Category("Bakery", "bakery.png"),
             new Category("Snacks", "snacks.png"),
             new Category("Fruits", "fruits.png"),
-            new Category("Vegetables", "vegetables.png")
+            new Category("Vegetables", "vegetables.png"),
+            new Category("Pantry", "pantry.png")
         };
 
         context.Categories.AddRange(categories);
