@@ -19,12 +19,22 @@ namespace Inventory.API.Controllers
         [HttpGet("recommendations/{sku}")]
         public async Task<IActionResult> GetRecommendations(string sku, [FromQuery] int topN = 5)
         {
-            var recs = await _context.ProductRecommendations
-                .Where(r => r.SKU == sku)
-                .OrderByDescending(r => r.Score)
-                .Take(topN)
-                .Select(r => r.RecommendedSKU)
-                .ToListAsync();
+            var recs = await (
+                from r in _context.ProductRecommendations
+                join p in _context.Products
+                    on r.RecommendedSKU equals p.SKU
+                where r.SKU == sku
+                orderby r.Score descending
+                select new
+                {
+                    id = p.Id,
+                    sku = p.SKU,
+                    name = p.Name,
+                    score = r.Score
+                }
+            )
+            .Take(topN)
+            .ToListAsync();
 
             return Ok(new { sku, recommendations = recs });
         }
@@ -37,7 +47,17 @@ namespace Inventory.API.Controllers
                 .Select(g => new
                 {
                     cluster_name = g.Key,
-                    items = g.Select(c => new { sku = c.SKU }).ToList()
+                    items = (
+    from c in g
+    join p in _context.Products
+        on c.SKU equals p.SKU
+    select new
+    {
+        id = p.Id,
+        sku = p.SKU,
+        name = p.Name
+    }
+).ToList()
                 })
                 .OrderBy(c => c.cluster_name)
                 .ToListAsync();
