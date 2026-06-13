@@ -1,5 +1,6 @@
 using Inventory.Domain.Entities;
 using Inventory.Domain.Entities.Users;
+using Inventory.Domain.Entities.ML;
 using Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -22,6 +23,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ReturnOrder> ReturnOrders { get; set; }
     public DbSet<ReturnOrderItem> ReturnOrderItems { get; set; }
     public DbSet<OrderItemBatchAllocation> OrderItemBatchAllocations { get; set; }
+
+    public DbSet<ProductRecommendation> ProductRecommendations { get; set; }
+    public DbSet<ProductCluster> ProductClusters { get; set; }
+    public DbSet<DemandForecast> DemandForecasts { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

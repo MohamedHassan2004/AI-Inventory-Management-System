@@ -310,5 +310,9 @@ namespace Inventory.Domain.Entities
 
             FinalTotal = taxable + TaxAmount + DeliveryFee;
         }
+        public void SetOrderDate(DateTime orderDate)
+        {
+            OrderDate = orderDate;
+        }
     }
 }
